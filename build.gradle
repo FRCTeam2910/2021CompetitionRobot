@@ -1,0 +1,50 @@
+plugins {
+    id "application"
+    id "edu.wpi.first.GradleRIO"
+    id "com.github.johnrengelman.shadow"
+}
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+application {
+    mainClassName "org.frcteam2910.c2020.Main"
+}
+
+wpi {
+    maven {
+        useLocal false
+    }
+
+    deps.vendor.loadFrom(project(":common:robot"))
+}
+
+deploy {
+    targets {
+        roboRIO("roborio") {
+            team frc.getTeamOrDefault(2910)
+        }
+    }
+    artifacts {
+        frcJavaArtifact("frcJava") {
+            jar "shadowJar"
+            targets << "roborio"
+
+            debug frc.getDebugOrDefault(false)
+        }
+    }
+}
+
+dependencies {
+    implementation wpi.deps.wpilib()
+    nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
+    nativeDesktopZip wpi.deps.wpilibJni(wpi.platforms.desktop)
+
+    implementation wpi.deps.vendor.java()
+    nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
+    nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
+
+    simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
+
+    implementation project(':common:robot')
+}
