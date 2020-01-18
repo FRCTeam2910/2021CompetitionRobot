@@ -23,5 +23,8 @@ public class Constants {
 
     public static final int DRIVETRAIN_PIGEON_PORT = 0;
 
+    public static final int INTAKE_MOTOR = 0;
+    public static final int INTAKE_EXTENSION_SOLENOID = 0;
+
     public static final int PRIMARY_CONTROLLER_PORT = 0;
 }
