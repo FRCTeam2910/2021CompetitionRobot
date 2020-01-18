@@ -100,6 +100,12 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final Object stateLock = new Object();
     private HolonomicDriveSignal driveSignal$stateLock = null;
 
+    public DrivetrainSubsystem() {
+        synchronized (sensorLock) {
+            navX$SensorLock.setInverted(true);
+        }
+    }
+
     public RigidTransform2 getPose() {
         synchronized (kinematicsLock) {
             return pose$kinematicsLock;
