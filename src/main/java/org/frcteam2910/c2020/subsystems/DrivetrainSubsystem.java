@@ -3,8 +3,13 @@ package org.frcteam2910.c2020.subsystems;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.common.drivers.SwerveModule;
@@ -26,59 +31,59 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private final SwerveModule frontLeftModule =
             new Mk2SwerveModuleBuilder(new Vector2(TRACKWIDTH / 2.0, WHEELBASE / 2.0))
-            .angleMotor(
-                    new CANSparkMax(Constants.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR,
-                            CANSparkMaxLowLevel.MotorType.kBrushless),
-                    Mk2SwerveModuleBuilder.MotorType.NEO)
-            .driveMotor(
-                    new WPI_TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR),
-                    Mk2SwerveModuleBuilder.MotorType.CIM)
-            .angleEncoder(
-                    new AnalogInput(Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_PORT),
-                    Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET)
-            .build();
+                    .angleMotor(
+                            new CANSparkMax(Constants.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR,
+                                    CANSparkMaxLowLevel.MotorType.kBrushless),
+                            Mk2SwerveModuleBuilder.MotorType.NEO)
+                    .driveMotor(
+                            new WPI_TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR),
+                            Mk2SwerveModuleBuilder.MotorType.CIM)
+                    .angleEncoder(
+                            new AnalogInput(Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_PORT),
+                            Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET)
+                    .build();
 
     private final SwerveModule frontRightModule =
             new Mk2SwerveModuleBuilder(new Vector2(TRACKWIDTH / 2.0, -WHEELBASE / 2.0))
-            .angleMotor(
-                    new CANSparkMax(Constants.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR,
-                            CANSparkMaxLowLevel.MotorType.kBrushless),
-                    Mk2SwerveModuleBuilder.MotorType.NEO)
-            .driveMotor(
-                    new WPI_TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR),
-                    Mk2SwerveModuleBuilder.MotorType.CIM)
-            .angleEncoder(
-                    new AnalogInput(Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_PORT),
-                    Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_OFFSET)
-            .build();
+                    .angleMotor(
+                            new CANSparkMax(Constants.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR,
+                                    CANSparkMaxLowLevel.MotorType.kBrushless),
+                            Mk2SwerveModuleBuilder.MotorType.NEO)
+                    .driveMotor(
+                            new WPI_TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR),
+                            Mk2SwerveModuleBuilder.MotorType.CIM)
+                    .angleEncoder(
+                            new AnalogInput(Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_PORT),
+                            Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_OFFSET)
+                    .build();
 
     private final SwerveModule backLeftModule =
             new Mk2SwerveModuleBuilder(new Vector2(-TRACKWIDTH / 2.0, WHEELBASE / 2.0))
-            .angleMotor(
-                    new CANSparkMax(Constants.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR,
-                            CANSparkMaxLowLevel.MotorType.kBrushless),
-                    Mk2SwerveModuleBuilder.MotorType.NEO)
-            .driveMotor(
-                    new WPI_TalonFX(Constants.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR),
-                    Mk2SwerveModuleBuilder.MotorType.CIM)
-            .angleEncoder(
-                    new AnalogInput(Constants.DRIVETRAIN_BACK_LEFT_ENCODER_PORT),
-                    Constants.DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET)
-            .build();
+                    .angleMotor(
+                            new CANSparkMax(Constants.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR,
+                                    CANSparkMaxLowLevel.MotorType.kBrushless),
+                            Mk2SwerveModuleBuilder.MotorType.NEO)
+                    .driveMotor(
+                            new WPI_TalonFX(Constants.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR),
+                            Mk2SwerveModuleBuilder.MotorType.CIM)
+                    .angleEncoder(
+                            new AnalogInput(Constants.DRIVETRAIN_BACK_LEFT_ENCODER_PORT),
+                            Constants.DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET)
+                    .build();
 
     private final SwerveModule backRightModule =
             new Mk2SwerveModuleBuilder(new Vector2(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0))
-            .angleMotor(
-                    new CANSparkMax(Constants.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR,
-                            CANSparkMaxLowLevel.MotorType.kBrushless),
-                    Mk2SwerveModuleBuilder.MotorType.NEO)
-            .driveMotor(
-                    new WPI_TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR),
-                    Mk2SwerveModuleBuilder.MotorType.CIM)
-            .angleEncoder(
-                    new AnalogInput(Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_PORT),
-                    Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET)
-            .build();
+                    .angleMotor(
+                            new CANSparkMax(Constants.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR,
+                                    CANSparkMaxLowLevel.MotorType.kBrushless),
+                            Mk2SwerveModuleBuilder.MotorType.NEO)
+                    .driveMotor(
+                            new WPI_TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR),
+                            Mk2SwerveModuleBuilder.MotorType.CIM)
+                    .angleEncoder(
+                            new AnalogInput(Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_PORT),
+                            Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET)
+                    .build();
 
     private final SwerveModule[] modules = {frontLeftModule, frontRightModule, backLeftModule, backRightModule};
 
@@ -100,9 +105,43 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final Object stateLock = new Object();
     private HolonomicDriveSignal driveSignal$stateLock = null;
 
+    // Logging
+    private final NetworkTableEntry odometryXEntry;
+    private final NetworkTableEntry odometryYEntry;
+    private final NetworkTableEntry odometryAngleEntry;
+
+    private final NetworkTableEntry[] moduleAngleEntries = new NetworkTableEntry[modules.length];
+
     public DrivetrainSubsystem() {
         synchronized (sensorLock) {
             navX$SensorLock.setInverted(true);
+        }
+
+        ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
+        odometryXEntry = tab.add("X", 0.0)
+                .withPosition(0, 0)
+                .withSize(1, 1)
+                .getEntry();
+        odometryYEntry = tab.add("Y", 0.0)
+                .withPosition(0, 1)
+                .withSize(1, 1)
+                .getEntry();
+        odometryAngleEntry = tab.add("Angle", 0.0)
+                .withPosition(0, 2)
+                .withSize(1, 1)
+                .getEntry();
+
+        ShuffleboardLayout[] moduleLayouts = {
+                tab.getLayout("Front Left Module", BuiltInLayouts.kList),
+                tab.getLayout("Front Right Module", BuiltInLayouts.kList),
+                tab.getLayout("Back Left Module", BuiltInLayouts.kList),
+                tab.getLayout("Back Right Module", BuiltInLayouts.kList)
+        };
+        for (int i = 0; i < modules.length; i++) {
+            ShuffleboardLayout layout = moduleLayouts[i]
+                    .withPosition(1 + i * 2, 0)
+                    .withSize(2, 4);
+            moduleAngleEntries[i] = layout.add("Angle", 0.0).getEntry();
         }
     }
 
@@ -126,7 +165,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private void updateOdometry(double dt) {
         Vector2[] moduleVelocities = new Vector2[modules.length];
-        for(int i = 0; i < modules.length; i++) {
+        for (int i = 0; i < modules.length; i++) {
             var module = modules[i];
             module.updateSensors();
 
@@ -146,7 +185,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private void updateModules(HolonomicDriveSignal driveSignal, double dt) {
         ChassisVelocity chassisVelocity;
-        if(driveSignal == null) {
+        if (driveSignal == null) {
             chassisVelocity = new ChassisVelocity(Vector2.ZERO, 0.0);
         } else if (driveSignal.isFieldOriented()) {
             chassisVelocity = new ChassisVelocity(
@@ -162,7 +201,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
         Vector2[] moduleOutputs = swerveKinematics.toModuleVelocities(chassisVelocity);
         SwerveKinematics.normalizeModuleVelocities(moduleOutputs, 1);
-        for(int i = 0; i < moduleOutputs.length; i++) {
+        for (int i = 0; i < moduleOutputs.length; i++) {
             var module = modules[i];
             module.setTargetVelocity(moduleOutputs[i]);
             module.updateState(dt);
@@ -179,5 +218,17 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         }
 
         updateModules(driveSignal, dt);
+    }
+
+    @Override
+    public void periodic() {
+        RigidTransform2 pose = getPose();
+        odometryXEntry.setDouble(pose.translation.x);
+        odometryYEntry.setDouble(pose.translation.y);
+        odometryAngleEntry.setDouble(getPose().rotation.toDegrees());
+
+        for (int i = 0; i < modules.length; i++) {
+            moduleAngleEntries[i].setDouble(Math.toDegrees(modules[i].getCurrentAngle()));
+        }
     }
 }
