@@ -21,6 +21,11 @@ public class Constants {
     public static final int DRIVETRAIN_BACK_LEFT_ENCODER_PORT = 1;
     public static final int DRIVETRAIN_BACK_RIGHT_ENCODER_PORT = 2;
 
+    public static final double WHEEL_OF_FORTUNE_RED_HUE = 45;
+    public static final double WHEEL_OF_FORTUNE_GREEN_HUE = 130;
+    public static final double WHEEL_OF_FORTUNE_BLUE_HUE = 170;
+    public static final double WHEEL_OF_FORTUNE_YELLOW_HUE = 90;
+
     public static final int DRIVETRAIN_PIGEON_PORT = 0;
 
     public static final int INTAKE_MOTOR = 0;
