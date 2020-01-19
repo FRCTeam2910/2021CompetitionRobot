@@ -8,6 +8,7 @@ public class Robot extends TimedRobot {
     private RobotContainer robotContainer = new RobotContainer();
     private UpdateManager updateManager = new UpdateManager(
             robotContainer.getDrivetrainSubsystem(),
+            robotContainer.getFeederSubsystem(),
             robotContainer.getWheelOfFortuneSubsystem()
     );
 

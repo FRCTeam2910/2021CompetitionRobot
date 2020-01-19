@@ -32,4 +32,6 @@ public class Constants {
     public static final int INTAKE_EXTENSION_SOLENOID = 0;
 
     public static final int PRIMARY_CONTROLLER_PORT = 0;
+
+    public static final int FEEDER_MOTOR_PORT = 0;
 }
