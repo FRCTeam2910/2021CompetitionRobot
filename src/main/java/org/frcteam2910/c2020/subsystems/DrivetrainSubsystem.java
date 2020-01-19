@@ -159,7 +159,9 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public void resetGyroAngle(Rotation2 angle) {
         synchronized (sensorLock) {
-            navX$SensorLock.setAdjustmentAngle(angle);
+            navX$SensorLock.setAdjustmentAngle(
+                    navX$SensorLock.getUnadjustedAngle().rotateBy(angle.inverse())
+            );
         }
     }
 
