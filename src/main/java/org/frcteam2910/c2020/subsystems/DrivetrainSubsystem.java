@@ -1,6 +1,7 @@
 package org.frcteam2910.c2020.subsystems;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -29,6 +30,9 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     public static final double TRACKWIDTH = 1.0;
     public static final double WHEELBASE = 1.0;
 
+    private static final double GEAR_REDUCTION = 190.0 / 27.0;
+    private static final double WHEEL_DIAMETER = 4.0;
+
     private final SwerveModule frontLeftModule =
             new Mk2SwerveModuleBuilder(new Vector2(TRACKWIDTH / 2.0, WHEELBASE / 2.0))
                     .angleMotor(
@@ -36,8 +40,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                                     CANSparkMaxLowLevel.MotorType.kBrushless),
                             Mk2SwerveModuleBuilder.MotorType.NEO)
                     .driveMotor(
-                            new WPI_TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR),
-                            Mk2SwerveModuleBuilder.MotorType.CIM)
+                            new TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
                     .angleEncoder(
                             new AnalogInput(Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_PORT),
                             Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET)
@@ -50,8 +53,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                                     CANSparkMaxLowLevel.MotorType.kBrushless),
                             Mk2SwerveModuleBuilder.MotorType.NEO)
                     .driveMotor(
-                            new WPI_TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR),
-                            Mk2SwerveModuleBuilder.MotorType.CIM)
+                            new TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR),  GEAR_REDUCTION, WHEEL_DIAMETER)
                     .angleEncoder(
                             new AnalogInput(Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_PORT),
                             Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_OFFSET)
@@ -64,8 +66,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                                     CANSparkMaxLowLevel.MotorType.kBrushless),
                             Mk2SwerveModuleBuilder.MotorType.NEO)
                     .driveMotor(
-                            new WPI_TalonFX(Constants.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR),
-                            Mk2SwerveModuleBuilder.MotorType.CIM)
+                            new TalonFX(Constants.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
                     .angleEncoder(
                             new AnalogInput(Constants.DRIVETRAIN_BACK_LEFT_ENCODER_PORT),
                             Constants.DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET)
@@ -78,8 +79,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                                     CANSparkMaxLowLevel.MotorType.kBrushless),
                             Mk2SwerveModuleBuilder.MotorType.NEO)
                     .driveMotor(
-                            new WPI_TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR),
-                            Mk2SwerveModuleBuilder.MotorType.CIM)
+                            new TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
                     .angleEncoder(
                             new AnalogInput(Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_PORT),
                             Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET)
@@ -97,13 +97,16 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final SwerveOdometry swerveOdometry = new SwerveOdometry(swerveKinematics, RigidTransform2.ZERO);
 
     private final Object sensorLock = new Object();
-    private NavX navX$SensorLock = new NavX(SPI.Port.kMXP);
+    @GuardedBy("sensorLock")
+    private NavX navX = new NavX(SPI.Port.kMXP);
 
     private final Object kinematicsLock = new Object();
-    private RigidTransform2 pose$kinematicsLock = RigidTransform2.ZERO;
+    @GuardedBy("kinematicsLock")
+    private RigidTransform2 pose = RigidTransform2.ZERO;
 
     private final Object stateLock = new Object();
-    private HolonomicDriveSignal driveSignal$stateLock = null;
+    @GuardedBy("stateLock")
+    private HolonomicDriveSignal driveSignal = null;
 
     // Logging
     private final NetworkTableEntry odometryXEntry;
@@ -114,7 +117,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public DrivetrainSubsystem() {
         synchronized (sensorLock) {
-            navX$SensorLock.setInverted(true);
+            navX.setInverted(true);
         }
 
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
@@ -147,20 +150,20 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public RigidTransform2 getPose() {
         synchronized (kinematicsLock) {
-            return pose$kinematicsLock;
+            return pose;
         }
     }
 
     public void drive(Vector2 translationalVelocity, double rotationalVelocity, boolean isFieldOriented) {
         synchronized (stateLock) {
-            driveSignal$stateLock = new HolonomicDriveSignal(translationalVelocity, rotationalVelocity, isFieldOriented);
+            driveSignal = new HolonomicDriveSignal(translationalVelocity, rotationalVelocity, isFieldOriented);
         }
     }
 
     public void resetGyroAngle(Rotation2 angle) {
         synchronized (sensorLock) {
-            navX$SensorLock.setAdjustmentAngle(
-                    navX$SensorLock.getUnadjustedAngle().rotateBy(angle.inverse())
+            navX.setAdjustmentAngle(
+                    navX.getUnadjustedAngle().rotateBy(angle.inverse())
             );
         }
     }
@@ -176,12 +179,12 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
         Rotation2 angle;
         synchronized (sensorLock) {
-            angle = navX$SensorLock.getAngle();
+            angle = navX.getAngle();
         }
 
         RigidTransform2 pose = swerveOdometry.update(angle, dt, moduleVelocities);
         synchronized (kinematicsLock) {
-            pose$kinematicsLock = pose;
+            this.pose = pose;
         }
     }
 
@@ -216,7 +219,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
         HolonomicDriveSignal driveSignal;
         synchronized (stateLock) {
-            driveSignal = driveSignal$stateLock;
+            driveSignal = this.driveSignal;
         }
 
         updateModules(driveSignal, dt);
