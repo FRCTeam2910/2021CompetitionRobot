@@ -2,10 +2,7 @@ package org.frcteam2910.c2020;
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.frcteam2910.c2020.commands.DriveCommand;
-import org.frcteam2910.c2020.subsystems.DrivetrainSubsystem;
-import org.frcteam2910.c2020.subsystems.FeederSubsystem;
-import org.frcteam2910.c2020.subsystems.WheelOfFortuneSubsystem;
-import org.frcteam2910.c2020.subsystems.IntakeSubsystem;
+import org.frcteam2910.c2020.subsystems.*;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.robot.input.Axis;
 import org.frcteam2910.common.robot.input.Controller;
@@ -18,6 +15,7 @@ public class RobotContainer {
     private final FeederSubsystem feederSubsystem = new FeederSubsystem();
     private final WheelOfFortuneSubsystem wheelOfFortuneSubsystem = new WheelOfFortuneSubsystem();
     private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
 
     public RobotContainer() {
         primaryController.getLeftXAxis().setInverted(true);
@@ -27,6 +25,7 @@ public class RobotContainer {
         CommandScheduler.getInstance().registerSubsystem(feederSubsystem);
         CommandScheduler.getInstance().registerSubsystem(wheelOfFortuneSubsystem);
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
 
         configureButtonBindings();
     }
@@ -61,6 +60,10 @@ public class RobotContainer {
 
     public WheelOfFortuneSubsystem getWheelOfFortuneSubsystem(){
         return wheelOfFortuneSubsystem;
+    }
+
+    public ClimberSubsystem getClimberSubsystem(){
+        return climberSubsystem;
     }
 
 }

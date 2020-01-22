@@ -9,7 +9,8 @@ public class Robot extends TimedRobot {
     private UpdateManager updateManager = new UpdateManager(
             robotContainer.getDrivetrainSubsystem(),
             robotContainer.getFeederSubsystem(),
-            robotContainer.getWheelOfFortuneSubsystem()
+            robotContainer.getWheelOfFortuneSubsystem(),
+            robotContainer.getClimberSubsystem()
     );
 
     @Override

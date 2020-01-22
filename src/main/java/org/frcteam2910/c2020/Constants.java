@@ -39,4 +39,7 @@ public class Constants {
     public static final int PRIMARY_CONTROLLER_PORT = 0;
 
     public static final int FEEDER_MOTOR_PORT = 0;
+
+    public static final int CLIMBER_DEPLOY_SOLENOID_PORT = 1;
+    public static final int CLIMBER_EXTEND_SOLENOID_PORT = 2;
 }
