@@ -1,8 +1,8 @@
 package org.frcteam2910.c2020;
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import org.frcteam2910.c2020.commands.DriveCommand;
-import org.frcteam2910.c2020.commands.IntakeCommand;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.c2020.subsystems.*;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.robot.input.Axis;
@@ -11,6 +11,7 @@ import org.frcteam2910.common.robot.input.XboxController;
 
 public class RobotContainer {
     private final Controller primaryController = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
+    private final Controller secondaryController = new XboxController(Constants.SECONDARY_CONTROLLER_PORT);
 
     private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
     private final FeederSubsystem feederSubsystem = new FeederSubsystem();
@@ -36,6 +37,14 @@ public class RobotContainer {
                 () -> drivetrainSubsystem.resetGyroAngle(Rotation2.ZERO)
         );
         primaryController.getLeftBumperButton().whileHeld(new IntakeCommand(intakeSubsystem, 0.5));
+
+        secondaryController.getXButton().whenPressed(new DeployClimberCommand(climberSubsystem));
+        secondaryController.getYButton().whenPressed(new ConditionalCommand(
+                new RetractClimberCommand(climberSubsystem),
+                new ExtendClimberCommand(climberSubsystem),
+                climberSubsystem::isExtended
+        ));
+
     }
 
     private Axis getDriveForwardAxis() {

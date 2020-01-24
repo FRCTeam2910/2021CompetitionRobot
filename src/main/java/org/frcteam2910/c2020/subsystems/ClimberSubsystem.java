@@ -10,12 +10,17 @@ public class ClimberSubsystem implements Subsystem, UpdateManager.Updatable {
     private final Solenoid deploySolenoid = new Solenoid(Constants.CLIMBER_DEPLOY_SOLENOID_PORT);
     private final Solenoid extendSolenoid = new Solenoid(Constants.CLIMBER_EXTEND_SOLENOID_PORT);
 
+
     public void deployClimber(){
         deploySolenoid.set(false);
     }
 
     public void extendClimber(){
         extendSolenoid.set(true);
+    }
+
+    public boolean isExtended(){
+        return extendSolenoid.get();
     }
 
     public void retractClimber(){
