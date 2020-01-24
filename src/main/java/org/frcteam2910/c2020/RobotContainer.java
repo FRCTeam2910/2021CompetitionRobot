@@ -1,6 +1,8 @@
 package org.frcteam2910.c2020;
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.frcteam2910.c2020.commands.DriveCommand;
+import org.frcteam2910.c2020.commands.IntakeCommand;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.c2020.subsystems.*;
@@ -26,7 +28,6 @@ public class RobotContainer {
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
         CommandScheduler.getInstance().registerSubsystem(feederSubsystem);
         CommandScheduler.getInstance().registerSubsystem(wheelOfFortuneSubsystem);
-        CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
         CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
 
         configureButtonBindings();
@@ -36,7 +37,7 @@ public class RobotContainer {
         primaryController.getBackButton().whenPressed(
                 () -> drivetrainSubsystem.resetGyroAngle(Rotation2.ZERO)
         );
-        primaryController.getLeftBumperButton().whileHeld(new IntakeCommand(intakeSubsystem, 0.5));
+        primaryController.getLeftBumperButton().whileHeld(new IntakeCommand(intakeSubsystem, feederSubsystem, 0.5));
 
         secondaryController.getXButton().whenPressed(new DeployClimberCommand(climberSubsystem));
         secondaryController.getYButton().whenPressed(new ConditionalCommand(
