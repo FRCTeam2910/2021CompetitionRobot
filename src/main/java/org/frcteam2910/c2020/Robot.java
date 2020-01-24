@@ -10,7 +10,8 @@ public class Robot extends TimedRobot {
             robotContainer.getDrivetrainSubsystem(),
             robotContainer.getFeederSubsystem(),
             robotContainer.getWheelOfFortuneSubsystem(),
-            robotContainer.getClimberSubsystem()
+            robotContainer.getClimberSubsystem(),
+            robotContainer.getIntakeSubsystem()
     );
 
     @Override

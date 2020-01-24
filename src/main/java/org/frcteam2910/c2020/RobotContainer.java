@@ -2,6 +2,7 @@ package org.frcteam2910.c2020;
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.frcteam2910.c2020.commands.DriveCommand;
+import org.frcteam2910.c2020.commands.IntakeCommand;
 import org.frcteam2910.c2020.subsystems.*;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.robot.input.Axis;
@@ -34,6 +35,7 @@ public class RobotContainer {
         primaryController.getBackButton().whenPressed(
                 () -> drivetrainSubsystem.resetGyroAngle(Rotation2.ZERO)
         );
+        primaryController.getLeftBumperButton().whileHeld(new IntakeCommand(intakeSubsystem, 0.5));
     }
 
     private Axis getDriveForwardAxis() {
@@ -56,7 +58,9 @@ public class RobotContainer {
         return feederSubsystem;
     }
 
-
+    public IntakeSubsystem getIntakeSubsystem(){
+        return intakeSubsystem;
+    }
 
     public WheelOfFortuneSubsystem getWheelOfFortuneSubsystem(){
         return wheelOfFortuneSubsystem;
