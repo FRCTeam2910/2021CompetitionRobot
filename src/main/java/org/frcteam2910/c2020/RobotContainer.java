@@ -1,12 +1,18 @@
 package org.frcteam2910.c2020;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.frcteam2910.c2020.commands.DriveCommand;
+import org.frcteam2910.c2020.commands.FollowTrajectoryCommand;
 import org.frcteam2910.c2020.commands.IntakeCommand;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.c2020.subsystems.*;
+import org.frcteam2910.common.control.Path;
+import org.frcteam2910.common.control.SplinePathBuilder;
+import org.frcteam2910.common.control.Trajectory;
 import org.frcteam2910.common.math.Rotation2;
+import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.Axis;
 import org.frcteam2910.common.robot.input.Controller;
 import org.frcteam2910.common.robot.input.XboxController;
@@ -48,6 +54,15 @@ public class RobotContainer {
 
     }
 
+    public Command getAutonomousCommand() {
+        Path path = new SplinePathBuilder(Vector2.ZERO, Rotation2.ZERO, Rotation2.ZERO)
+                .hermite(new Vector2(24.0, 24.0), Rotation2.ZERO)
+                .build();
+        Trajectory trajectory = new Trajectory(path, DrivetrainSubsystem.TRAJECTORY_CONSTRAINTS, 0.1);
+
+        return new FollowTrajectoryCommand(drivetrainSubsystem, trajectory);
+    }
+
     private Axis getDriveForwardAxis() {
         return primaryController.getLeftYAxis();
     }
@@ -64,7 +79,7 @@ public class RobotContainer {
         return drivetrainSubsystem;
     }
 
-    public FeederSubsystem getFeederSubsystem(){
+    public FeederSubsystem getFeederSubsystem() {
         return feederSubsystem;
     }
 
@@ -72,11 +87,11 @@ public class RobotContainer {
         return intakeSubsystem;
     }
 
-    public WheelOfFortuneSubsystem getWheelOfFortuneSubsystem(){
+    public WheelOfFortuneSubsystem getWheelOfFortuneSubsystem() {
         return wheelOfFortuneSubsystem;
     }
 
-    public ClimberSubsystem getClimberSubsystem(){
+    public ClimberSubsystem getClimberSubsystem() {
         return climberSubsystem;
     }
 
