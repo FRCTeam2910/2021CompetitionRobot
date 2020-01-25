@@ -27,6 +27,8 @@ import org.frcteam2910.common.robot.drivers.Mk2SwerveModuleBuilder;
 import org.frcteam2910.common.robot.drivers.NavX;
 import org.frcteam2910.common.util.DrivetrainFeedforwardConstants;
 import org.frcteam2910.common.util.HolonomicDriveSignal;
+import org.frcteam2910.common.util.InterpolatingDouble;
+import org.frcteam2910.common.util.InterpolatingTreeMap;
 import org.frcteam2910.common.util.HolonomicFeedforward;
 
 import java.util.Optional;
@@ -38,6 +40,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private static final double GEAR_REDUCTION = 190.0 / 27.0;
     private static final double WHEEL_DIAMETER = 4.0;
+
     private static final DrivetrainFeedforwardConstants FEEDFORWARD_CONSTANTS = new DrivetrainFeedforwardConstants(
             0.058,
             0.00742,
@@ -49,6 +52,8 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             new MaxAccelerationConstraint(4.0 * 12.0),
             new CentripetalAccelerationConstraint(30.0 * 12.0)
     };
+
+    private static final int MAX_LATENCY_COMPENSATION_MAP_ENTRIES = 25;
 
     private final SwerveModule frontLeftModule =
             new Mk2SwerveModuleBuilder(new Vector2(TRACKWIDTH / 2.0, WHEELBASE / 2.0))
@@ -116,6 +121,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             new Vector2(-TRACKWIDTH / 2.0, WHEELBASE / 2.0),       //back left
             new Vector2(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0)        //back right
     );
+
     private final Object sensorLock = new Object();
     @GuardedBy("sensorLock")
     private NavX navX = new NavX(SPI.Port.kMXP);
@@ -125,6 +131,8 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final SwerveOdometry swerveOdometry = new SwerveOdometry(swerveKinematics, RigidTransform2.ZERO);
     @GuardedBy("kinematicsLock")
     private RigidTransform2 pose = RigidTransform2.ZERO;
+    @GuardedBy("kinematicsLock")
+    private InterpolatingTreeMap<InterpolatingDouble, RigidTransform2> latencyCompensationMap = new InterpolatingTreeMap<>();
     @GuardedBy("kinematicsLock")
     private Vector2 velocity = Vector2.ZERO;
     @GuardedBy("kinematicsLock")
@@ -213,7 +221,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
-    private void updateOdometry(double dt) {
+    private void updateOdometry(double time, double dt) {
         Vector2[] moduleVelocities = new Vector2[modules.length];
         for (int i = 0; i < modules.length; i++) {
             var module = modules[i];
@@ -233,6 +241,10 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
         synchronized (kinematicsLock) {
             this.pose = swerveOdometry.update(angle, dt, moduleVelocities);
+            if (latencyCompensationMap.size() > MAX_LATENCY_COMPENSATION_MAP_ENTRIES) {
+                latencyCompensationMap.remove(latencyCompensationMap.firstKey());
+            }
+            latencyCompensationMap.put(new InterpolatingDouble(time), pose);
             this.velocity = velocity.getTranslationalVelocity();
             this.angularVelocity = angularVelocity;
         }
@@ -263,9 +275,18 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
+    public RigidTransform2 getPoseAtTime(double timestamp) {
+        synchronized (kinematicsLock) {
+            if(latencyCompensationMap.isEmpty()) {
+                return RigidTransform2.ZERO;
+            }
+            return latencyCompensationMap.getInterpolated(new InterpolatingDouble(timestamp));
+        }
+    }
+
     @Override
     public void update(double time, double dt) {
-        updateOdometry(dt);
+        updateOdometry(time, dt);
 
         HolonomicDriveSignal driveSignal;
         Optional<HolonomicDriveSignal> trajectorySignal = follower.update(
