@@ -12,7 +12,7 @@ public class ClimberSubsystem implements Subsystem, UpdateManager.Updatable {
 
 
     public void deployClimber(){
-        deploySolenoid.set(false);
+        deploySolenoid.set(true);
     }
 
     public void extendClimber(){
