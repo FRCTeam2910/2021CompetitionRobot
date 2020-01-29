@@ -58,9 +58,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final SwerveModule frontLeftModule =
             new Mk2SwerveModuleBuilder(new Vector2(TRACKWIDTH / 2.0, WHEELBASE / 2.0))
                     .angleMotor(
-                            new CANSparkMax(Constants.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR,
-                                    CANSparkMaxLowLevel.MotorType.kBrushless),
-                            Mk2SwerveModuleBuilder.MotorType.NEO)
+                            new TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR))
                     .driveMotor(
                             new TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
                     .angleEncoder(
@@ -71,9 +69,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final SwerveModule frontRightModule =
             new Mk2SwerveModuleBuilder(new Vector2(TRACKWIDTH / 2.0, -WHEELBASE / 2.0))
                     .angleMotor(
-                            new CANSparkMax(Constants.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR,
-                                    CANSparkMaxLowLevel.MotorType.kBrushless),
-                            Mk2SwerveModuleBuilder.MotorType.NEO)
+                            new TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR))
                     .driveMotor(
                             new TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
                     .angleEncoder(
@@ -84,9 +80,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final SwerveModule backLeftModule =
             new Mk2SwerveModuleBuilder(new Vector2(-TRACKWIDTH / 2.0, WHEELBASE / 2.0))
                     .angleMotor(
-                            new CANSparkMax(Constants.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR,
-                                    CANSparkMaxLowLevel.MotorType.kBrushless),
-                            Mk2SwerveModuleBuilder.MotorType.NEO)
+                            new TalonFX(Constants.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR))
                     .driveMotor(
                             new TalonFX(Constants.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
                     .angleEncoder(
@@ -97,9 +91,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final SwerveModule backRightModule =
             new Mk2SwerveModuleBuilder(new Vector2(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0))
                     .angleMotor(
-                            new CANSparkMax(Constants.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR,
-                                    CANSparkMaxLowLevel.MotorType.kBrushless),
-                            Mk2SwerveModuleBuilder.MotorType.NEO)
+                            new TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR))
                     .driveMotor(
                             new TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
                     .angleEncoder(
