@@ -3,7 +3,10 @@ package org.frcteam2910.c2020.subsystems;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.common.robot.UpdateManager;
 
@@ -19,6 +22,21 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
     private double motorOutput = 0.0;
     @GuardedBy("stateLock")
     private boolean extended = false;
+
+    private final NetworkTableEntry motorSpeedEntry;
+    private final NetworkTableEntry isExtendedEntry;
+
+    public IntakeSubsystem() {
+        ShuffleboardTab tab = Shuffleboard.getTab("Intake");
+        motorSpeedEntry = tab.add("Motor Speed", 0.0)
+                .withPosition(0, 0)
+                .withSize(1, 1)
+                .getEntry();
+        isExtendedEntry = tab.add("Is Extended", false)
+                .withPosition(0, 1)
+                .withSize(1, 1)
+                .getEntry();
+    }
 
     @Override
     public void update(double time, double dt) {
@@ -51,5 +69,17 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
         synchronized (stateLock) {
             this.motorOutput = motorOutput;
         }
+    }
+
+    public double getMotorOutput() {
+        synchronized (stateLock) {
+            return motor.get();
+        }
+    }
+
+    @Override
+    public void periodic() {
+        motorSpeedEntry.setDouble(getMotorOutput());
+        isExtendedEntry.setBoolean(isExtended());
     }
 }
