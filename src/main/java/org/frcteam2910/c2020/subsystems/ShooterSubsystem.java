@@ -4,6 +4,9 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.*;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.common.robot.UpdateManager;
@@ -29,6 +32,10 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private final TalonSRX angleMotor = new TalonSRX(Constants.SHOOTER_ANGLE_MOTOR_PORT);
 
+    private final NetworkTableEntry hoodAngleEntry;
+    private final NetworkTableEntry flyWheelMotor1SpeedEntry;
+    private final NetworkTableEntry flyWheelMotor2SpeedEntry;
+
     public ShooterSubsystem() {
         TalonFXConfiguration flyWheelConfiguration = new TalonFXConfiguration();
         flyWheelConfiguration.slot0.kP = FLYWHEEL_P;
@@ -49,8 +56,21 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         hoodConfiguration.primaryPID.selectedFeedbackSensor = FeedbackDevice.CTRE_MagEncoder_Absolute;
         hoodConfiguration.primaryPID.selectedFeedbackCoefficient = HOOD_SENSOR_COEFFICIENT;
 
-
         angleMotor.configAllSettings(hoodConfiguration);
+
+        ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
+        hoodAngleEntry = tab.add("hood angle", 0.0)
+                .withPosition(0, 0)
+                .withSize(1, 1)
+                .getEntry();
+        flyWheelMotor1SpeedEntry = tab.add("Wheel 1 Speed", 0.0)
+                .withPosition(1, 0)
+                .withSize(1, 1)
+                .getEntry();
+        flyWheelMotor2SpeedEntry = tab.add("Wheel 2 Speed", 0.0)
+                .withPosition(1, 1)
+                .withSize(1, 1)
+                .getEntry();
     }
 
     public double getHoodAngle() {
@@ -69,5 +89,12 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     @Override
     public void update(double time, double dt) {
 
+    }
+
+    @Override
+    public void periodic() {
+        hoodAngleEntry.setDouble(getHoodAngle());
+        flyWheelMotor1SpeedEntry.setDouble(flywheelMotor1.getSensorCollection().getIntegratedSensorVelocity());
+        flyWheelMotor2SpeedEntry.setDouble(flywheelMotor2.getSensorCollection().getIntegratedSensorVelocity());
     }
 }
