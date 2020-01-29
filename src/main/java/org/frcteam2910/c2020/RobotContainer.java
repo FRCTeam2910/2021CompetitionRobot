@@ -26,6 +26,7 @@ public class RobotContainer {
     private final WheelOfFortuneSubsystem wheelOfFortuneSubsystem = new WheelOfFortuneSubsystem();
     private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
+    private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
 
     public RobotContainer() {
         primaryController.getLeftXAxis().setInverted(true);
@@ -35,6 +36,8 @@ public class RobotContainer {
         CommandScheduler.getInstance().registerSubsystem(feederSubsystem);
         CommandScheduler.getInstance().registerSubsystem(wheelOfFortuneSubsystem);
         CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(shooterSubsystem);
 
         configureButtonBindings();
     }
