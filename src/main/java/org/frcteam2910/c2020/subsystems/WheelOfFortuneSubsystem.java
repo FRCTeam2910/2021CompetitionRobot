@@ -1,7 +1,10 @@
 package org.frcteam2910.c2020.subsystems;
 
 import com.revrobotics.ColorSensorV3;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
@@ -23,6 +26,17 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
 
 
     private DetectedColor detectedColor;
+    private final NetworkTableEntry colorEntry;
+
+
+    public WheelOfFortuneSubsystem(){
+        ShuffleboardTab tab = Shuffleboard.getTab("Wheel of Fortune");
+        colorEntry = tab.add("Color", DetectedColor.GREEN.toString())
+                .withPosition(0,0)
+                .withSize(1,1)
+                .getEntry();
+
+    }
 
     @Override
     public void periodic(){
@@ -30,7 +44,7 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
         double hueColor  = calculateHue(colorFromSensor);
         detectedColor = calculateDetectedColor(hueColor);
 
-        SmartDashboard.putString("Color Detected", detectedColor.toString());
+        colorEntry.setString(detectedColor.toString());
     }
 
 
