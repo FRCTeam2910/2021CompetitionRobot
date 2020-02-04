@@ -33,7 +33,7 @@ public class RobotContainer {
         primaryController.getRightXAxis().setInverted(true);
 
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
-        CommandScheduler.getInstance().registerSubsystem(feederSubsystem);
+        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.75));
         CommandScheduler.getInstance().registerSubsystem(wheelOfFortuneSubsystem);
         CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
