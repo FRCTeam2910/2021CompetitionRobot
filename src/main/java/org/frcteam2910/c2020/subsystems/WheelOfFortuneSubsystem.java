@@ -1,11 +1,15 @@
 package org.frcteam2910.c2020.subsystems;
 
+import com.revrobotics.CANPIDController;
+import com.revrobotics.CANSparkMax;
 import com.revrobotics.ColorSensorV3;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANEncoder;
+import com.revrobotics.ControlType;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.c2020.util.DetectedColor;
@@ -21,21 +25,34 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
     private final double BLUE_MIN = Constants.WHEEL_OF_FORTUNE_BLUE_HUE - (Constants.WHEEL_OF_FORTUNE_BLUE_HUE - Constants.WHEEL_OF_FORTUNE_GREEN_HUE) / 2;
     private final double BLUE_MAX = Constants.WHEEL_OF_FORTUNE_BLUE_HUE + (210 - Constants.WHEEL_OF_FORTUNE_BLUE_HUE) / 2;
 
+    private static final double SPINNER_POSITION_COEFFICIENT = 0.0;
+    private static final double SPINNER_INTEGRAL_COEFFICIENT = 0.0;
+    private static final double SPINNER_DERIVATIVE_COEFFICIENT = 0.0;
+    private static final double SENSOR_COEFFICIENT = 1.0;
+
     private final I2C.Port i2cPort = I2C.Port.kOnboard;
     private final ColorSensorV3 COLOR_SENSOR = new ColorSensorV3(i2cPort);
 
+    private CANSparkMax motor = new CANSparkMax(Constants.WHEEL_OF_FORTUNE_MOTOR_PORT, MotorType.kBrushless);
+
+    private CANEncoder encoder =  motor.getEncoder();
+    private CANPIDController pidController = motor.getPIDController();
 
     private DetectedColor detectedColor;
     private final NetworkTableEntry colorEntry;
 
-
     public WheelOfFortuneSubsystem(){
+        encoder.setPositionConversionFactor(SENSOR_COEFFICIENT);
+
+        pidController.setP(SPINNER_POSITION_COEFFICIENT);
+        pidController.setI(SPINNER_INTEGRAL_COEFFICIENT);
+        pidController.setD(SPINNER_DERIVATIVE_COEFFICIENT);
+
         ShuffleboardTab tab = Shuffleboard.getTab("Wheel of Fortune");
         colorEntry = tab.add("Color", DetectedColor.GREEN.toString())
                 .withPosition(0,0)
                 .withSize(1,1)
                 .getEntry();
-
     }
 
     @Override
@@ -45,6 +62,10 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
         detectedColor = calculateDetectedColor(hueColor);
 
         colorEntry.setString(detectedColor.toString());
+    }
+
+    public void spin(double numRevolutions) {
+        pidController.setReference(numRevolutions, ControlType.kPosition);
     }
 
 
