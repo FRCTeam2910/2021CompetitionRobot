@@ -14,12 +14,11 @@ import org.frcteam2910.common.control.Trajectory;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.Axis;
-import org.frcteam2910.common.robot.input.Controller;
 import org.frcteam2910.common.robot.input.XboxController;
 
 public class RobotContainer {
-    private final Controller primaryController = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
-    private final Controller secondaryController = new XboxController(Constants.SECONDARY_CONTROLLER_PORT);
+    private final XboxController primaryController = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
+    private final XboxController secondaryController = new XboxController(Constants.SECONDARY_CONTROLLER_PORT);
 
     private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
     private final FeederSubsystem feederSubsystem = new FeederSubsystem();
@@ -48,13 +47,17 @@ public class RobotContainer {
         );
         primaryController.getLeftBumperButton().whileHeld(new IntakeCommand(intakeSubsystem, feederSubsystem, 0.5));
 
+        primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem));
+        primaryController.getRightBumperButton().whileHeld(
+                new TargetWithShooterCommand(shooterSubsystem, primaryController).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem))
+        );
+
         secondaryController.getXButton().whenPressed(new DeployClimberCommand(climberSubsystem));
         secondaryController.getYButton().whenPressed(new ConditionalCommand(
                 new RetractClimberCommand(climberSubsystem),
                 new ExtendClimberCommand(climberSubsystem),
                 climberSubsystem::isExtended
         ));
-
     }
 
     public Command getAutonomousCommand() {
