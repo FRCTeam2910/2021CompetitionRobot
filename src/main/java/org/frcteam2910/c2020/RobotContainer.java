@@ -58,6 +58,8 @@ public class RobotContainer {
                 new ExtendClimberCommand(climberSubsystem),
                 climberSubsystem::isExtended
         ));
+        secondaryController.getBButton().whenPressed(wheelOfFortuneSubsystem::extendSolenoid);
+        secondaryController.getBButton().whenReleased(wheelOfFortuneSubsystem::retractSolenoid);
     }
 
     public Command getAutonomousCommand() {

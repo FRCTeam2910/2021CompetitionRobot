@@ -43,6 +43,8 @@ public class Constants {
 
     public static final int WHEEL_OF_FORTUNE_MOTOR_PORT = 5;
 
+    public static final int WHEEL_OF_FORTUNE_DEPLOY_SOLENOID_PORT = 3;
+
     public static final int CLIMBER_DEPLOY_SOLENOID_PORT = 1;
     public static final int CLIMBER_EXTEND_SOLENOID_PORT = 2;
 

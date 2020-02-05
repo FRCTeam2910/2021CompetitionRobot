@@ -8,6 +8,7 @@ import com.revrobotics.CANEncoder;
 import com.revrobotics.ControlType;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -39,6 +40,8 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
 
     private CANEncoder encoder =  motor.getEncoder();
     private CANPIDController pidController = motor.getPIDController();
+
+    private Solenoid deploySolenoid = new Solenoid(Constants.WHEEL_OF_FORTUNE_DEPLOY_SOLENOID_PORT);
 
     private DetectedColor detectedColor;
     private final NetworkTableEntry colorEntry;
@@ -115,6 +118,13 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
        return detectedColor;
     }
 
+    public void extendSolenoid() {
+        deploySolenoid.set(true);
+    }
+
+    public void retractSolenoid() {
+        deploySolenoid.set(false);
+    }
 
     @Override
     public void update(double time, double dt){
