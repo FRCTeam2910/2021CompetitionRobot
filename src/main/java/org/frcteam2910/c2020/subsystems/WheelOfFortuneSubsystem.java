@@ -30,6 +30,8 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
     private static final double SPINNER_DERIVATIVE_COEFFICIENT = 0.0;
     private static final double SENSOR_COEFFICIENT = 1.0;
 
+    public static final double SPINNER_REVOLUTIONS_PER_WHEEL_SECTION = 1.0;
+
     private final I2C.Port i2cPort = I2C.Port.kOnboard;
     private final ColorSensorV3 COLOR_SENSOR = new ColorSensorV3(i2cPort);
 
@@ -68,6 +70,17 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
         pidController.setReference(numRevolutions, ControlType.kPosition);
     }
 
+    public void stopMotor() {
+        motor.stopMotor();
+    }
+
+    public void resetEncoderPosition() {
+        encoder.setPosition(0.0);
+    }
+
+    public double getEncoderPosition() {
+        return encoder.getPosition();
+    }
 
     private double calculateHue(Color colorFromSensor){
 
