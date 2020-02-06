@@ -9,9 +9,7 @@ import static org.frcteam2910.c2020.subsystems.WheelOfFortuneSubsystem.SPINNER_R
 
 public class SpinColorControlCommand extends CommandBase {
     private WheelOfFortuneSubsystem spinner;
-    private DetectedColor desiredColor = null;
-
-    private boolean motorStart = false;
+    private DetectedColor desiredColor;
 
     public SpinColorControlCommand(WheelOfFortuneSubsystem wheelOfFortuneSpinner) {
         spinner = wheelOfFortuneSpinner;
@@ -23,13 +21,7 @@ public class SpinColorControlCommand extends CommandBase {
         String gameMessage = DriverStation.getInstance().getGameSpecificMessage();
         if (gameMessage.length() > 0) {
             desiredColor = DetectedColor.convertGameMessageToColor(gameMessage);
-        }
-    }
 
-    @Override
-    public void execute() {
-        if (!motorStart && desiredColor != null && spinner.isCloseToColorSensor()) {
-            motorStart = true;
             DetectedColor currentRobotColor = spinner.getDetectedColor();
             DetectedColor fieldSensorColor = currentRobotColor.getColorOnFieldSensor();
 
