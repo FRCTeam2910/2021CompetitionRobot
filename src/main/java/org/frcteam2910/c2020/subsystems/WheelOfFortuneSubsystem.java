@@ -31,6 +31,8 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
     private static final double SPINNER_DERIVATIVE_COEFFICIENT = 0.0;
     private static final double SENSOR_COEFFICIENT = 1.0;
 
+    private static final int PROXIMITY_CUTOFF_VALUE = 1024;
+
     public static final double SPINNER_REVOLUTIONS_PER_WHEEL_SECTION = 1.0;
 
     private final I2C.Port i2cPort = I2C.Port.kOnboard;
@@ -45,6 +47,8 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
 
     private DetectedColor detectedColor;
     private final NetworkTableEntry colorEntry;
+
+    private int proximityValue;
 
     public WheelOfFortuneSubsystem(){
         encoder.setPositionConversionFactor(SENSOR_COEFFICIENT);
@@ -66,11 +70,17 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
         double hueColor  = calculateHue(colorFromSensor);
         detectedColor = calculateDetectedColor(hueColor);
 
+        proximityValue = COLOR_SENSOR.getProximity();
+
         colorEntry.setString(detectedColor.toString());
     }
 
     public void spin(double numRevolutions) {
         pidController.setReference(numRevolutions, ControlType.kPosition);
+    }
+
+    public boolean isCloseToColorSensor() {
+        return proximityValue >= PROXIMITY_CUTOFF_VALUE;
     }
 
     public void stopMotor() {

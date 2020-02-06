@@ -9,6 +9,8 @@ public class SpinRotationControlCommand extends CommandBase {
     private static final double ROTATION_CONTROL_NUM_SECTIONS = 27.0;
     private static final double NUM_SECTIONS_ALLOWABLE_ERROR = 0.5;
 
+    private boolean motorStart = false;
+
     private WheelOfFortuneSubsystem spinner;
 
     public SpinRotationControlCommand(WheelOfFortuneSubsystem wheelOfFortuneSpinner) {
@@ -17,9 +19,13 @@ public class SpinRotationControlCommand extends CommandBase {
     }
 
     @Override
-    public void initialize() {
-        spinner.resetEncoderPosition();
-        spinner.spin(ROTATION_CONTROL_NUM_SECTIONS * SPINNER_REVOLUTIONS_PER_WHEEL_SECTION);
+    public void execute() {
+        if (!motorStart && spinner.isCloseToColorSensor()) {
+            motorStart = true;
+
+            spinner.resetEncoderPosition();
+            spinner.spin(ROTATION_CONTROL_NUM_SECTIONS * SPINNER_REVOLUTIONS_PER_WHEEL_SECTION);
+        }
     }
 
     @Override
