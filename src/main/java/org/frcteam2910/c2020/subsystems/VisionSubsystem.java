@@ -12,17 +12,18 @@ import java.util.OptionalDouble;
 
 public class VisionSubsystem implements Subsystem {
     private static final double TARGET_HEIGHT = 98.25;
-    private static final double LIMELIGHT_MOUTNING_ANGLE = Math.toRadians(20.0);
+    // TODO: Put the actual height of the Limelight
+    private static final double LIMELIGHT_HEIGHT = 20.0;
+    // TODO: Put the actual angle the Limelight is mounted at
+    private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(20.0);
 
-    private final Limelight limelight;
+    private final Limelight limelight = new Limelight();
 
     private final NetworkTableEntry distanceToTargetEntry;
 
     private OptionalDouble distanceToTarget;
 
     public VisionSubsystem() {
-        limelight = new Limelight();
-
         ShuffleboardTab tab = Shuffleboard.getTab("Vision");
         distanceToTargetEntry = tab.add("distance to target", 0.0)
                 .withPosition(0, 0)
@@ -40,8 +41,8 @@ public class VisionSubsystem implements Subsystem {
         if (limelight.hasTarget()) {
             // If so, get the target position and calculate the distance to it
             Vector2 targetPosition = limelight.getTargetPosition();
-            double theta = LIMELIGHT_MOUTNING_ANGLE + targetPosition.y;
-            distanceToTarget = OptionalDouble.of(TARGET_HEIGHT /  Math.tan(theta));
+            double theta = LIMELIGHT_MOUNTING_ANGLE + targetPosition.y;
+            distanceToTarget = OptionalDouble.of((TARGET_HEIGHT - LIMELIGHT_HEIGHT) /  Math.tan(theta));
             distanceToTargetEntry.setDouble(distanceToTarget.getAsDouble());
         } else {
             // Else, set distanceToTarget to an empty OptionalDouble
