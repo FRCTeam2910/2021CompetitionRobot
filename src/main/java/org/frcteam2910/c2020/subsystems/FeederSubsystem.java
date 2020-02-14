@@ -21,6 +21,7 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     private final NetworkTableEntry motorSpeedEntry;
 
     public FeederSubsystem() {
+        motor.setInverted(true);
         ShuffleboardTab tab = Shuffleboard.getTab("Feeder");
         fullEntry = tab.add("Is feeder full", false)
                 .withPosition(0, 0)
@@ -41,14 +42,14 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     }
 
     public boolean isFull(){
-        return fullSensor.get();
+        return !fullSensor.get();
     }
 
     public boolean shouldAdvance(){
         if(isFull()){
             return false;
         }
-        return intakeBallSensor.get();
+        return !intakeBallSensor.get();
     }
 
     @Override
@@ -61,7 +62,7 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     @Override
     public void periodic() {
         fullEntry.setBoolean(isFull());
-        hasBallEntry.setBoolean(intakeBallSensor.get());
+        hasBallEntry.setBoolean(!intakeBallSensor.get());
         motorSpeedEntry.setDouble(motor.getSensorCollection().getIntegratedSensorVelocity());
     }
 }
