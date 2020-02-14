@@ -1,20 +1,20 @@
 package org.frcteam2910.c2020.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.sensors.PigeonIMU;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
+import org.frcteam2910.c2020.Pigeon;
 import org.frcteam2910.common.control.*;
+import org.frcteam2910.common.drivers.Gyroscope;
 import org.frcteam2910.common.drivers.SwerveModule;
 import org.frcteam2910.common.kinematics.ChassisVelocity;
 import org.frcteam2910.common.kinematics.SwerveKinematics;
@@ -24,7 +24,6 @@ import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.UpdateManager;
 import org.frcteam2910.common.robot.drivers.Mk2SwerveModuleBuilder;
-import org.frcteam2910.common.robot.drivers.NavX;
 import org.frcteam2910.common.util.DrivetrainFeedforwardConstants;
 import org.frcteam2910.common.util.HolonomicDriveSignal;
 import org.frcteam2910.common.util.InterpolatingDouble;
@@ -116,7 +115,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private final Object sensorLock = new Object();
     @GuardedBy("sensorLock")
-    private NavX navX = new NavX(SPI.Port.kMXP);
+    private Gyroscope gyroscope = new Pigeon(Constants.DRIVETRAIN_PIGEON_PORT);
 
     private final Object kinematicsLock = new Object();
     @GuardedBy("kinematicsLock")
@@ -143,7 +142,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public DrivetrainSubsystem() {
         synchronized (sensorLock) {
-            navX.setInverted(true);
+            gyroscope.setInverted(true);
         }
 
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
@@ -207,8 +206,8 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public void resetGyroAngle(Rotation2 angle) {
         synchronized (sensorLock) {
-            navX.setAdjustmentAngle(
-                    navX.getUnadjustedAngle().rotateBy(angle.inverse())
+            gyroscope.setAdjustmentAngle(
+                    gyroscope.getUnadjustedAngle().rotateBy(angle.inverse())
             );
         }
     }
@@ -225,8 +224,8 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         Rotation2 angle;
         double angularVelocity;
         synchronized (sensorLock) {
-            angle = navX.getAngle();
-            angularVelocity = navX.getRate();
+            angle = gyroscope.getAngle();
+            angularVelocity = gyroscope.getRate();
         }
 
         ChassisVelocity velocity = swerveKinematics.toChassisVelocity(moduleVelocities);
