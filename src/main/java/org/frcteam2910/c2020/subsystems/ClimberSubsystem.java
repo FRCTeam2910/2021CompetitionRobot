@@ -11,7 +11,10 @@ import org.frcteam2910.common.robot.UpdateManager;
 public class ClimberSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private final Solenoid deploySolenoid = new Solenoid(Constants.CLIMBER_DEPLOY_SOLENOID_PORT);
-    private final Solenoid extendSolenoid = new Solenoid(Constants.CLIMBER_EXTEND_SOLENOID_PORT);
+    private final Solenoid[] extendSolenoids = {
+            new Solenoid(Constants.CLIMBER_EXTEND_SOLENOID_1_PORT),
+            new Solenoid(Constants.CLIMBER_EXTEND_SOLENOID_2_PORT)
+    };
 
     private final NetworkTableEntry isDeployedEntry;
     private final NetworkTableEntry isExtendedEntry;
@@ -33,15 +36,19 @@ public class ClimberSubsystem implements Subsystem, UpdateManager.Updatable {
     }
 
     public void extendClimber(){
-        extendSolenoid.set(true);
+        for (var solenoid : extendSolenoids) {
+            solenoid.set(true);
+        }
     }
 
     public boolean isExtended(){
-        return extendSolenoid.get();
+        return extendSolenoids[0].get();
     }
 
     public void retractClimber(){
-        extendSolenoid.set(false);
+        for (var solenoid : extendSolenoids) {
+            solenoid.set(false);
+        }
     }
 
     @Override
