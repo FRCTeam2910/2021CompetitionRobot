@@ -26,6 +26,7 @@ public class RobotContainer {
     private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 //    private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
+    private final VisionSubsystem visionSubsystem = new VisionSubsystem();
 
     public RobotContainer() {
         primaryController.getLeftXAxis().setInverted(true);
@@ -37,6 +38,7 @@ public class RobotContainer {
 //        CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
         CommandScheduler.getInstance().registerSubsystem(shooterSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
 
         configureButtonBindings();
     }
