@@ -3,15 +3,19 @@ package org.frcteam2910.c2020;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import org.frcteam2910.c2020.commands.DriveCommand;
 import org.frcteam2910.c2020.commands.FollowTrajectoryCommand;
 import org.frcteam2910.c2020.commands.IntakeCommand;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.c2020.subsystems.*;
+import org.frcteam2910.c2020.util.AutonomousChooser;
+import org.frcteam2910.c2020.util.AutonomousTrajectories;
 import org.frcteam2910.common.control.Path;
 import org.frcteam2910.common.control.SplinePathBuilder;
 import org.frcteam2910.common.control.Trajectory;
+import org.frcteam2910.common.control.TrajectoryConstraint;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.Axis;
@@ -28,6 +32,10 @@ public class RobotContainer {
     private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
     private final VisionSubsystem visionSubsystem = new VisionSubsystem(drivetrainSubsystem);
+
+    private final TrajectoryConstraint[] trajectoryConstraints = {};
+    private final AutonomousTrajectories autonomousTrajectories = new AutonomousTrajectories(trajectoryConstraints);
+    private final AutonomousChooser autonomousChooser = new AutonomousChooser(autonomousTrajectories);
 
     public RobotContainer() {
         primaryController.getLeftXAxis().setInverted(true);
@@ -74,7 +82,7 @@ public class RobotContainer {
                 .build();
         Trajectory trajectory = new Trajectory(path, DrivetrainSubsystem.TRAJECTORY_CONSTRAINTS, 0.1);
 
-        return new FollowTrajectoryCommand(drivetrainSubsystem, trajectory);
+        return autonomousChooser.getCommand(drivetrainSubsystem, shooterSubsystem, primaryController);
     }
 
     private Axis getDriveForwardAxis() {
