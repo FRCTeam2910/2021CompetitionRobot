@@ -22,9 +22,9 @@ public class RobotContainer {
 
     private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
     private final FeederSubsystem feederSubsystem = new FeederSubsystem();
-    private final WheelOfFortuneSubsystem wheelOfFortuneSubsystem = new WheelOfFortuneSubsystem();
+//    private final WheelOfFortuneSubsystem wheelOfFortuneSubsystem = new WheelOfFortuneSubsystem();
     private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-    private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
+//    private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
 
     public RobotContainer() {
@@ -32,9 +32,9 @@ public class RobotContainer {
         primaryController.getRightXAxis().setInverted(true);
 
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
-        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.75));
-        CommandScheduler.getInstance().registerSubsystem(wheelOfFortuneSubsystem);
-        CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
+        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.3));
+//        CommandScheduler.getInstance().registerSubsystem(wheelOfFortuneSubsystem);
+//        CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
         CommandScheduler.getInstance().registerSubsystem(shooterSubsystem);
 
@@ -51,16 +51,23 @@ public class RobotContainer {
 //        primaryController.getRightBumperButton().whileHeld(
 //                new TargetWithShooterCommand(shooterSubsystem, primaryController).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem))
 //        );
-        primaryController.getRightBumperButton().whileHeld(new SpinFlywheelCommand(shooterSubsystem, 500));
 
-        secondaryController.getXButton().whenPressed(new DeployClimberCommand(climberSubsystem));
-        secondaryController.getYButton().whenPressed(new ConditionalCommand(
-                new RetractClimberCommand(climberSubsystem),
-                new ExtendClimberCommand(climberSubsystem),
-                climberSubsystem::isExtended
-        ));
-        secondaryController.getBButton().whenPressed(wheelOfFortuneSubsystem::extendSolenoid);
-        secondaryController.getBButton().whenReleased(wheelOfFortuneSubsystem::retractSolenoid);
+        primaryController.getRightBumperButton().whenPressed(() -> shooterSubsystem.setHoodTargetAngle(Math.toRadians(50)));
+        primaryController.getRightBumperButton().whileHeld(new SpinFlywheelCommand(shooterSubsystem, 6000.0));
+        primaryController.getRightBumperButton().whenReleased(() -> shooterSubsystem.setHoodTargetAngle(Math.toRadians(24)));
+
+        primaryController.getAButton().whenPressed(() -> shooterSubsystem.setHoodTargetAngle(Math.toRadians(40.0)));
+        primaryController.getBButton().whenPressed(() -> shooterSubsystem.setHoodTargetAngle(Math.toRadians(30.0)));
+        primaryController.getXButton().whenPressed(() -> shooterSubsystem.setHoodTargetAngle(Math.toRadians(50.0)));
+
+//        secondaryController.getXButton().whenPressed(new DeployClimberCommand(climberSubsystem));
+//        secondaryController.getYButton().whenPressed(new ConditionalCommand(
+//                new RetractClimberCommand(climberSubsystem),
+//                new ExtendClimberCommand(climberSubsystem),
+//                climberSubsystem::isExtended
+//        ));
+//        secondaryController.getBButton().whenPressed(wheelOfFortuneSubsystem::extendSolenoid);
+//        secondaryController.getBButton().whenReleased(wheelOfFortuneSubsystem::retractSolenoid);
     }
 
     public Command getAutonomousCommand() {
@@ -96,13 +103,13 @@ public class RobotContainer {
         return intakeSubsystem;
     }
 
-    public WheelOfFortuneSubsystem getWheelOfFortuneSubsystem() {
-        return wheelOfFortuneSubsystem;
-    }
-
-    public ClimberSubsystem getClimberSubsystem() {
-        return climberSubsystem;
-    }
+//    public WheelOfFortuneSubsystem getWheelOfFortuneSubsystem() {
+//        return wheelOfFortuneSubsystem;
+//    }
+//
+//    public ClimberSubsystem getClimberSubsystem() {
+//        return climberSubsystem;
+//    }
 
     public ShooterSubsystem getShooterSubsystem() {
         return shooterSubsystem;

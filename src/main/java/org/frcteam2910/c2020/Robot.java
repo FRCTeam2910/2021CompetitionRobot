@@ -3,6 +3,7 @@ package org.frcteam2910.c2020;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.frcteam2910.c2020.commands.CharacterizeFlywheelCommand;
 import org.frcteam2910.c2020.commands.SpinFlywheelCommand;
 import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
@@ -13,8 +14,8 @@ public class Robot extends TimedRobot {
     private UpdateManager updateManager = new UpdateManager(
             robotContainer.getDrivetrainSubsystem(),
             robotContainer.getFeederSubsystem(),
-            robotContainer.getWheelOfFortuneSubsystem(),
-            robotContainer.getClimberSubsystem(),
+//            robotContainer.getWheelOfFortuneSubsystem(),
+//            robotContainer.getClimberSubsystem(),
             robotContainer.getIntakeSubsystem(),
             robotContainer.getShooterSubsystem()
     );
@@ -34,7 +35,8 @@ public class Robot extends TimedRobot {
         robotContainer.getDrivetrainSubsystem().resetPose(RigidTransform2.ZERO);
         robotContainer.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO);
 
-        robotContainer.getAutonomousCommand().schedule();
+//        robotContainer.getAutonomousCommand().schedule();
+        new CharacterizeFlywheelCommand(robotContainer.getShooterSubsystem()).schedule();
     }
 
     @Override

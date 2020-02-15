@@ -1,18 +1,17 @@
 package org.frcteam2910.c2020.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
+import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
+import org.frcteam2910.common.math.MathUtils;
 import org.frcteam2910.common.robot.UpdateManager;
 import org.frcteam2910.common.util.InterpolatingDouble;
 import org.frcteam2910.common.util.InterpolatingTreeMap;
@@ -21,11 +20,16 @@ import org.frcteam2910.common.util.InterpolatingTreeMap;
 public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     private static final double HOOD_GEAR_REDUCTION = 14.0 / 60.0;
 
-    private static final double HOOD_SENSOR_COEFFICIENT = ((2.0 * Math.PI) * HOOD_GEAR_REDUCTION / 2048.0);
+    private static final double HOOD_SENSOR_COEFFICIENT = ((2.0 * Math.PI) * HOOD_GEAR_REDUCTION / 4096.0);
+
+    private static final double HOOD_MIN_ANGLE = Math.toRadians(24.0);
+    private static final double HOOD_MAX_ANGLE = Math.toRadians(58.0);
+    private static final double HOOD_OFFSET = Math.toRadians(-63.2);
+
     private static final double FLYWHEEL_POSITION_SENSOR_COEFFICIENT = 1.0 / 2048.0;
     private static final double FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT = FLYWHEEL_POSITION_SENSOR_COEFFICIENT * (1000.0 / 100.0) * (60.0 / 1.0);
 
-    private static final double FLYWHEEL_P = 0.05;
+    private static final double FLYWHEEL_P = 0.25;
     private static final double FLYWHEEL_I = 0.0;
     private static final double FLYWHEEL_D = 0.0;
 
@@ -33,21 +37,19 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
      * Flywheel regression constants
      *
      * Found by doing an exponential regression using the following points:
-     * (2000, 0.0001775)
-     * (3000, 0.0001705)
-     * (4000, 0.0001672)
-     * (5000, 0.000165)
-     * (6000, 0.000164)
+     * (0.25, 1480)
+     * (0.3, 1780)
+     * (0.5, 3000)
+     * (0.6, 3600)
+     * (0.7, 4235)
+     * (0.8, 4835)
      */
-    private static final double[] FLYWHEEL_FF_REGRESSION_CONSTANTS = {
-            0.0000514026,
-            0.999372,
-            0.00016284
-    };
+    private static final double FLYWHEEL_FF_CONSTANT = 0.00189;
+    private static final double FLYWHEEL_STATIC_FRICTION_CONSTANT = 0.469;
 
-    private static final double HOOD_P = 0.0;
+    private static final double HOOD_P = 8.0;
     private static final double HOOD_I = 0.0;
-    private static final double HOOD_D = 0.0;
+    private static final double HOOD_D = 0.1;
 
     private final TalonFX flywheelMotor1 = new TalonFX(Constants.SHOOTER_DRIVE_MOTOR_PORT_1);
     private final TalonFX flywheelMotor2 = new TalonFX(Constants.SHOOTER_DRIVE_MOTOR_PORT_2);
@@ -79,8 +81,8 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         flywheelMotor1.configAllSettings(flyWheelConfiguration);
         flywheelMotor2.configAllSettings(flyWheelConfiguration);
 
-        flywheelMotor1.enableVoltageCompensation(true);
-        flywheelMotor2.enableVoltageCompensation(true);
+        flywheelMotor1.enableVoltageCompensation(false);
+        flywheelMotor2.enableVoltageCompensation(false);
 
         TalonSRXConfiguration hoodConfiguration = new TalonSRXConfiguration();
         hoodConfiguration.slot0.kP = HOOD_P;
@@ -88,9 +90,11 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         hoodConfiguration.slot0.kD = HOOD_D;
         hoodConfiguration.feedbackNotContinuous = false;
         hoodConfiguration.primaryPID.selectedFeedbackSensor = FeedbackDevice.CTRE_MagEncoder_Absolute;
-        hoodConfiguration.primaryPID.selectedFeedbackCoefficient = HOOD_SENSOR_COEFFICIENT;
 
         angleMotor.configAllSettings(hoodConfiguration);
+        angleMotor.setNeutralMode(NeutralMode.Coast);
+        angleMotor.setInverted(true);
+        angleMotor.setSensorPhase(true);
 
         ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
         hoodAngleEntry = tab.add("hood angle", 0.0)
@@ -123,20 +127,16 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
                 .getEntry();
     }
 
-    private double calculateFlywheelFeedforward(double velocity) {
-        return FLYWHEEL_FF_REGRESSION_CONSTANTS[0] * Math.pow(FLYWHEEL_FF_REGRESSION_CONSTANTS[1], velocity) + FLYWHEEL_FF_REGRESSION_CONSTANTS[2];
-    }
-
     public double getHoodAngle() {
-        return angleMotor.getSelectedSensorPosition();
+        return angleMotor.getSelectedSensorPosition() * HOOD_SENSOR_COEFFICIENT + HOOD_OFFSET;
     }
 
     public void setHoodTargetAngle(double angle) {
-        angleMotor.set(ControlMode.Position, angle);
+        angleMotor.set(ControlMode.Position, (MathUtils.clamp(angle, HOOD_MIN_ANGLE, HOOD_MAX_ANGLE) - HOOD_OFFSET) / HOOD_SENSOR_COEFFICIENT);
     }
 
     public void shootFlywheel(double speed) {
-        double feedforward = calculateFlywheelFeedforward(speed) * speed;
+        double feedforward = (FLYWHEEL_FF_CONSTANT * speed + FLYWHEEL_STATIC_FRICTION_CONSTANT) / RobotController.getBatteryVoltage();
 
         flywheelMotor1.set(ControlMode.Velocity, -speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, -feedforward);
         flywheelMotor2.set(ControlMode.Velocity, speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, feedforward);
@@ -159,7 +159,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     @Override
     public void periodic() {
-        hoodAngleEntry.setDouble(getHoodAngle());
+        hoodAngleEntry.setDouble(Math.toDegrees(getHoodAngle()));
         flyWheelMotor1SpeedEntry.setDouble(-flywheelMotor1.getSensorCollection().getIntegratedSensorVelocity() * FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT);
         flywheelMotor1VoltageEntry.setDouble(-flywheelMotor1.getMotorOutputVoltage());
         flywheelMotor1CurrentEntry.setDouble(flywheelMotor1.getSupplyCurrent());
