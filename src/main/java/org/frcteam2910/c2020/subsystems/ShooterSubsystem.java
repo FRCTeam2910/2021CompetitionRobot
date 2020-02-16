@@ -24,7 +24,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private static final double HOOD_MIN_ANGLE = Math.toRadians(24.0);
     private static final double HOOD_MAX_ANGLE = Math.toRadians(58.0);
-    private static final double HOOD_OFFSET = Math.toRadians(-221.648438) + HOOD_MIN_ANGLE;
+    private static final double HOOD_OFFSET = Math.toRadians(214.8);
 
     private static final double FLYWHEEL_POSITION_SENSOR_COEFFICIENT = 1.0 / 2048.0;
     private static final double FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT = FLYWHEEL_POSITION_SENSOR_COEFFICIENT * (1000.0 / 100.0) * (60.0 / 1.0);
@@ -93,7 +93,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
         angleMotor.configAllSettings(hoodConfiguration);
         angleMotor.setNeutralMode(NeutralMode.Coast);
-        angleMotor.setInverted(true);
+        angleMotor.setInverted(false);
         angleMotor.setSensorPhase(true);
 
         ShuffleboardTab tab = Shuffleboard.getTab("Shooter");

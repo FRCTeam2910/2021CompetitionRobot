@@ -34,7 +34,7 @@ public class Constants {
     public static final int DRIVETRAIN_PIGEON_PORT = 0;
 
     public static final int INTAKE_MOTOR = 19;
-    public static final int INTAKE_EXTENSION_SOLENOID = 3;
+    public static final int INTAKE_EXTENSION_SOLENOID = 0;
 
     public static final int PRIMARY_CONTROLLER_PORT = 0;
     public static final int SECONDARY_CONTROLLER_PORT = 1;
@@ -43,7 +43,7 @@ public class Constants {
 
     public static final int WHEEL_OF_FORTUNE_MOTOR_PORT = 5;
 
-    public static final int WHEEL_OF_FORTUNE_DEPLOY_SOLENOID_PORT = 0;
+    public static final int WHEEL_OF_FORTUNE_DEPLOY_SOLENOID_PORT = 3;
 
     public static final int CLIMBER_DEPLOY_SOLENOID_PORT = 1;
     public static final int CLIMBER_EXTEND_SOLENOID_1_PORT = 6;
