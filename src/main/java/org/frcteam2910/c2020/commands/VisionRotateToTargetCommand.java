@@ -1,5 +1,6 @@
 package org.frcteam2910.c2020.commands;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import org.frcteam2910.c2020.subsystems.DrivetrainSubsystem;
@@ -52,6 +53,10 @@ public class VisionRotateToTargetCommand extends CommandBase {
             double targetAngle = visionSubsystem.getAngleToTarget().getAsDouble();
             controller.setSetpoint(targetAngle);
             rotationalVelocity = controller.calculate(currentAngle, dt);
+            rotationalVelocity += Math.copySign(
+                    DrivetrainSubsystem.FEEDFORWARD_CONSTANTS.getStaticConstant() / RobotController.getBatteryVoltage(),
+                    rotationalVelocity
+            );
         }
         drivetrain.drive(new Vector2(xAxis.getAsDouble(), yAxis.getAsDouble()), rotationalVelocity, true);
     }
