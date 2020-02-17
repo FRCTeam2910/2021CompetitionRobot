@@ -39,6 +39,7 @@ public class TargetWithShooterCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        shooterSubsystem.setFlywheelCurrentLimitEnabled(false);
     }
 
     @Override
@@ -56,7 +57,8 @@ public class TargetWithShooterCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        shooterSubsystem.setFlywheelOutput(0.0);
+        shooterSubsystem.setFlywheelCurrentLimitEnabled(true);
+        shooterSubsystem.stopFlywheel();
         primaryController.getRawJoystick().setRumble(GenericHID.RumbleType.kRightRumble, 0.0);
     }
 }

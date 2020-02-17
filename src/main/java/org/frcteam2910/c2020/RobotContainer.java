@@ -38,7 +38,7 @@ public class RobotContainer {
 //        CommandScheduler.getInstance().registerSubsystem(wheelOfFortuneSubsystem);
         CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
-        CommandScheduler.getInstance().registerSubsystem(shooterSubsystem);
+        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new SpinFlywheelCommand(shooterSubsystem, 3000.0));
         CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
 
         configureButtonBindings();
