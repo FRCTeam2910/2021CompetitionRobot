@@ -185,6 +185,10 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         return -flywheelMotor1.getSensorCollection().getIntegratedSensorVelocity() * FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT;
     }
 
+    public double getFlywheelTargetVelocity() {
+        return -flywheelMotor1.getClosedLoopTarget() * FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT;
+    }
+
     public void resetFlywheelPosition() {
         flywheelMotor1.getSensorCollection().setIntegratedSensorPosition(0.0, 0);
     }

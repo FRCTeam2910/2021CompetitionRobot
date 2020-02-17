@@ -38,7 +38,7 @@ public class RobotContainer {
 //        CommandScheduler.getInstance().registerSubsystem(wheelOfFortuneSubsystem);
         CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
-        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new SpinFlywheelCommand(shooterSubsystem, 3000.0));
+        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new SpinFlywheelCommand(shooterSubsystem, 4500.0));
         CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
 
         configureButtonBindings();
@@ -53,7 +53,7 @@ public class RobotContainer {
         primaryController.getLeftBumperButton().whenReleased(() -> intakeSubsystem.setExtended(false));
 
 
-        primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem));
+        primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
         primaryController.getRightBumperButton().whileHeld(
                 new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, primaryController).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true)))
         );
