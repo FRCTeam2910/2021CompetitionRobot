@@ -50,8 +50,8 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public static final TrajectoryConstraint[] TRAJECTORY_CONSTRAINTS = {
             new FeedforwardConstraint(11.0, FEEDFORWARD_CONSTANTS.getVelocityConstant(), FEEDFORWARD_CONSTANTS.getAccelerationConstant(), false),
-            new MaxAccelerationConstraint(4.0 * 12.0),
-            new CentripetalAccelerationConstraint(30.0 * 12.0)
+            new MaxAccelerationConstraint(8.0 * 12.0),
+            new CentripetalAccelerationConstraint(120.0 * 12.0)
     };
 
     private static final int MAX_LATENCY_COMPENSATION_MAP_ENTRIES = 25;

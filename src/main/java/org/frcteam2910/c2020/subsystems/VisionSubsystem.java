@@ -22,6 +22,8 @@ public class VisionSubsystem implements Subsystem {
 
     private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(32.0);
 
+    private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(1.0);
+
     private static final Limelight LIMELIGHT = new Limelight();
     private final DrivetrainSubsystem drivetrain;
 
@@ -46,7 +48,7 @@ public class VisionSubsystem implements Subsystem {
                 .withPosition(1, 0)
                 .withSize(1, 1)
                 .getEntry();
-        dYOuterEntry = tab.add("dXOuter", 0.0)
+        dYOuterEntry = tab.add("dYOuter", 0.0)
                 .withPosition(2, 0)
                 .withSize(1, 1)
                 .getEntry();
@@ -105,7 +107,7 @@ public class VisionSubsystem implements Subsystem {
             isInnerTargetVisible = MathUtils.isInRange(-INNER_TARGET_RANGE_ANGLE, INNER_TARGET_RANGE_ANGLE, alpha);
             // Get the field oriented angle for the inner target, with latency compensation
             alpha = drivetrain.getPoseAtTime(Timer.getFPGATimestamp() - LIMELIGHT.getPipelineLatency() / 1000.0).rotation.toRadians() - alpha;
-            if (isInnerTargetVisible) {
+            if (false) {
                 distanceToTarget = OptionalDouble.of(distanceToInnerTarget);
                 angleToTarget = OptionalDouble.of(alpha);
             } else {
@@ -121,5 +123,9 @@ public class VisionSubsystem implements Subsystem {
         // Update shuffleboard
         distanceToTargetEntry.setDouble(distanceToTarget.orElse(-1.0));
         canSeeInnerTargetEntry.setBoolean(isInnerTargetVisible);
+    }
+
+    public boolean isOnTarget() {
+        return MathUtils.epsilonEquals(LIMELIGHT.getTargetPosition().x, 0.0, TARGET_ALLOWABLE_ERROR);
     }
 }
