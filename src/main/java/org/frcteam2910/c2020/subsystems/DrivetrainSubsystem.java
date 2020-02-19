@@ -39,14 +39,14 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     public static final double TRACKWIDTH = 1.0;
     public static final double WHEELBASE = 1.0;
 
-    private static final double GEAR_REDUCTION = 190.0 / 27.0;
-    private static final double WHEEL_DIAMETER = 4.0;
-
-    private static final DrivetrainFeedforwardConstants FEEDFORWARD_CONSTANTS = new DrivetrainFeedforwardConstants(
+    public static final DrivetrainFeedforwardConstants FEEDFORWARD_CONSTANTS = new DrivetrainFeedforwardConstants(
             0.058,
             0.00742,
             0.615
     );
+
+    private static final double GEAR_REDUCTION = 190.0 / 27.0;
+    private static final double WHEEL_DIAMETER = 4.0;
 
     public static final TrajectoryConstraint[] TRAJECTORY_CONSTRAINTS = {
             new FeedforwardConstraint(11.0, FEEDFORWARD_CONSTANTS.getVelocityConstant(), FEEDFORWARD_CONSTANTS.getAccelerationConstant(), false),

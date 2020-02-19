@@ -47,6 +47,8 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     private static final double FLYWHEEL_FF_CONSTANT = 0.00189;
     private static final double FLYWHEEL_STATIC_FRICTION_CONSTANT = 0.469;
 
+    private static final double FLYWHEEL_CURRENT_LIMIT = 5.0;
+
     private static final double HOOD_P = 8.0;
     private static final double HOOD_I = 0.0;
     private static final double HOOD_D = 0.1;
@@ -73,10 +75,9 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         flyWheelConfiguration.slot0.kI = FLYWHEEL_I;
         flyWheelConfiguration.slot0.kD = FLYWHEEL_D;
         flyWheelConfiguration.primaryPID.selectedFeedbackSensor = TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice();
-        flyWheelConfiguration.supplyCurrLimit.currentLimit = 40.0;
+        flyWheelConfiguration.supplyCurrLimit.currentLimit = FLYWHEEL_CURRENT_LIMIT;
         flyWheelConfiguration.supplyCurrLimit.enable = true;
         flyWheelConfiguration.voltageCompSaturation = 11.5;
-
 
         flywheelMotor1.configAllSettings(flyWheelConfiguration);
         flywheelMotor2.configAllSettings(flyWheelConfiguration);
@@ -127,6 +128,14 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
                 .getEntry();
     }
 
+    public void setFlywheelCurrentLimitEnabled(boolean enabled) {
+        SupplyCurrentLimitConfiguration config = new SupplyCurrentLimitConfiguration();
+        config.currentLimit = FLYWHEEL_CURRENT_LIMIT;
+        config.enable = enabled;
+        flywheelMotor1.configSupplyCurrentLimit(config, 0);
+        flywheelMotor2.configSupplyCurrentLimit(config, 0);
+    }
+
     public double getHoodAngle() {
         return angleMotor.getSelectedSensorPosition() * HOOD_SENSOR_COEFFICIENT + HOOD_OFFSET;
     }
@@ -174,6 +183,10 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public double getFlywheelVelocity() {
         return -flywheelMotor1.getSensorCollection().getIntegratedSensorVelocity() * FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT;
+    }
+
+    public double getFlywheelTargetVelocity() {
+        return -flywheelMotor1.getClosedLoopTarget() * FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT;
     }
 
     public void resetFlywheelPosition() {
