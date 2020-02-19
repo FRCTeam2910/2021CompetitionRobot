@@ -20,7 +20,7 @@ public class VisionSubsystem implements Subsystem {
     // The distance from the inner target to the apex of the triangle we use to find the distance
     private static final double DISTANCE_FROM_INNER_TO_APEX = 16.92;
 
-    private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(32.0);
+    private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(36.2);
 
     private static final Limelight LIMELIGHT = new Limelight();
     private final DrivetrainSubsystem drivetrain;
@@ -46,7 +46,7 @@ public class VisionSubsystem implements Subsystem {
                 .withPosition(1, 0)
                 .withSize(1, 1)
                 .getEntry();
-        dYOuterEntry = tab.add("dXOuter", 0.0)
+        dYOuterEntry = tab.add("dYOuter", 0.0)
                 .withPosition(2, 0)
                 .withSize(1, 1)
                 .getEntry();
@@ -54,7 +54,7 @@ public class VisionSubsystem implements Subsystem {
                 .withPosition(3, 0)
                 .withSize(1, 1)
                 .getEntry();
-        tab.addNumber("tx", () -> Math.toDegrees(getAngleToTarget().orElse(Double.NaN)))
+        tab.addNumber("target angle", () -> Math.toDegrees(getAngleToTarget().orElse(Double.NaN)))
                 .withPosition(4, 0)
                 .withSize(1, 1);
     }
@@ -90,27 +90,35 @@ public class VisionSubsystem implements Subsystem {
             double distanceToOuterTarget = (TARGET_HEIGHT - LIMELIGHT_HEIGHT) /  Math.tan(theta);
 
             // Get the field oriented angle for the outer target, with latency compensation
-            double tx = drivetrain.getPoseAtTime(Timer.getFPGATimestamp() - LIMELIGHT.getPipelineLatency() / 1000.0).rotation.toRadians() - targetPosition.x;
-            double dYOuter = distanceToOuterTarget * Math.sin(tx);
-            double dXOuter = distanceToOuterTarget * Math.cos(tx);
+            double angleToOuter = drivetrain.getPoseAtTime(Timer.getFPGATimestamp() - LIMELIGHT.getPipelineLatency() / 1000.0).rotation.toRadians() - targetPosition.x;
+            double dYOuter = distanceToOuterTarget * Math.sin(angleToOuter);
+            double dXOuter = distanceToOuterTarget * Math.cos(angleToOuter);
+            dXOuterEntry.setDouble(dXOuter);
+            dYOuterEntry.setDouble(dYOuter);
 
             // Calculate the distance to the inner target
             double dXInner = dXOuter + INNER_TARGET_DEPTH;
             double distanceToInnerTarget = Math.hypot(dXInner, dYOuter);
             // Add DISTANCE_FROM_INNER_TO_APEX to dXInner here because we want if we did it when we defined dXInner
-            // distanceToInnerTarget would be incorrect, and we only need this extra bit to calculate the angle
-            double alpha = Math.atan(dYOuter / (dXInner + DISTANCE_FROM_INNER_TO_APEX));
+            // distanceToInnerTarget would be incorrect, and we only need this extra bit to determine if we can see
+            // the inner target
+            double angleToApex = Math.atan(dYOuter / (dXInner + DISTANCE_FROM_INNER_TO_APEX));
+            if (angleToApex < 0.0) {
+                angleToApex += 2 * Math.PI;
+            }
+            double angleToInner = Math.atan(dYOuter / dXInner);
+            if (angleToInner < 0.0) {
+                angleToInner += 2 * Math.PI;
+            }
 
             // Check whether we can see the inner target
-            isInnerTargetVisible = MathUtils.isInRange(-INNER_TARGET_RANGE_ANGLE, INNER_TARGET_RANGE_ANGLE, alpha);
-            // Get the field oriented angle for the inner target, with latency compensation
-            alpha = drivetrain.getPoseAtTime(Timer.getFPGATimestamp() - LIMELIGHT.getPipelineLatency() / 1000.0).rotation.toRadians() - alpha;
+            isInnerTargetVisible = angleToApex <= INNER_TARGET_RANGE_ANGLE || angleToApex >= 2 * Math.PI - INNER_TARGET_RANGE_ANGLE;
             if (isInnerTargetVisible) {
                 distanceToTarget = OptionalDouble.of(distanceToInnerTarget);
-                angleToTarget = OptionalDouble.of(alpha);
+                angleToTarget = OptionalDouble.of(angleToInner);
             } else {
                 distanceToTarget = OptionalDouble.of(distanceToOuterTarget);
-                angleToTarget = OptionalDouble.of(tx);
+                angleToTarget = OptionalDouble.of(angleToOuter);
             }
         } else {
             distanceToTarget = OptionalDouble.empty();
