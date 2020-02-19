@@ -12,10 +12,7 @@ import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.c2020.subsystems.*;
 import org.frcteam2910.c2020.util.AutonomousChooser;
 import org.frcteam2910.c2020.util.AutonomousTrajectories;
-import org.frcteam2910.common.control.Path;
-import org.frcteam2910.common.control.SplinePathBuilder;
-import org.frcteam2910.common.control.Trajectory;
-import org.frcteam2910.common.control.TrajectoryConstraint;
+import org.frcteam2910.common.control.*;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.Axis;
@@ -35,20 +32,12 @@ public class RobotContainer {
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
     private final VisionSubsystem visionSubsystem = new VisionSubsystem(drivetrainSubsystem);
 
-    private final TrajectoryConstraint[] trajectoryConstraints = {
-            new TrajectoryConstraint() {
-                @Override
-                public double getMaxVelocity(Path.State state) {
-                    return super.getMaxVelocity(state);
-                }
-            }
-    };
     private AutonomousTrajectories autonomousTrajectories;
     private final AutonomousChooser autonomousChooser;
 
     public RobotContainer() {
         try {
-            autonomousTrajectories  = new AutonomousTrajectories(trajectoryConstraints);
+            autonomousTrajectories  = new AutonomousTrajectories(DrivetrainSubsystem.TRAJECTORY_CONSTRAINTS);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -93,12 +82,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        Path path = new SplinePathBuilder(Vector2.ZERO, Rotation2.ZERO, Rotation2.ZERO)
-                .hermite(new Vector2(24.0, 24.0), Rotation2.ZERO)
-                .build();
-        Trajectory trajectory = new Trajectory(path, DrivetrainSubsystem.TRAJECTORY_CONSTRAINTS, 0.1);
-
-        return autonomousChooser.getCommand(drivetrainSubsystem, shooterSubsystem, primaryController);
+        return autonomousChooser.getCommand(this);
     }
 
     private Axis getDriveForwardAxis() {
@@ -135,5 +119,15 @@ public class RobotContainer {
 
     public ShooterSubsystem getShooterSubsystem() {
         return shooterSubsystem;
+    }
+
+    public VisionSubsystem getVisionSubsystem() { return  visionSubsystem; }
+
+    public XboxController getPrimaryController() {
+        return primaryController;
+    }
+
+    public XboxController getSecondaryController() {
+        return secondaryController;
     }
 }

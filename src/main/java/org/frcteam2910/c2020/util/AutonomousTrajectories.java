@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class AutonomousTrajectories {
 
-    private static final double SAMPLE_DISTANCE = 0.01;
+    private static final double SAMPLE_DISTANCE = 0.1;
 
     private static final String EIGHT_BALL_AUTO_PART_ONE_NAME = "autos/8BallAuto/8BallAutoPart1.path";
     private static final String EIGHT_BALL_AUTO_PART_TWO_NAME = "autos/8BallAuto/8BallAutoPart1.path";
