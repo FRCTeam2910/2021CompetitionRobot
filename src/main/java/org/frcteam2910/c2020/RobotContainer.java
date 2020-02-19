@@ -21,6 +21,8 @@ import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.Axis;
 import org.frcteam2910.common.robot.input.XboxController;
 
+import java.io.IOException;
+
 public class RobotContainer {
     private final XboxController primaryController = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
     private final XboxController secondaryController = new XboxController(Constants.SECONDARY_CONTROLLER_PORT);
@@ -33,11 +35,25 @@ public class RobotContainer {
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
     private final VisionSubsystem visionSubsystem = new VisionSubsystem(drivetrainSubsystem);
 
-    private final TrajectoryConstraint[] trajectoryConstraints = {};
-    private final AutonomousTrajectories autonomousTrajectories = new AutonomousTrajectories(trajectoryConstraints);
-    private final AutonomousChooser autonomousChooser = new AutonomousChooser(autonomousTrajectories);
+    private final TrajectoryConstraint[] trajectoryConstraints = {
+            new TrajectoryConstraint() {
+                @Override
+                public double getMaxVelocity(Path.State state) {
+                    return super.getMaxVelocity(state);
+                }
+            }
+    };
+    private AutonomousTrajectories autonomousTrajectories;
+    private final AutonomousChooser autonomousChooser;
 
     public RobotContainer() {
+        try {
+            autonomousTrajectories  = new AutonomousTrajectories(trajectoryConstraints);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        autonomousChooser = new AutonomousChooser(autonomousTrajectories);
+
         primaryController.getLeftXAxis().setInverted(true);
         primaryController.getRightXAxis().setInverted(true);
 
