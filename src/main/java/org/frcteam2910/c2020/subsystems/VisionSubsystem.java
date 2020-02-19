@@ -15,10 +15,10 @@ public class VisionSubsystem implements Subsystem {
     private static final double TARGET_HEIGHT = 98.25;
     private static final double LIMELIGHT_HEIGHT = 21.85;
 
-    private static final double INNER_TARGET_RANGE_ANGLE = Math.toRadians(20.3);
+    private static final double INNER_TARGET_RANGE_ANGLE = Math.toRadians(18.0);
     private static final double INNER_TARGET_DEPTH = 29.25;
     // The distance from the inner target to the apex of the triangle we use to find the distance
-    private static final double DISTANCE_FROM_INNER_TO_APEX = 17.57;
+    private static final double DISTANCE_FROM_INNER_TO_APEX = 16.92;
 
     private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(32.0);
 
@@ -26,6 +26,8 @@ public class VisionSubsystem implements Subsystem {
     private final DrivetrainSubsystem drivetrain;
 
     private final NetworkTableEntry distanceToTargetEntry;
+    private final NetworkTableEntry dXOuterEntry;
+    private final NetworkTableEntry dYOuterEntry;
     private final NetworkTableEntry canSeeInnerTargetEntry;
 
     private boolean hasTarget;
@@ -40,12 +42,20 @@ public class VisionSubsystem implements Subsystem {
                 .withPosition(0, 0)
                 .withSize(1, 1)
                 .getEntry();
-        canSeeInnerTargetEntry = tab.add("can see inner target", false)
+        dXOuterEntry = tab.add("dXOuter", 0.0)
                 .withPosition(1, 0)
                 .withSize(1, 1)
                 .getEntry();
-        tab.addNumber("tx", () -> Math.toDegrees(getAngleToTarget().orElse(Double.NaN)))
+        dYOuterEntry = tab.add("dXOuter", 0.0)
                 .withPosition(2, 0)
+                .withSize(1, 1)
+                .getEntry();
+        canSeeInnerTargetEntry = tab.add("can see inner target", false)
+                .withPosition(3, 0)
+                .withSize(1, 1)
+                .getEntry();
+        tab.addNumber("tx", () -> Math.toDegrees(getAngleToTarget().orElse(Double.NaN)))
+                .withPosition(4, 0)
                 .withSize(1, 1);
     }
 
@@ -95,7 +105,7 @@ public class VisionSubsystem implements Subsystem {
             isInnerTargetVisible = MathUtils.isInRange(-INNER_TARGET_RANGE_ANGLE, INNER_TARGET_RANGE_ANGLE, alpha);
             // Get the field oriented angle for the inner target, with latency compensation
             alpha = drivetrain.getPoseAtTime(Timer.getFPGATimestamp() - LIMELIGHT.getPipelineLatency() / 1000.0).rotation.toRadians() - alpha;
-            if (false) {
+            if (isInnerTargetVisible) {
                 distanceToTarget = OptionalDouble.of(distanceToInnerTarget);
                 angleToTarget = OptionalDouble.of(alpha);
             } else {

@@ -44,7 +44,7 @@ public class Robot extends TimedRobot {
         robotContainer.getDrivetrainSubsystem().resetPose(RigidTransform2.ZERO);
         robotContainer.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO);
 
-        new SpinFlywheelCommand(robotContainer.getShooterSubsystem(), 6000.0).schedule();
+        new SpinFlywheelCommand(robotContainer.getShooterSubsystem(), 0.0).schedule();
     }
 
     @Override
