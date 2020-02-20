@@ -13,7 +13,7 @@ import org.frcteam2910.common.robot.drivers.Limelight;
 import java.util.function.DoubleSupplier;
 
 public class VisionRotateToTargetCommand extends CommandBase {
-    private static final PidConstants PID_CONSTANTS = new PidConstants(1.25, 0.0, 0.0);
+    private static final PidConstants PID_CONSTANTS = new PidConstants(1.0, 0.0, 0.05);
 
     private final DrivetrainSubsystem drivetrain;
     private final VisionSubsystem visionSubsystem;
@@ -32,6 +32,9 @@ public class VisionRotateToTargetCommand extends CommandBase {
         this.yAxis = yAxis;
         addRequirements(drivetrain);
         addRequirements(visionSubsystem);
+
+        controller.setInputRange(0.0, 2.0 * Math.PI);
+        controller.setContinuous(true);
     }
 
     @Override
