@@ -62,7 +62,7 @@ public class RobotContainer {
                 () -> drivetrainSubsystem.resetGyroAngle(Rotation2.ZERO)
         );
         primaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setExtended(true));
-        primaryController.getLeftBumperButton().whileHeld(new WaitCommand(0.25).andThen(new IntakeCommand(intakeSubsystem, feederSubsystem, 0.5)));
+        primaryController.getLeftBumperButton().whileHeld(new WaitCommand(0.25).andThen(new IntakeCommand(intakeSubsystem, feederSubsystem, 1.0)));
         primaryController.getLeftBumperButton().whenReleased(() -> intakeSubsystem.setExtended(false));
 
 

@@ -3,6 +3,7 @@ package org.frcteam2910.c2020.util;
 import org.frcteam2910.common.control.*;
 import org.frcteam2910.common.io.PathReader;
 import org.frcteam2910.common.math.Rotation2;
+import org.frcteam2910.common.math.Vector2;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -21,15 +22,35 @@ public class AutonomousTrajectories {
 
     private Trajectory eightBallAutoPartOne;
     private Trajectory eightBallAutoPartTwo;
+    private Trajectory eightBallAutoPartThree;
     private Trajectory tenBallAutoPartOne;
     private Trajectory tenBallAutoPartTwo;
 
     public AutonomousTrajectories(TrajectoryConstraint[] trajectoryConstraints) throws IOException {
-        TrajectoryConstraint[] slowConstraints = Arrays.copyOf(trajectoryConstraints, trajectoryConstraints.length + 1);
+        TrajectoryConstraint[] slowConstraints = Arrays.copyOf(trajectoryConstraints, trajectoryConstraints.length + 2);
         slowConstraints[slowConstraints.length - 1] = new MaxVelocityConstraint(6.0 * 12.0);
+        slowConstraints[slowConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
 
-        eightBallAutoPartOne = new Trajectory(getPath(EIGHT_BALL_AUTO_PART_ONE_NAME), trajectoryConstraints, SAMPLE_DISTANCE);
-        eightBallAutoPartTwo = new Trajectory(getPath(EIGHT_BALL_AUTO_PART_TWO_NAME), slowConstraints, SAMPLE_DISTANCE);
+        eightBallAutoPartOne = new Trajectory(
+                new SimplePathBuilder(new Vector2(509.0, -160.5), Rotation2.ZERO)
+                .lineTo(new Vector2(455.8, -76.0))
+                .build(),
+                trajectoryConstraints, SAMPLE_DISTANCE
+        );
+        eightBallAutoPartTwo = new Trajectory(
+                new SimplePathBuilder(new Vector2(455.8, -76.0), Rotation2.ZERO)
+                .arcTo(new Vector2(415.82, -134.25), new Vector2(415.82, -88.05))
+                .lineTo(new Vector2(243.82, -134.25), Rotation2.fromDegrees(10.0))
+                .build(),
+                slowConstraints, SAMPLE_DISTANCE
+        );
+        eightBallAutoPartThree = new Trajectory(
+                new SimplePathBuilder(new Vector2(243.82, -134.25), Rotation2.fromDegrees(10.0))
+                .lineTo(new Vector2(327.13, -134.25))
+                .arcTo(new Vector2(455.8, -76.0), new Vector2(327.13, 51.53))
+                .build(),
+                trajectoryConstraints, SAMPLE_DISTANCE
+        );
         tenBallAutoPartOne  = new Trajectory(getPath(TEN_BALL_AUTO_PART_ONE_NAME), trajectoryConstraints, SAMPLE_DISTANCE);
         tenBallAutoPartTwo = new Trajectory(getPath(TEN_BALL_AUTO_PART_TWO_NAME), trajectoryConstraints, SAMPLE_DISTANCE);
     }
@@ -53,6 +74,10 @@ public class AutonomousTrajectories {
         return eightBallAutoPartTwo;
     }
 
+    public Trajectory getEightBallAutoPartThree() {
+        return eightBallAutoPartThree;
+    }
+
     public Trajectory getTenBallAutoPartOne(){
         return tenBallAutoPartOne;
     }
@@ -60,13 +85,4 @@ public class AutonomousTrajectories {
     public Trajectory getTenBallAutoPartTwo(){
         return tenBallAutoPartTwo;
     }
-
-
-
-
-
-
-
-
-
 }

@@ -35,7 +35,7 @@ public class AutonomousChooser {
         SequentialCommandGroup command = new SequentialCommandGroup();
 
         resetRobotPose(command, container, trajectories.getTenBallAutoPartOne());
-        followAndIntake(command, container, trajectories.getEightBallAutoPartTwo(), 0.25);
+        followAndIntake(command, container, trajectories.getEightBallAutoPartTwo());
         shootAtTarget(command, container);
         //command.addCommands(new FollowTrajectoryCommand(drivetrainSubsystem, trajectories.getTenBallAutoPartTwo()));
         //command.addCommands(new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, xboxController));
@@ -52,7 +52,10 @@ public class AutonomousChooser {
         command.addCommands(new FollowTrajectoryCommand(container.getDrivetrainSubsystem(), trajectories.getEightBallAutoPartOne()));
         shootAtTarget(command, container);
         //follow second trajectory and shoot
-        followAndIntake(command, container, trajectories.getEightBallAutoPartTwo(), 0.5);
+        followAndIntake(command, container, trajectories.getEightBallAutoPartTwo());
+//        shootAtTarget(command, container);
+
+        followAndIntake(command, container, trajectories.getEightBallAutoPartThree());
         shootAtTarget(command, container);
 
         return command;
@@ -72,20 +75,21 @@ public class AutonomousChooser {
         command.addCommands(
                 new TargetWithShooterCommand(container.getShooterSubsystem(), container.getVisionSubsystem(), container.getPrimaryController())
                         .alongWith(new VisionRotateToTargetCommand(container.getDrivetrainSubsystem(), container.getVisionSubsystem(), () -> 0.0, () -> 0.0))
-                        .alongWith(new AutonomousFeedCommand(container.getShooterSubsystem(), container.getFeederSubsystem(), container.getVisionSubsystem()))
+                        .alongWith(
+                                new WaitCommand(0.1).andThen(new AutonomousFeedCommand(container.getShooterSubsystem(), container.getFeederSubsystem(), container.getVisionSubsystem())))
                         .withTimeout(2.5));
     }
 
-    private void followAndIntake(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory, double waitTime) {
+    private void followAndIntake(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {
         command.addCommands(new InstantCommand(() -> container.getIntakeSubsystem().setExtended(true)));
         command.addCommands(
                 new FollowTrajectoryCommand(container.getDrivetrainSubsystem(), trajectory)
                         .deadlineWith(
-                                new WaitCommand(waitTime)
+                                new WaitCommand(0.25)
                                         .andThen(
-                                                new IntakeCommand(container.getIntakeSubsystem(), container.getFeederSubsystem(), 0.5)
+                                                new IntakeCommand(container.getIntakeSubsystem(), container.getFeederSubsystem(), 1.0)
                                                         .alongWith(
-                                                                new FeederIntakeWhenNotFullCommand(container.getFeederSubsystem(), 0.3)
+                                                                new FeederIntakeWhenNotFullCommand(container.getFeederSubsystem(), 0.5)
                                                         ))));
         command.addCommands(new InstantCommand(() -> container.getIntakeSubsystem().setExtended(false)));
     }

@@ -24,7 +24,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private static final double HOOD_MIN_ANGLE = Math.toRadians(24.0);
     private static final double HOOD_MAX_ANGLE = Math.toRadians(58.0);
-    private static final double HOOD_OFFSET = Math.toRadians(27.2 + 24.0);
+    private static final double HOOD_OFFSET = Math.toRadians(56.42 + 24.0);
 
     private static final double FLYWHEEL_POSITION_SENSOR_COEFFICIENT = 1.0 / 2048.0;
     private static final double FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT = FLYWHEEL_POSITION_SENSOR_COEFFICIENT * (1000.0 / 100.0) * (60.0 / 1.0);
@@ -48,6 +48,8 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     private static final double FLYWHEEL_STATIC_FRICTION_CONSTANT = 0.469;
 
     private static final double FLYWHEEL_CURRENT_LIMIT = 5.0;
+
+    private static final double FLYWHEEL_ALLOWABLE_ERROR = 200.0;
 
     private static final double HOOD_P = 8.0;
     private static final double HOOD_I = 0.0;
@@ -126,6 +128,9 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withPosition(3, 1)
                 .withSize(1, 1)
                 .getEntry();
+        tab.addBoolean("Is Flywheel at Target", this::isFlywheelAtTargetVelocity)
+                .withPosition(4, 1)
+                .withSize(1, 1);
     }
 
     public void setFlywheelCurrentLimitEnabled(boolean enabled) {
@@ -191,5 +196,13 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public void resetFlywheelPosition() {
         flywheelMotor1.getSensorCollection().setIntegratedSensorPosition(0.0, 0);
+    }
+
+    public boolean isFlywheelAtTargetVelocity() {
+        return MathUtils.epsilonEquals(
+                getFlywheelVelocity(),
+                getFlywheelTargetVelocity(),
+                FLYWHEEL_ALLOWABLE_ERROR
+        );
     }
 }

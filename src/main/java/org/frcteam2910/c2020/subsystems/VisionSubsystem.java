@@ -22,7 +22,7 @@ public class VisionSubsystem implements Subsystem {
 
     private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(36.2);
 
-    private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(1.0);
+    private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(2.0);
 
     private static final Limelight LIMELIGHT = new Limelight();
     private final DrivetrainSubsystem drivetrain;
@@ -58,6 +58,9 @@ public class VisionSubsystem implements Subsystem {
                 .getEntry();
         tab.addNumber("target angle", () -> Math.toDegrees(getAngleToTarget().orElse(Double.NaN)))
                 .withPosition(4, 0)
+                .withSize(1, 1);
+        tab.addBoolean("Is on target", this::isOnTarget)
+                .withPosition(5, 0)
                 .withSize(1, 1);
     }
 
@@ -134,6 +137,20 @@ public class VisionSubsystem implements Subsystem {
     }
 
     public boolean isOnTarget() {
-        return MathUtils.epsilonEquals(LIMELIGHT.getTargetPosition().x, 0.0, TARGET_ALLOWABLE_ERROR);
+        OptionalDouble targetAngle = getAngleToTarget();
+        if (targetAngle.isEmpty()) {
+            return false;
+        }
+
+        double delta = targetAngle.getAsDouble() - drivetrain.getPose().rotation.toRadians();
+        if (delta > Math.PI) {
+            delta = 2.0 * Math.PI - delta;
+        }
+
+        return MathUtils.epsilonEquals(
+                delta,
+                0,
+                TARGET_ALLOWABLE_ERROR
+        );
     }
 }
