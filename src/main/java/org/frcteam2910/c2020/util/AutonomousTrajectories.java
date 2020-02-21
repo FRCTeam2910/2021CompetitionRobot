@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Arrays;
 
 public class AutonomousTrajectories {
 
@@ -32,32 +32,33 @@ public class AutonomousTrajectories {
         slowConstraints[slowConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
 
         eightBallAutoPartOne = new Trajectory(
-                new SimplePathBuilder(new Vector2(509.0, -160.5), Rotation2.ZERO)
-                .lineTo(new Vector2(455.8, -76.0))
-                .build(),
+                new SimplePathBuilder(new Vector2(509.0, -150.0), Rotation2.ZERO)
+                        .lineTo(new Vector2(468.0, -67.34))
+                        .build(),
                 trajectoryConstraints, SAMPLE_DISTANCE
         );
         eightBallAutoPartTwo = new Trajectory(
-                new SimplePathBuilder(new Vector2(455.8, -76.0), Rotation2.ZERO)
-                .arcTo(new Vector2(415.82, -134.25), new Vector2(415.82, -88.05))
-                .lineTo(new Vector2(243.82, -134.25), Rotation2.fromDegrees(10.0))
-                .build(),
+                new SimplePathBuilder(new Vector2(468.0, -67.34), Rotation2.ZERO)
+                        .lineTo(new Vector2(459.23, -111.87))
+                        .arcTo(new Vector2(432.0, -134.25), new Vector2(432.0, -106.5))
+                        .lineTo(new Vector2(250.36, -134.25), Rotation2.fromDegrees(10.0))
+                        .build(),
                 slowConstraints, SAMPLE_DISTANCE
         );
         eightBallAutoPartThree = new Trajectory(
-                new SimplePathBuilder(new Vector2(243.82, -134.25), Rotation2.fromDegrees(10.0))
-                .lineTo(new Vector2(327.13, -134.25))
-                .arcTo(new Vector2(455.8, -76.0), new Vector2(327.13, 51.53))
-                .build(),
+                new SimplePathBuilder(new Vector2(250.36, -134.25), Rotation2.fromDegrees(10.0))
+                        .lineTo(new Vector2(324.0, -134.25))
+                        .arcTo(new Vector2(468.0, -67.34), new Vector2(324.0, 54.16))
+                        .build(),
                 trajectoryConstraints, SAMPLE_DISTANCE
         );
-        tenBallAutoPartOne  = new Trajectory(getPath(TEN_BALL_AUTO_PART_ONE_NAME), trajectoryConstraints, SAMPLE_DISTANCE);
+        tenBallAutoPartOne = new Trajectory(getPath(TEN_BALL_AUTO_PART_ONE_NAME), trajectoryConstraints, SAMPLE_DISTANCE);
         tenBallAutoPartTwo = new Trajectory(getPath(TEN_BALL_AUTO_PART_TWO_NAME), trajectoryConstraints, SAMPLE_DISTANCE);
     }
 
     private Path getPath(String name) throws IOException {
         InputStream in = getClass().getClassLoader().getResourceAsStream(name);
-        if (in == null){
+        if (in == null) {
             throw new FileNotFoundException("Path file not found: " + name);
         }
 
@@ -66,11 +67,11 @@ public class AutonomousTrajectories {
         }
     }
 
-    public Trajectory getEightBallAutoPartOne(){
+    public Trajectory getEightBallAutoPartOne() {
         return eightBallAutoPartOne;
     }
 
-    public Trajectory getEightBallAutoPartTwo(){
+    public Trajectory getEightBallAutoPartTwo() {
         return eightBallAutoPartTwo;
     }
 
@@ -78,11 +79,11 @@ public class AutonomousTrajectories {
         return eightBallAutoPartThree;
     }
 
-    public Trajectory getTenBallAutoPartOne(){
+    public Trajectory getTenBallAutoPartOne() {
         return tenBallAutoPartOne;
     }
 
-    public Trajectory getTenBallAutoPartTwo(){
+    public Trajectory getTenBallAutoPartTwo() {
         return tenBallAutoPartTwo;
     }
 }
