@@ -146,19 +146,23 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     }
 
     public void setHoodTargetAngle(double angle) {
-        angleMotor.set(ControlMode.Position, (MathUtils.clamp(angle, HOOD_MIN_ANGLE, HOOD_MAX_ANGLE) - HOOD_OFFSET) / HOOD_SENSOR_COEFFICIENT);
+//        angleMotor.set(ControlMode.Position, (MathUtils.clamp(angle, HOOD_MIN_ANGLE, HOOD_MAX_ANGLE) - HOOD_OFFSET) / HOOD_SENSOR_COEFFICIENT);
     }
 
     public void shootFlywheel(double speed) {
         double feedforward = (FLYWHEEL_FF_CONSTANT * speed + FLYWHEEL_STATIC_FRICTION_CONSTANT) / RobotController.getBatteryVoltage();
 
-        flywheelMotor1.set(ControlMode.Velocity, -speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, -feedforward);
-        flywheelMotor2.set(ControlMode.Velocity, speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, feedforward);
+//        flywheelMotor1.set(ControlMode.Velocity, -speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, -feedforward);
+//        flywheelMotor2.set(ControlMode.Velocity, speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, feedforward);
+        flywheelMotor1.set(ControlMode.Velocity, 0.0);
+        flywheelMotor2.set(ControlMode.Velocity, 0.0);
     }
 
     public void setFlywheelOutput(double percentage) {
-        flywheelMotor1.set(ControlMode.PercentOutput, -percentage);
-        flywheelMotor2.set(ControlMode.PercentOutput, percentage);
+//        flywheelMotor1.set(ControlMode.PercentOutput, -percentage);
+//        flywheelMotor2.set(ControlMode.PercentOutput, percentage);
+        flywheelMotor1.set(ControlMode.Disabled, 0.0);
+        flywheelMotor2.set(ControlMode.Disabled, 0.0);
     }
 
     public void stopFlywheel() {

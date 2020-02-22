@@ -3,6 +3,7 @@ package org.frcteam2910.c2020;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.frcteam2910.c2020.commands.CharacterizeDrivetrainCommand;
 import org.frcteam2910.c2020.commands.CharacterizeFlywheelCommand;
 import org.frcteam2910.c2020.commands.SpinFlywheelCommand;
 import org.frcteam2910.common.math.RigidTransform2;
@@ -34,6 +35,8 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         robotContainer.getDrivetrainSubsystem().resetPose(RigidTransform2.ZERO);
         robotContainer.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO);
+
+        NetworkTableInstance.getDefault().setUpdateRate(10.0e-3);
 
         robotContainer.getAutonomousCommand().schedule();
     }
