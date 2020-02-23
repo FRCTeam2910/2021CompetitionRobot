@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.c2020.Pigeon;
+import org.frcteam2910.c2020.Robot;
+import org.frcteam2910.c2020.RobotContainer;
 import org.frcteam2910.common.control.*;
 import org.frcteam2910.common.drivers.Gyroscope;
 import org.frcteam2910.common.drivers.SwerveModule;
@@ -189,6 +191,18 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                     .withSize(2, 4);
             moduleAngleEntries[i] = layout.add("Angle", 0.0).getEntry();
         }
+        tab.addNumber("Rotation Voltage", () -> {
+            HolonomicDriveSignal signal;
+            synchronized (stateLock) {
+                signal = driveSignal;
+            }
+
+            if (signal == null) {
+                return 0.0;
+            }
+
+            return signal.getRotation() * RobotController.getBatteryVoltage();
+        });
     }
 
     public RigidTransform2 getPose() {

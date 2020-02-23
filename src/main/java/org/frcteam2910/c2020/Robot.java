@@ -24,6 +24,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         updateManager.startLoop(5.0e-3);
+        NetworkTableInstance.getDefault().setUpdateRate(10.0e-3);
     }
 
     @Override

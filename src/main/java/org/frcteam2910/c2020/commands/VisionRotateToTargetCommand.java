@@ -50,17 +50,23 @@ public class VisionRotateToTargetCommand extends CommandBase {
         double dt = time - lastTime;
         lastTime = time;
 
+        Vector2 translationalVelocity = new Vector2(xAxis.getAsDouble(), yAxis.getAsDouble());
+
         double rotationalVelocity = 0.0;
         if(visionSubsystem.hasTarget()) {
             double currentAngle = drivetrain.getPose().rotation.toRadians();
             double targetAngle = visionSubsystem.getAngleToTarget().getAsDouble();
             controller.setSetpoint(targetAngle);
             rotationalVelocity = controller.calculate(currentAngle, dt);
-            rotationalVelocity += Math.copySign(
-                    DrivetrainSubsystem.FEEDFORWARD_CONSTANTS.getStaticConstant() / RobotController.getBatteryVoltage(),
-                    rotationalVelocity
-            );
+
+            if (translationalVelocity.length <
+                    DrivetrainSubsystem.FEEDFORWARD_CONSTANTS.getStaticConstant() / RobotController.getBatteryVoltage()) {
+                rotationalVelocity += Math.copySign(
+                        0.8 / RobotController.getBatteryVoltage(),
+                        rotationalVelocity
+                );
+            }
         }
-        drivetrain.drive(new Vector2(xAxis.getAsDouble(), yAxis.getAsDouble()), rotationalVelocity, true);
+        drivetrain.drive(translationalVelocity, rotationalVelocity, true);
     }
 }

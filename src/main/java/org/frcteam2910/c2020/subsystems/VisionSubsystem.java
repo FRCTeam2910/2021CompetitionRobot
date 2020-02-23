@@ -62,6 +62,13 @@ public class VisionSubsystem implements Subsystem {
         tab.addBoolean("Is on target", this::isOnTarget)
                 .withPosition(5, 0)
                 .withSize(1, 1);
+        tab.addNumber("Horizontal Target Error", () -> {
+            double gyroAngle = drivetrain.getPose().rotation.toRadians();
+            return getDistanceToTarget().orElse(0.0) *
+                    (Math.sin(gyroAngle - getAngleToTarget().orElse(0.0)) / Math.sin(Math.PI / 2.0 - gyroAngle));
+        })
+                .withPosition(6, 0)
+                .withSize(1, 1);
     }
 
     public void setCamMode(Limelight.CamMode mode) {
@@ -74,6 +81,19 @@ public class VisionSubsystem implements Subsystem {
 
     public OptionalDouble getAngleToTarget() {
         return angleToTarget;
+    }
+
+    public OptionalDouble getHorizontalError() {
+        OptionalDouble distanceToTargetOpt = getDistanceToTarget();
+        OptionalDouble angleToTargetOpt = getAngleToTarget();
+
+        if (distanceToTargetOpt.isEmpty() || angleToTargetOpt.isEmpty()) {
+            return OptionalDouble.empty();
+        }
+
+        double gyroAngle = drivetrain.getPose().rotation.toRadians();
+        return OptionalDouble.of(distanceToTargetOpt.getAsDouble() *
+                (Math.sin(gyroAngle - angleToTargetOpt.getAsDouble()) / Math.sin(Math.PI / 2.0 - gyroAngle)));
     }
 
     public boolean hasTarget() {
@@ -92,7 +112,7 @@ public class VisionSubsystem implements Subsystem {
             // Calculate the distance to the outer target
             Vector2 targetPosition = LIMELIGHT.getTargetPosition();
             double theta = LIMELIGHT_MOUNTING_ANGLE + targetPosition.y;
-            double distanceToOuterTarget = (TARGET_HEIGHT - LIMELIGHT_HEIGHT) /  Math.tan(theta);
+            double distanceToOuterTarget = (TARGET_HEIGHT - LIMELIGHT_HEIGHT) / Math.tan(theta);
 
             // Get the field oriented angle for the outer target, with latency compensation
             double angleToOuter = drivetrain.getPoseAtTime(Timer.getFPGATimestamp() - LIMELIGHT.getPipelineLatency() / 1000.0).rotation.toRadians() - targetPosition.x;

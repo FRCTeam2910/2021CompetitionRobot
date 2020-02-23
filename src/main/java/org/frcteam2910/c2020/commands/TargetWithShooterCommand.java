@@ -23,6 +23,7 @@ public class TargetWithShooterCommand extends CommandBase {
     static {
         SHOOTER_TUNING.put(new InterpolatingDouble(96.0), new Vector2(Math.toRadians(56.5), 2850));
         SHOOTER_TUNING.put(new InterpolatingDouble(120.0), new Vector2(Math.toRadians(50.5), 3100));
+        SHOOTER_TUNING.put(new InterpolatingDouble(156.0), new Vector2(Math.toRadians(41.5), 3600.0));
         SHOOTER_TUNING.put(new InterpolatingDouble(180.0), new Vector2(Math.toRadians(38.0), 3900));
         SHOOTER_TUNING.put(new InterpolatingDouble(240.0), new Vector2(Math.toRadians(29.5), 4900));
         SHOOTER_TUNING.put(new InterpolatingDouble(288.0), new Vector2(Math.toRadians(24.5), 5800));

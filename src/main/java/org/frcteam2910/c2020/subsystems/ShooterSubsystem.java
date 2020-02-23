@@ -22,7 +22,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private static final double HOOD_MIN_ANGLE = Math.toRadians(24.0);
     private static final double HOOD_MAX_ANGLE = Math.toRadians(58.0);
-    private static final double HOOD_OFFSET = Math.toRadians(4.4 + 24.0);
+    private static final double HOOD_OFFSET = Math.toRadians(33.38 + 24.0);
 
     private static final double FLYWHEEL_POSITION_SENSOR_COEFFICIENT = 1.0 / 2048.0;
     private static final double FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT = FLYWHEEL_POSITION_SENSOR_COEFFICIENT * (1000.0 / 100.0) * (60.0 / 1.0);
@@ -144,7 +144,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     }
 
     public void setHoodTargetAngle(double angle) {
-//        angleMotor.set(ControlMode.Position, (MathUtils.clamp(angle, HOOD_MIN_ANGLE, HOOD_MAX_ANGLE) - HOOD_OFFSET) / HOOD_SENSOR_COEFFICIENT);
+        angleMotor.set(ControlMode.Position, (MathUtils.clamp(angle, HOOD_MIN_ANGLE, HOOD_MAX_ANGLE) - HOOD_OFFSET) / HOOD_SENSOR_COEFFICIENT);
     }
 
     public void shootFlywheel(double speed) {
