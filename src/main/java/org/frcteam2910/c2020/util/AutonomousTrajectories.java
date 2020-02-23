@@ -29,9 +29,9 @@ public class AutonomousTrajectories {
     private Trajectory circuitTenBallAutoPartTwo;
 
     public AutonomousTrajectories(TrajectoryConstraint[] trajectoryConstraints) throws IOException {
-        TrajectoryConstraint[] slowConstraints = Arrays.copyOf(trajectoryConstraints, trajectoryConstraints.length + 2);
-        slowConstraints[slowConstraints.length - 1] = new MaxVelocityConstraint(6.0 * 12.0);
-        slowConstraints[slowConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
+        TrajectoryConstraint[] slowConstraints = Arrays.copyOf(trajectoryConstraints, trajectoryConstraints.length + 1);
+        slowConstraints[slowConstraints.length - 1] = new MaxVelocityConstraint(8.0 * 12.0);
+//        slowConstraints[slowConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
 
         eightBallAutoPartOne = new Trajectory(
                 new SimplePathBuilder(new Vector2(509.0, -162.0), Rotation2.ZERO)
@@ -43,12 +43,12 @@ public class AutonomousTrajectories {
                 new SimplePathBuilder(new Vector2(468.0, -67.34), Rotation2.ZERO)
                         .lineTo(new Vector2(459.23, -111.87))
                         .arcTo(new Vector2(432.0, -134.25), new Vector2(432.0, -106.5))
-                        .lineTo(new Vector2(250.36, -134.25), Rotation2.fromDegrees(0.0))
+                        .lineTo(new Vector2(230.36, -134.25), Rotation2.fromDegrees(0.0))
                         .build(),
                 slowConstraints, SAMPLE_DISTANCE
         );
         eightBallAutoPartThree = new Trajectory(
-                new SimplePathBuilder(new Vector2(250.36, -134.25), Rotation2.fromDegrees(0.0))
+                new SimplePathBuilder(new Vector2(230.36, -134.25), Rotation2.fromDegrees(0.0))
                         .lineTo(new Vector2(324.0, -134.25))
                         .arcTo(new Vector2(468.0, -67.34), new Vector2(324.0, 54.16))
                         .build(),

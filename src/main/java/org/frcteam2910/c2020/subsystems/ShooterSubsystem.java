@@ -13,8 +13,6 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.common.math.MathUtils;
 import org.frcteam2910.common.robot.UpdateManager;
-import org.frcteam2910.common.util.InterpolatingDouble;
-import org.frcteam2910.common.util.InterpolatingTreeMap;
 
 
 public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
@@ -24,7 +22,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private static final double HOOD_MIN_ANGLE = Math.toRadians(24.0);
     private static final double HOOD_MAX_ANGLE = Math.toRadians(58.0);
-    private static final double HOOD_OFFSET = Math.toRadians(56.42 + 24.0);
+    private static final double HOOD_OFFSET = Math.toRadians(4.4 + 24.0);
 
     private static final double FLYWHEEL_POSITION_SENSOR_COEFFICIENT = 1.0 / 2048.0;
     private static final double FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT = FLYWHEEL_POSITION_SENSOR_COEFFICIENT * (1000.0 / 100.0) * (60.0 / 1.0);
@@ -152,17 +150,13 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     public void shootFlywheel(double speed) {
         double feedforward = (FLYWHEEL_FF_CONSTANT * speed + FLYWHEEL_STATIC_FRICTION_CONSTANT) / RobotController.getBatteryVoltage();
 
-//        flywheelMotor1.set(ControlMode.Velocity, -speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, -feedforward);
-//        flywheelMotor2.set(ControlMode.Velocity, speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, feedforward);
-        flywheelMotor1.set(ControlMode.Velocity, 0.0);
-        flywheelMotor2.set(ControlMode.Velocity, 0.0);
+        flywheelMotor1.set(ControlMode.Velocity, -speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, -feedforward);
+        flywheelMotor2.set(ControlMode.Velocity, speed / FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT, DemandType.ArbitraryFeedForward, feedforward);
     }
 
     public void setFlywheelOutput(double percentage) {
-//        flywheelMotor1.set(ControlMode.PercentOutput, -percentage);
-//        flywheelMotor2.set(ControlMode.PercentOutput, percentage);
-        flywheelMotor1.set(ControlMode.Disabled, 0.0);
-        flywheelMotor2.set(ControlMode.Disabled, 0.0);
+        flywheelMotor1.set(ControlMode.PercentOutput, -percentage);
+        flywheelMotor2.set(ControlMode.PercentOutput, percentage);
     }
 
     public void stopFlywheel() {
