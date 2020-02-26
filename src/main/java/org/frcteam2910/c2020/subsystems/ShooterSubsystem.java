@@ -11,18 +11,14 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
+import org.frcteam2910.common.control.PidConstants;
+import org.frcteam2910.common.control.PidController;
 import org.frcteam2910.common.math.MathUtils;
 import org.frcteam2910.common.robot.UpdateManager;
 
 
 public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
-    private static final double HOOD_GEAR_REDUCTION = 14.0 / 60.0;
-
-    private static final double HOOD_SENSOR_COEFFICIENT = ((2.0 * Math.PI) * HOOD_GEAR_REDUCTION / 4096.0);
-
-    private static final double HOOD_MIN_ANGLE = Math.toRadians(24.0);
-    private static final double HOOD_MAX_ANGLE = Math.toRadians(58.0);
-    private static final double HOOD_OFFSET = Math.toRadians(33.38 + 24.0);
+    private static final double HOOD_SENSOR_COEFFICIENT = ((2.0 * Math.PI) * Constants.SHOOTER_HOOD_GEAR_RATIO / 4096.0);
 
     private static final double FLYWHEEL_POSITION_SENSOR_COEFFICIENT = 1.0 / 2048.0;
     private static final double FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT = FLYWHEEL_POSITION_SENSOR_COEFFICIENT * (1000.0 / 100.0) * (60.0 / 1.0);
@@ -49,14 +45,12 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private static final double FLYWHEEL_ALLOWABLE_ERROR = 200.0;
 
-    private static final double HOOD_P = 8.0;
-    private static final double HOOD_I = 0.0;
-    private static final double HOOD_D = 0.1;
-
     private final TalonFX flywheelMotor1 = new TalonFX(Constants.SHOOTER_DRIVE_MOTOR_PORT_1);
     private final TalonFX flywheelMotor2 = new TalonFX(Constants.SHOOTER_DRIVE_MOTOR_PORT_2);
 
     private final TalonSRX angleMotor = new TalonSRX(Constants.SHOOTER_ANGLE_MOTOR_PORT);
+
+    private final PidController hoodController = new PidController(new PidConstants(0.0, 0.0, 0.0));
 
     private final NetworkTableEntry hoodAngleEntry;
     private final NetworkTableEntry flyWheelMotor1SpeedEntry;
@@ -86,9 +80,6 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         flywheelMotor2.enableVoltageCompensation(false);
 
         TalonSRXConfiguration hoodConfiguration = new TalonSRXConfiguration();
-        hoodConfiguration.slot0.kP = HOOD_P;
-        hoodConfiguration.slot0.kI = HOOD_I;
-        hoodConfiguration.slot0.kD = HOOD_D;
         hoodConfiguration.feedbackNotContinuous = false;
         hoodConfiguration.primaryPID.selectedFeedbackSensor = FeedbackDevice.CTRE_MagEncoder_Absolute;
 
@@ -102,6 +93,12 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withPosition(0, 0)
                 .withSize(1, 1)
                 .getEntry();
+        tab.addNumber("Hood Target Angle", () -> Math.toDegrees(getHoodTargetAngle()))
+                .withPosition(0, 1)
+                .withSize(1, 1);
+        tab.addNumber("Hood Raw Encoder", angleMotor::getSelectedSensorPosition)
+                .withPosition(0, 2)
+                .withSize(1, 1);
         flyWheelMotor1SpeedEntry = tab.add("Wheel 1 Speed", 0.0)
                 .withPosition(1, 0)
                 .withSize(1, 1)
@@ -140,11 +137,16 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     }
 
     public double getHoodAngle() {
-        return angleMotor.getSelectedSensorPosition() * HOOD_SENSOR_COEFFICIENT + HOOD_OFFSET;
+        return (angleMotor.getSelectedSensorPosition() % 4096.0) * HOOD_SENSOR_COEFFICIENT + Constants.SHOOTER_HOOD_OFFSET;
+    }
+
+    public double getHoodTargetAngle() {
+        return hoodController.getSetpoint();
     }
 
     public void setHoodTargetAngle(double angle) {
-        angleMotor.set(ControlMode.Position, (MathUtils.clamp(angle, HOOD_MIN_ANGLE, HOOD_MAX_ANGLE) - HOOD_OFFSET) / HOOD_SENSOR_COEFFICIENT);
+        hoodController.setSetpoint(MathUtils.clamp(angle, Constants.SHOOTER_HOOD_MIN_ANGLE, Constants.SHOOTER_HOOD_MAX_ANGLE));
+//        angleMotor.set(ControlMode.Position, (MathUtils.clamp(angle, Constants.SHOOTER_HOOD_MIN_ANGLE, Constants.SHOOTER_HOOD_MAX_ANGLE) - Constants.SHOOTER_HOOD_OFFSET) / HOOD_SENSOR_COEFFICIENT);
     }
 
     public void shootFlywheel(double speed) {
@@ -171,6 +173,8 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     @Override
     public void periodic() {
+        angleMotor.set(ControlMode.PercentOutput, hoodController.calculate(getHoodAngle(), 0.02));
+
         hoodAngleEntry.setDouble(Math.toDegrees(getHoodAngle()));
         flyWheelMotor1SpeedEntry.setDouble(-flywheelMotor1.getSensorCollection().getIntegratedSensorVelocity() * FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT);
         flywheelMotor1VoltageEntry.setDouble(-flywheelMotor1.getMotorOutputVoltage());

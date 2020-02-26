@@ -13,14 +13,14 @@ import java.util.OptionalDouble;
 
 public class VisionSubsystem implements Subsystem {
     private static final double TARGET_HEIGHT = 98.25;
-    private static final double LIMELIGHT_HEIGHT = 21.85;
+    private static final double LIMELIGHT_HEIGHT = 24.1;
 
     private static final double INNER_TARGET_RANGE_ANGLE = Math.toRadians(18.0);
     private static final double INNER_TARGET_DEPTH = 29.25;
     // The distance from the inner target to the apex of the triangle we use to find the distance
     private static final double DISTANCE_FROM_INNER_TO_APEX = 16.92;
 
-    private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(36.2);
+    private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(34.0);
 
     private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(2.0);
 
