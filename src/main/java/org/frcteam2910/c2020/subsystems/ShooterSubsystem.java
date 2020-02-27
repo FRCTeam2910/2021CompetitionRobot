@@ -42,6 +42,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     private static final double FLYWHEEL_STATIC_FRICTION_CONSTANT = 0.469;
 
     private static final double FLYWHEEL_CURRENT_LIMIT = 5.0;
+    private static final int HOOD_CURRENT_LIMIT = 15;
 
     private static final double FLYWHEEL_ALLOWABLE_ERROR = 200.0;
 
@@ -50,7 +51,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private final TalonSRX angleMotor = new TalonSRX(Constants.SHOOTER_ANGLE_MOTOR_PORT);
 
-    private final PidController hoodController = new PidController(new PidConstants(0.0, 0.0, 0.0));
+    private final PidController hoodController = new PidController(new PidConstants(10.0, 0.0, 0.0));
 
     private final NetworkTableEntry hoodAngleEntry;
     private final NetworkTableEntry flyWheelMotor1SpeedEntry;
@@ -82,11 +83,13 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         TalonSRXConfiguration hoodConfiguration = new TalonSRXConfiguration();
         hoodConfiguration.feedbackNotContinuous = false;
         hoodConfiguration.primaryPID.selectedFeedbackSensor = FeedbackDevice.CTRE_MagEncoder_Absolute;
+        hoodConfiguration.continuousCurrentLimit = HOOD_CURRENT_LIMIT;
 
         angleMotor.configAllSettings(hoodConfiguration);
         angleMotor.setNeutralMode(NeutralMode.Coast);
         angleMotor.setInverted(false);
         angleMotor.setSensorPhase(true);
+        hoodController.setSetpoint(Constants.SHOOTER_HOOD_MAX_ANGLE);
 
         ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
         hoodAngleEntry = tab.add("hood angle", 0.0)

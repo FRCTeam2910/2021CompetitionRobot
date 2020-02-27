@@ -127,7 +127,6 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         updateManager.startLoop(5.0e-3);
-        NetworkTableInstance.getDefault().setUpdateRate(10.0e-3);
     }
 
     @Override
@@ -139,8 +138,6 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         robotContainer.getDrivetrainSubsystem().resetPose(RigidTransform2.ZERO);
         robotContainer.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO);
-
-        NetworkTableInstance.getDefault().setUpdateRate(10.0e-3);
 
         robotContainer.getAutonomousCommand().schedule();
     }

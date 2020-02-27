@@ -71,8 +71,8 @@ public class RobotContainer {
                 new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, primaryController).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true)))
         );
 
-        secondaryController.getXButton().whenPressed(new DeployClimberCommand(climberSubsystem));
-        secondaryController.getYButton().whenPressed(new ConditionalCommand(
+        secondaryController.getBackButton().whenPressed(new DeployClimberCommand(climberSubsystem));
+        secondaryController.getStartButton().whenPressed(new ConditionalCommand(
                 new RetractClimberCommand(climberSubsystem),
                 new ExtendClimberCommand(climberSubsystem),
                 climberSubsystem::isExtended
