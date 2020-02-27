@@ -49,7 +49,7 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
         if(isFull()){
             return false;
         }
-        return !intakeBallSensor.get();
+        return isBallAtIntake();
     }
 
     @Override
@@ -62,7 +62,11 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     @Override
     public void periodic() {
         fullEntry.setBoolean(isFull());
-        hasBallEntry.setBoolean(!intakeBallSensor.get());
+        hasBallEntry.setBoolean(isBallAtIntake());
         motorSpeedEntry.setDouble(motor.getSensorCollection().getIntegratedSensorVelocity());
+    }
+
+    public boolean isBallAtIntake() {
+        return !intakeBallSensor.get();
     }
 }

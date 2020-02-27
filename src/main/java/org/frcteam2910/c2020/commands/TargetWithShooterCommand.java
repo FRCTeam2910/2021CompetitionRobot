@@ -1,7 +1,9 @@
 package org.frcteam2910.c2020.commands;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.MedianFilter;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpiutil.CircularBuffer;
 import org.frcteam2910.c2020.subsystems.ShooterSubsystem;
 import org.frcteam2910.c2020.subsystems.VisionSubsystem;
 import org.frcteam2910.common.math.MathUtils;
@@ -9,16 +11,20 @@ import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.XboxController;
 import org.frcteam2910.common.util.InterpolatingDouble;
 import org.frcteam2910.common.util.InterpolatingTreeMap;
+import org.frcteam2910.common.util.MovingAverage;
 
 public class TargetWithShooterCommand extends CommandBase {
     private static final InterpolatingTreeMap<InterpolatingDouble, Vector2> SHOOTER_TUNING = new InterpolatingTreeMap<>();
+
+    private static final double MAXIMUM_ALLOWABLE_ANGLE_RANGE = Math.toRadians(3);
+    private static final double MAXIMUM_ALLOWABLE_VELOCITY_RANGE = 50;
 
     private final ShooterSubsystem shooterSubsystem;
     private final VisionSubsystem visionSubsystem;
     private final XboxController primaryController;
 
-    private static final double MAXIMUM_ALLOWABLE_ANGLE_RANGE = Math.toRadians(3);
-    private static final double MAXIMUM_ALLOWABLE_VELOCITY_RANGE = 50;
+    private int iterationsSinceLastBufferAddition = 0;
+    private final MovingAverage distanceBuffer = new MovingAverage(10);
 
     static {
         SHOOTER_TUNING.put(new InterpolatingDouble(4.0 * 12.0), new Vector2(Math.toRadians(64.5), 3000));
@@ -61,6 +67,7 @@ public class TargetWithShooterCommand extends CommandBase {
     @Override
     public void initialize() {
         shooterSubsystem.setFlywheelCurrentLimitEnabled(false);
+        iterationsSinceLastBufferAddition = 0;
     }
 
     @Override

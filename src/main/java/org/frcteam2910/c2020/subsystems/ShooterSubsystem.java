@@ -51,7 +51,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private final TalonSRX angleMotor = new TalonSRX(Constants.SHOOTER_ANGLE_MOTOR_PORT);
 
-    private final PidController hoodController = new PidController(new PidConstants(10.0, 0.0, 0.0));
+    private final PidController hoodController = new PidController(new PidConstants(4.0, 0.0, 0.0));
 
     private final NetworkTableEntry hoodAngleEntry;
     private final NetworkTableEntry flyWheelMotor1SpeedEntry;
@@ -86,10 +86,10 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         hoodConfiguration.continuousCurrentLimit = HOOD_CURRENT_LIMIT;
 
         angleMotor.configAllSettings(hoodConfiguration);
-        angleMotor.setNeutralMode(NeutralMode.Coast);
+        angleMotor.setNeutralMode(NeutralMode.Brake);
         angleMotor.setInverted(false);
         angleMotor.setSensorPhase(true);
-        hoodController.setSetpoint(Constants.SHOOTER_HOOD_MAX_ANGLE);
+        hoodController.setSetpoint(Constants.SHOOTER_HOOD_MIN_ANGLE + (Constants.SHOOTER_HOOD_MAX_ANGLE - Constants.SHOOTER_HOOD_MIN_ANGLE) / 2.0);
 
         ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
         hoodAngleEntry = tab.add("hood angle", 0.0)

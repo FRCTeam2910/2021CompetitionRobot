@@ -107,7 +107,7 @@ public class AutonomousChooser {
         command.addCommands(
                 new FollowTrajectoryCommand(container.getDrivetrainSubsystem(), trajectory)
                         .deadlineWith(
-                                new WaitCommand(0.25)
+                                new IntakeCommand(container.getIntakeSubsystem(), container.getFeederSubsystem(), -1.0).withTimeout(0.25)
                                         .andThen(
                                                 new IntakeCommand(container.getIntakeSubsystem(), container.getFeederSubsystem(), 1.0)
                                                         .alongWith(

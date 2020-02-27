@@ -1,13 +1,9 @@
 package org.frcteam2910.c2020;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.*;
 import org.frcteam2910.c2020.commands.DriveCommand;
 import org.frcteam2910.c2020.commands.FollowTrajectoryCommand;
 import org.frcteam2910.c2020.commands.IntakeCommand;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.c2020.subsystems.*;
 import org.frcteam2910.c2020.util.AutonomousChooser;
@@ -47,11 +43,11 @@ public class RobotContainer {
         primaryController.getRightXAxis().setInverted(true);
 
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
-        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.5));
+        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.75));
 //        CommandScheduler.getInstance().registerSubsystem(wheelOfFortuneSubsystem);
         CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
-        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new SpinFlywheelCommand(shooterSubsystem, 4500.0));
+        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new DefaultShooterCommand(shooterSubsystem, 4500.0, Constants.SHOOTER_HOOD_MAX_ANGLE));
         CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
 
         configureButtonBindings();
@@ -62,8 +58,12 @@ public class RobotContainer {
                 () -> drivetrainSubsystem.resetGyroAngle(Rotation2.ZERO)
         );
         primaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setExtended(true));
-        primaryController.getLeftBumperButton().whileHeld(new WaitCommand(0.25).andThen(new IntakeCommand(intakeSubsystem, feederSubsystem, 1.0)));
-        primaryController.getLeftBumperButton().whenReleased(() -> intakeSubsystem.setExtended(false));
+        primaryController.getLeftBumperButton().whileHeld(
+                new IntakeCommand(intakeSubsystem, feederSubsystem, -1.0).withTimeout(0.25)
+                        .andThen(new IntakeCommand(intakeSubsystem, feederSubsystem, 1.0)));
+        primaryController.getLeftBumperButton().whenReleased(
+                new InstantCommand(() -> intakeSubsystem.setExtended(false))
+        .andThen(new ReindexFeederCommand(feederSubsystem, -0.5).withTimeout(5.0)));
 
 
         primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
@@ -71,14 +71,20 @@ public class RobotContainer {
                 new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, primaryController).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true)))
         );
 
+        secondaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(
+                new ReindexFeederCommand(feederSubsystem, -0.5)
+        );
+
+        secondaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setExtended(true));
+        secondaryController.getLeftBumperButton().whileHeld(new WaitCommand(0.5).andThen(new IntakeCommand(intakeSubsystem, feederSubsystem, 1.0)));
+        secondaryController.getLeftBumperButton().whenReleased(() -> intakeSubsystem.setExtended(false));
+
         secondaryController.getBackButton().whenPressed(new DeployClimberCommand(climberSubsystem));
         secondaryController.getStartButton().whenPressed(new ConditionalCommand(
                 new RetractClimberCommand(climberSubsystem),
                 new ExtendClimberCommand(climberSubsystem),
                 climberSubsystem::isExtended
         ));
-//        secondaryController.getBButton().whenPressed(wheelOfFortuneSubsystem::extendSolenoid);
-//        secondaryController.getBButton().whenReleased(wheelOfFortuneSubsystem::retractSolenoid);
     }
 
     public Command getAutonomousCommand() {
