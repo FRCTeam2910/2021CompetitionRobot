@@ -8,11 +8,17 @@ public class IntakeCommand extends CommandBase {
     private final IntakeSubsystem intake;
     private final FeederSubsystem feeder;
     private final double intakeSpeed;
+    private final boolean ignoreFull;
 
     public IntakeCommand(IntakeSubsystem intake, FeederSubsystem feeder, double intakeSpeed) {
+        this(intake, feeder, intakeSpeed, false);
+    }
+
+    public IntakeCommand(IntakeSubsystem intake, FeederSubsystem feeder, double intakeSpeed, boolean ignoreFull) {
         this.intake = intake;
         this.feeder = feeder;
         this.intakeSpeed = intakeSpeed;
+        this.ignoreFull = ignoreFull;
 
         addRequirements(intake);
     }
@@ -25,7 +31,7 @@ public class IntakeCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return feeder.isFull();
+        return feeder.isFull() && !ignoreFull;
     }
 
     @Override

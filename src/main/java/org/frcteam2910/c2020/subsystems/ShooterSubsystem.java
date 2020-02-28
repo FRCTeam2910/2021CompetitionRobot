@@ -133,6 +133,9 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         tab.addBoolean("Is Flywheel at Target", this::isFlywheelAtTargetVelocity)
                 .withPosition(4, 1)
                 .withSize(1, 1);
+        tab.addNumber("Flywheel Target", this::getFlywheelTargetVelocity)
+                .withPosition(4, 0)
+                .withSize(1, 1);
     }
 
     public void setFlywheelCurrentLimitEnabled(boolean enabled) {

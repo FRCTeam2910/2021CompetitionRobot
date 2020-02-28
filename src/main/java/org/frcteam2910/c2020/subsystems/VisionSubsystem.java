@@ -140,11 +140,10 @@ public class VisionSubsystem implements Subsystem {
             isInnerTargetVisible = angleToApex <= INNER_TARGET_RANGE_ANGLE || angleToApex >= 2 * Math.PI - INNER_TARGET_RANGE_ANGLE;
             if (isInnerTargetVisible) {
                 distanceToTarget = OptionalDouble.of(distanceToInnerTarget);
-                angleToTarget = OptionalDouble.of(angleToInner);
             } else {
                 distanceToTarget = OptionalDouble.of(distanceToOuterTarget);
-                angleToTarget = OptionalDouble.of(angleToOuter);
             }
+            angleToTarget = OptionalDouble.of(angleToOuter);
         } else {
             distanceToTarget = OptionalDouble.empty();
             angleToTarget = OptionalDouble.empty();
