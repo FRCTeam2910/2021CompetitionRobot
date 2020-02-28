@@ -1,6 +1,5 @@
 package org.frcteam2910.c2020.util;
 
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -8,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import org.frcteam2910.c2020.Robot;
 import org.frcteam2910.c2020.RobotContainer;
 import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.common.control.Trajectory;
@@ -25,8 +23,9 @@ public class AutonomousChooser {
 
         autonomousModeChooser = new SendableChooser<>();
         autonomousModeChooser.setDefaultOption("8 Ball Auto", AutonomousMode.EIGHT_BALL);
-        autonomousModeChooser.addOption("10 Ball Auto", AutonomousMode.TEN_BALL_AUTO);
-        autonomousModeChooser.addOption("Circuit 10 Ball Auto", AutonomousMode.CIRCUIT_TEN_BALL_AUTO);
+        autonomousModeChooser.addOption("8 Ball Compatible", AutonomousMode.EIGHT_BALL_COMPATIBLE);
+        autonomousModeChooser.addOption("10 Ball Auto", AutonomousMode.TEN_BALL);
+        autonomousModeChooser.addOption("Circuit 10 Ball Auto", AutonomousMode.TEN_BALL_CIRCUIT);
         autoTab.add("Mode", autonomousModeChooser);
     }
 
@@ -52,12 +51,29 @@ public class AutonomousChooser {
         //reset robot pose
         resetRobotPose(command, container, trajectories.getEightBallAutoPartOne());
         //follow first trajectory and shoot
-        command.addCommands(new FollowTrajectoryCommand(container.getDrivetrainSubsystem(), trajectories.getEightBallAutoPartOne()));
-        shootAtTarget(command, container);
+        follow(command, container, trajectories.getEightBallAutoPartOne());
+        shootAtTarget(command, container, 1.5);
         //follow second trajectory and shoot
         followAndIntake(command, container, trajectories.getEightBallAutoPartTwo());
 
-        followAndIntake(command, container, trajectories.getEightBallAutoPartThree());
+        follow(command, container, trajectories.getEightBallAutoPartThree());
+        shootAtTarget(command, container);
+
+        return command;
+    }
+
+    private Command get8BallCompatibleCommand(RobotContainer container) {
+        SequentialCommandGroup command = new SequentialCommandGroup();
+
+        //reset robot pose
+        resetRobotPose(command, container, trajectories.getEightBallCompatiblePartOne());
+        //follow first trajectory and shoot
+        follow(command, container, trajectories.getEightBallCompatiblePartOne());
+        shootAtTarget(command, container);
+        //follow second trajectory and shoot
+        followAndIntake(command, container, trajectories.getEightBallCompatiblePartTwo());
+
+        follow(command, container, trajectories.getEightBallCompatiblePartThree());
         shootAtTarget(command, container);
 
         return command;
@@ -82,24 +98,36 @@ public class AutonomousChooser {
     }
 
     public Command getCommand(RobotContainer container) {
-        if (autonomousModeChooser.getSelected() == AutonomousMode.TEN_BALL_AUTO) {
-            return get10BallAutoCommand(container);
-        } else if(autonomousModeChooser.getSelected() == AutonomousMode.EIGHT_BALL) {
-            return get8BallAutoCommand(container);
-        } else if(autonomousModeChooser.getSelected() == AutonomousMode.CIRCUIT_TEN_BALL_AUTO) {
-            return getCircuit10BallAutoCommand(container);
+        switch (autonomousModeChooser.getSelected()) {
+            case EIGHT_BALL:
+                return get8BallAutoCommand(container);
+            case EIGHT_BALL_COMPATIBLE:
+                return get8BallCompatibleCommand(container);
+            case TEN_BALL:
+                return get10BallAutoCommand(container);
+            case TEN_BALL_CIRCUIT:
+                return getCircuit10BallAutoCommand(container);
         }
 
         return get10BallAutoCommand(container);
     }
 
     private void shootAtTarget(SequentialCommandGroup command, RobotContainer container) {
+        shootAtTarget(command, container, 2.5);
+    }
+
+    private void shootAtTarget(SequentialCommandGroup command, RobotContainer container, double timeToWait) {
         command.addCommands(
                 new TargetWithShooterCommand(container.getShooterSubsystem(), container.getVisionSubsystem(), container.getPrimaryController())
                         .alongWith(new VisionRotateToTargetCommand(container.getDrivetrainSubsystem(), container.getVisionSubsystem(), () -> 0.0, () -> 0.0))
                         .alongWith(
                                 new WaitCommand(0.1).andThen(new AutonomousFeedCommand(container.getShooterSubsystem(), container.getFeederSubsystem(), container.getVisionSubsystem())))
-                        .withTimeout(2.5));
+                        .withTimeout(timeToWait));
+    }
+
+    private void follow(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {
+        command.addCommands(new FollowTrajectoryCommand(container.getDrivetrainSubsystem(), trajectory)
+                .deadlineWith(new TargetWithShooterCommand(container.getShooterSubsystem(), container.getVisionSubsystem(), container.getPrimaryController())));
     }
 
     private void followAndIntake(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {
@@ -124,7 +152,8 @@ public class AutonomousChooser {
 
     private enum AutonomousMode {
         EIGHT_BALL,
-        TEN_BALL_AUTO,
-        CIRCUIT_TEN_BALL_AUTO
+        EIGHT_BALL_COMPATIBLE,
+        TEN_BALL,
+        TEN_BALL_CIRCUIT
     }
 }

@@ -15,7 +15,7 @@ public class VisionSubsystem implements Subsystem {
     private static final double TARGET_HEIGHT = 98.25;
     private static final double LIMELIGHT_HEIGHT = 24.1;
 
-    private static final double INNER_TARGET_RANGE_ANGLE = Math.toRadians(18.0);
+    private static final double INNER_TARGET_RANGE_ANGLE = Math.toRadians(10.0); // "Theoretical": 18.0
     private static final double INNER_TARGET_DEPTH = 29.25;
     // The distance from the inner target to the apex of the triangle we use to find the distance
     private static final double DISTANCE_FROM_INNER_TO_APEX = 16.92;

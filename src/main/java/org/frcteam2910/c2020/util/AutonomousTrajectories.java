@@ -20,6 +20,16 @@ public class AutonomousTrajectories {
     private static final String TEN_BALL_AUTO_PART_ONE_NAME = "autos/10BallAuto/10BallAutoPart1.path";
     private static final String TEN_BALL_AUTO_PART_TWO_NAME = "autos/10BallAuto/10BallAutoPart2.path";
 
+    private static final Path EIGHT_BALL_COMPATIBLE_PART_ONE = new SimplePathBuilder(new Vector2(511.75, -145.75), Rotation2.ZERO)
+            .lineTo(new Vector2(475.75, -134.25), Rotation2.fromDegrees(18.83))
+            .build();
+    private static final Path EIGHT_BALL_COMPATIBLE_PART_TWO = new SimplePathBuilder(new Vector2(475.75, -134.25), Rotation2.ZERO)
+            .lineTo(new Vector2(244.0, -134.25), Rotation2.ZERO)
+            .build();
+    private static final Path EIGHT_BALL_COMPATIBLE_PART_THREE = new SimplePathBuilder(new Vector2(244.0, -134.25), Rotation2.ZERO)
+            .lineTo(new Vector2(424.0, -134.25), Rotation2.fromDegrees(15.1))
+            .build();
+
     private Trajectory eightBallAutoPartOne;
     private Trajectory eightBallAutoPartTwo;
     private Trajectory eightBallAutoPartThree;
@@ -28,10 +38,14 @@ public class AutonomousTrajectories {
     private Trajectory circuitTenBallAutoPartOne;
     private Trajectory circuitTenBallAutoPartTwo;
 
+    private final Trajectory eightBallCompatiblePartOne;
+    private final Trajectory eightBallCompatiblePartTwo;
+    private final Trajectory eightBallCompatiblePartThree;
+
     public AutonomousTrajectories(TrajectoryConstraint[] trajectoryConstraints) throws IOException {
         TrajectoryConstraint[] slowConstraints = Arrays.copyOf(trajectoryConstraints, trajectoryConstraints.length + 1);
         slowConstraints[slowConstraints.length - 1] = new MaxVelocityConstraint(8.0 * 12.0);
-//        slowConstraints[slowConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
+        slowConstraints[slowConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
 
         eightBallAutoPartOne = new Trajectory(
                 new SimplePathBuilder(new Vector2(509.0, -162.0), Rotation2.ZERO)
@@ -73,6 +87,10 @@ public class AutonomousTrajectories {
                         .build(),
                 trajectoryConstraints, SAMPLE_DISTANCE
         );
+
+        eightBallCompatiblePartOne = new Trajectory(EIGHT_BALL_COMPATIBLE_PART_ONE, trajectoryConstraints, SAMPLE_DISTANCE);
+        eightBallCompatiblePartTwo = new Trajectory(EIGHT_BALL_COMPATIBLE_PART_TWO, slowConstraints, SAMPLE_DISTANCE);
+        eightBallCompatiblePartThree = new Trajectory(EIGHT_BALL_COMPATIBLE_PART_THREE, trajectoryConstraints, SAMPLE_DISTANCE);
     }
 
     private Path getPath(String name) throws IOException {
@@ -112,5 +130,17 @@ public class AutonomousTrajectories {
 
     public Trajectory getCircuitTenBallAutoPartTwo() {
         return circuitTenBallAutoPartTwo;
+    }
+
+    public Trajectory getEightBallCompatiblePartOne() {
+        return eightBallCompatiblePartOne;
+    }
+
+    public Trajectory getEightBallCompatiblePartTwo() {
+        return eightBallCompatiblePartTwo;
+    }
+
+    public Trajectory getEightBallCompatiblePartThree() {
+        return eightBallCompatiblePartThree;
     }
 }
