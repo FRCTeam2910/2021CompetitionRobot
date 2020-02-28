@@ -12,11 +12,15 @@ import org.frcteam2910.common.control.*;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.Axis;
+import org.frcteam2910.common.robot.input.DPadButton;
 import org.frcteam2910.common.robot.input.XboxController;
 
 import java.io.IOException;
 
 public class RobotContainer {
+    private static final double HOOD_MANUAL_ADJUST_INTERVAL = 25.0;
+    private static final double FYWHEEL_MANUAL_ADJUST_INTERVAL = Math.toRadians(0.5);
+
     private final XboxController primaryController = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
     private final XboxController secondaryController = new XboxController(Constants.SECONDARY_CONTROLLER_PORT);
 
@@ -69,6 +73,24 @@ public class RobotContainer {
         primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
         primaryController.getRightBumperButton().whileHeld(
                 new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, primaryController).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true)))
+        );
+
+        primaryController.getAButton().whileHeld(new ManuallyAdjustShooterCommand(shooterSubsystem));
+
+        // Manual hood adjustment
+        primaryController.getDPadButton(DPadButton.Direction.DOWN).whenPressed(
+                () -> shooterSubsystem.setHoodTargetAngle(shooterSubsystem.getHoodAngle() - FYWHEEL_MANUAL_ADJUST_INTERVAL)
+        );
+        primaryController.getDPadButton(DPadButton.Direction.UP).whenPressed(
+                () -> shooterSubsystem.setHoodTargetAngle(shooterSubsystem.getHoodAngle() + FYWHEEL_MANUAL_ADJUST_INTERVAL)
+        );
+
+        // Manual flywheel adjustment
+        primaryController.getDPadButton(DPadButton.Direction.RIGHT).whenPressed(
+                () -> shooterSubsystem.setFlywheelOutput(shooterSubsystem.getFlywheelVelocity() + HOOD_MANUAL_ADJUST_INTERVAL)
+        );
+        primaryController.getDPadButton(DPadButton.Direction.LEFT).whenPressed(
+                () -> shooterSubsystem.setFlywheelOutput(shooterSubsystem.getFlywheelVelocity() - HOOD_MANUAL_ADJUST_INTERVAL)
         );
 
         secondaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(
