@@ -16,6 +16,8 @@ import org.frcteam2910.common.control.PidController;
 import org.frcteam2910.common.math.MathUtils;
 import org.frcteam2910.common.robot.UpdateManager;
 
+import java.util.OptionalDouble;
+
 
 public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     private static final double HOOD_SENSOR_COEFFICIENT = ((2.0 * Math.PI) * Constants.SHOOTER_HOOD_GEAR_RATIO / 4096.0);
@@ -29,7 +31,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     /**
      * Flywheel regression constants
-     *
+     * <p>
      * Found by doing an exponential regression using the following points:
      * (0.25, 1480)
      * (0.3, 1780)
@@ -61,6 +63,9 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     private final NetworkTableEntry flywheelMotor2VoltageEntry;
     private final NetworkTableEntry flywheelMotor2CurrentEntry;
 
+    private HoodControlMode hoodControlMode = HoodControlMode.DISABLED;
+    private OptionalDouble hoodTargetPosition = OptionalDouble.empty();
+
     public ShooterSubsystem() {
         flywheelMotor1.configFactoryDefault();
         flywheelMotor2.configFactoryDefault();
@@ -89,14 +94,13 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         angleMotor.setNeutralMode(NeutralMode.Brake);
         angleMotor.setInverted(true);
         angleMotor.setSensorPhase(false);
-        hoodController.setSetpoint(Constants.SHOOTER_HOOD_MIN_ANGLE + (Constants.SHOOTER_HOOD_MAX_ANGLE - Constants.SHOOTER_HOOD_MIN_ANGLE) / 2.0);
 
         ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
         hoodAngleEntry = tab.add("hood angle", 0.0)
                 .withPosition(0, 0)
                 .withSize(1, 1)
                 .getEntry();
-        tab.addNumber("Hood Target Angle", () -> Math.toDegrees(getHoodTargetAngle()))
+        tab.addNumber("Hood Target Angle", () -> Math.toDegrees(getHoodTargetAngle().orElse(Double.NaN)))
                 .withPosition(0, 1)
                 .withSize(1, 1);
         tab.addNumber("Hood Raw Encoder", angleMotor::getSelectedSensorPosition)
@@ -143,13 +147,13 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         return (angleMotor.getSelectedSensorPosition() % 4096.0) * HOOD_SENSOR_COEFFICIENT + Constants.SHOOTER_HOOD_OFFSET;
     }
 
-    public double getHoodTargetAngle() {
-        return hoodController.getSetpoint();
+    public OptionalDouble getHoodTargetAngle() {
+        return hoodTargetPosition;
     }
 
     public void setHoodTargetAngle(double angle) {
-        hoodController.setSetpoint(MathUtils.clamp(angle, Constants.SHOOTER_HOOD_MIN_ANGLE, Constants.SHOOTER_HOOD_MAX_ANGLE));
-//        angleMotor.set(ControlMode.Position, (MathUtils.clamp(angle, Constants.SHOOTER_HOOD_MIN_ANGLE, Constants.SHOOTER_HOOD_MAX_ANGLE) - Constants.SHOOTER_HOOD_OFFSET) / HOOD_SENSOR_COEFFICIENT);
+        hoodControlMode = HoodControlMode.POSITION;
+        hoodTargetPosition = OptionalDouble.of(angle);
     }
 
     public void shootFlywheel(double speed) {
@@ -176,7 +180,22 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     @Override
     public void periodic() {
-        angleMotor.set(ControlMode.PercentOutput, hoodController.calculate(getHoodAngle(), 0.02));
+        switch (hoodControlMode) {
+            case DISABLED:
+                angleMotor.set(TalonSRXControlMode.Disabled, 0.0);
+                break;
+            case POSITION:
+                if (getHoodTargetAngle().isEmpty()) {
+                    angleMotor.set(TalonSRXControlMode.Disabled, 0.0);
+                } else {
+                    double targetAngle = getHoodTargetAngle().getAsDouble();
+                    targetAngle = MathUtils.clamp(targetAngle, Constants.SHOOTER_HOOD_MIN_ANGLE, Constants.SHOOTER_HOOD_MAX_ANGLE);
+
+                    hoodController.setSetpoint(targetAngle);
+                    angleMotor.set(TalonSRXControlMode.PercentOutput, hoodController.calculate(getHoodAngle(), 0.02));
+                }
+                break;
+        }
 
         hoodAngleEntry.setDouble(Math.toDegrees(getHoodAngle()));
         flyWheelMotor1SpeedEntry.setDouble(-flywheelMotor1.getSensorCollection().getIntegratedSensorVelocity() * FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT);
@@ -209,5 +228,15 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
                 getFlywheelTargetVelocity(),
                 FLYWHEEL_ALLOWABLE_ERROR
         );
+    }
+
+    public void disableHood() {
+        hoodControlMode = HoodControlMode.DISABLED;
+        hoodTargetPosition = OptionalDouble.empty();
+    }
+
+    public enum HoodControlMode {
+        DISABLED,
+        POSITION
     }
 }

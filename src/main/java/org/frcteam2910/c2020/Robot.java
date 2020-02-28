@@ -1,10 +1,9 @@
 package org.frcteam2910.c2020;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import org.frcteam2910.c2020.commands.SpinFlywheelCommand;
+import org.frcteam2910.c2020.commands.TestModeShooterCommand;
 import org.frcteam2910.common.Logger;
 import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
@@ -144,14 +143,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
-        robotContainer.getDrivetrainSubsystem().resetPose(RigidTransform2.ZERO);
-        robotContainer.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO);
-
-        new SpinFlywheelCommand(robotContainer.getShooterSubsystem(), 0.0).schedule();
-    }
-
-    @Override
-    public void testPeriodic() {
-        NetworkTableInstance.getDefault().flush();
+        new TestModeShooterCommand(robotContainer.getShooterSubsystem()).schedule();
     }
 }
