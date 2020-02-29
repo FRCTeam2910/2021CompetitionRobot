@@ -83,6 +83,10 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
         return proximityValue >= PROXIMITY_CUTOFF_VALUE;
     }
 
+    public void setMotorSpeed(double speed) {
+        motor.set(speed);
+    }
+
     public void stopMotor() {
         motor.stopMotor();
     }
