@@ -8,6 +8,7 @@ import org.frcteam2910.common.Logger;
 import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.robot.UpdateManager;
+import org.frcteam2910.common.robot.drivers.Limelight;
 
 import java.io.IOException;
 import java.net.NetworkInterface;
@@ -135,6 +136,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.DEFAULT);
         robotContainer.getDrivetrainSubsystem().resetPose(RigidTransform2.ZERO);
         robotContainer.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO);
 
@@ -144,5 +146,15 @@ public class Robot extends TimedRobot {
     @Override
     public void testInit() {
         new TestModeShooterCommand(robotContainer.getShooterSubsystem()).schedule();
+    }
+
+    @Override
+    public void disabledInit() {
+        robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.OFF);
+    }
+
+    @Override
+    public void teleopInit() {
+        robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.DEFAULT);
     }
 }

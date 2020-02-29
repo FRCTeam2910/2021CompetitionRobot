@@ -172,4 +172,8 @@ public class VisionSubsystem implements Subsystem {
                 TARGET_ALLOWABLE_ERROR
         );
     }
+
+    public void setLedMode(Limelight.LedMode mode) {
+        LIMELIGHT.setLedMode(mode);
+    }
 }
