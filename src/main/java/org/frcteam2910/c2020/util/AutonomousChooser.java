@@ -26,7 +26,8 @@ public class AutonomousChooser {
         autonomousModeChooser.addOption("8 Ball Compatible", AutonomousMode.EIGHT_BALL_COMPATIBLE);
         autonomousModeChooser.addOption("10 Ball Auto", AutonomousMode.TEN_BALL);
         autonomousModeChooser.addOption("Circuit 10 Ball Auto", AutonomousMode.TEN_BALL_CIRCUIT);
-        autoTab.add("Mode", autonomousModeChooser);
+        autoTab.add("Mode", autonomousModeChooser)
+        .withSize(3, 1);
     }
 
     public AutonomousChooser(AutonomousTrajectories trajectories) {
