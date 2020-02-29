@@ -140,7 +140,7 @@ public class AutonomousChooser {
                                         .andThen(
                                                 new IntakeCommand(container.getIntakeSubsystem(), container.getFeederSubsystem(), 1.0)
                                                         .alongWith(
-                                                                new FeederIntakeWhenNotFullCommand(container.getFeederSubsystem(), 0.5)
+                                                                new FeederIntakeWhenNotFullCommand(container.getFeederSubsystem(), 1.0)
                                                         ))));
         command.addCommands(new InstantCommand(() -> container.getIntakeSubsystem().setExtended(false)));
     }

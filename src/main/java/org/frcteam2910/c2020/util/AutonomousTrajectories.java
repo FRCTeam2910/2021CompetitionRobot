@@ -44,7 +44,7 @@ public class AutonomousTrajectories {
 
     public AutonomousTrajectories(TrajectoryConstraint[] trajectoryConstraints) throws IOException {
         TrajectoryConstraint[] slowConstraints = Arrays.copyOf(trajectoryConstraints, trajectoryConstraints.length + 1);
-        slowConstraints[slowConstraints.length - 1] = new MaxVelocityConstraint(8.0 * 12.0);
+        slowConstraints[slowConstraints.length - 1] = new MaxVelocityConstraint(6.0 * 12.0);
         slowConstraints[slowConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
 
         eightBallAutoPartOne = new Trajectory(

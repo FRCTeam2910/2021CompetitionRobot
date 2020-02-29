@@ -45,7 +45,7 @@ public class RobotContainer {
         primaryController.getRightXAxis().setInverted(true);
 
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
-        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.75));
+        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 1.0));
 //        CommandScheduler.getInstance().setDefaultCommand(wheelOfFortuneSubsystem, new ManualWheelOfFortuneCommand(wheelOfFortuneSubsystem, () -> secondaryController.getRightXAxis().get()));
         CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
@@ -72,7 +72,7 @@ public class RobotContainer {
         .andThen(new ReindexFeederCommand(feederSubsystem, -0.5).withTimeout(5.0)));
 
         primaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(new SpinFeederCommand(feederSubsystem, -0.5));
-        primaryController.getLeftTriggerAxis().getButton(0.5).whenReleased(new ReindexFeederCommand(feederSubsystem, -0.5).withTimeout(5.0));
+        primaryController.getLeftTriggerAxis().getButton(0.5).whenReleased(new ReindexFeederCommand(feederSubsystem, -1.0).withTimeout(5.0));
 
 
         primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));

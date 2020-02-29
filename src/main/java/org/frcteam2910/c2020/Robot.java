@@ -149,7 +149,12 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-    public void disabledInit() {
+    public void testPeriodic() {
+        robotContainer.getShooterSubsystem().disableHood();
+    }
+
+    @Override
+    public void disabledPeriodic() {
         robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.OFF);
     }
 
