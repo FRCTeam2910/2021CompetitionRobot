@@ -27,7 +27,7 @@ public class AutonomousTrajectories {
             .lineTo(new Vector2(324.0, -134.25), Rotation2.ZERO)
             .build();
     private static final Path EIGHT_BALL_COMPATIBLE_PART_THREE = new SimplePathBuilder(new Vector2(324.0, -134.25), Rotation2.ZERO)
-            .lineTo(new Vector2(424.0, -134.25), Rotation2.fromDegrees(15.1))
+            .lineTo(new Vector2(474.0, -114.25), Rotation2.fromDegrees(14.0))
             .build();
 
     private Trajectory eightBallAutoPartOne;
