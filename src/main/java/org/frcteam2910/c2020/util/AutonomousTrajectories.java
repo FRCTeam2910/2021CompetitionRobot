@@ -24,9 +24,9 @@ public class AutonomousTrajectories {
             .lineTo(new Vector2(475.75, -134.25), Rotation2.fromDegrees(18.83))
             .build();
     private static final Path EIGHT_BALL_COMPATIBLE_PART_TWO = new SimplePathBuilder(new Vector2(475.75, -134.25), Rotation2.ZERO)
-            .lineTo(new Vector2(244.0, -134.25), Rotation2.ZERO)
+            .lineTo(new Vector2(324.0, -134.25), Rotation2.ZERO)
             .build();
-    private static final Path EIGHT_BALL_COMPATIBLE_PART_THREE = new SimplePathBuilder(new Vector2(244.0, -134.25), Rotation2.ZERO)
+    private static final Path EIGHT_BALL_COMPATIBLE_PART_THREE = new SimplePathBuilder(new Vector2(324.0, -134.25), Rotation2.ZERO)
             .lineTo(new Vector2(424.0, -134.25), Rotation2.fromDegrees(15.1))
             .build();
 
@@ -57,13 +57,12 @@ public class AutonomousTrajectories {
                 new SimplePathBuilder(new Vector2(468.0, -67.34), Rotation2.ZERO)
                         .lineTo(new Vector2(459.23, -111.87))
                         .arcTo(new Vector2(432.0, -134.25), new Vector2(432.0, -106.5))
-                        .lineTo(new Vector2(230.36, -134.25), Rotation2.fromDegrees(0.0))
+                        .lineTo(new Vector2(324.0, -134.25), Rotation2.fromDegrees(0.0))
                         .build(),
                 slowConstraints, SAMPLE_DISTANCE
         );
         eightBallAutoPartThree = new Trajectory(
-                new SimplePathBuilder(new Vector2(230.36, -134.25), Rotation2.fromDegrees(0.0))
-                        .lineTo(new Vector2(324.0, -134.25))
+                new SimplePathBuilder(new Vector2(324.0, -134.25), Rotation2.fromDegrees(0.0))
                         .arcTo(new Vector2(468.0, -67.34), new Vector2(324.0, 54.16))
                         .build(),
                 trajectoryConstraints, SAMPLE_DISTANCE
