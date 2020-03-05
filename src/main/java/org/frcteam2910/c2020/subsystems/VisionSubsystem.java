@@ -176,4 +176,8 @@ public class VisionSubsystem implements Subsystem {
     public void setLedMode(Limelight.LedMode mode) {
         LIMELIGHT.setLedMode(mode);
     }
+
+    public void setSnapshotEnabled(boolean isEnabled) {
+        LIMELIGHT.setSnapshotsEnabled(isEnabled);
+    }
 }

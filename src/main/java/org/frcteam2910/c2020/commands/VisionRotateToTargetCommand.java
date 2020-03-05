@@ -41,6 +41,7 @@ public class VisionRotateToTargetCommand extends CommandBase {
     public void initialize() {
         lastTime = Timer.getFPGATimestamp();
         visionSubsystem.setCamMode(Limelight.CamMode.VISION);
+        visionSubsystem.setSnapshotEnabled(true);
         controller.reset();
     }
 
@@ -68,5 +69,10 @@ public class VisionRotateToTargetCommand extends CommandBase {
             }
         }
         drivetrain.drive(translationalVelocity, rotationalVelocity, true);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        visionSubsystem.setSnapshotEnabled(false);
     }
 }
