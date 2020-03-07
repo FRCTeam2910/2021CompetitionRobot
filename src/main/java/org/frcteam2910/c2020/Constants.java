@@ -45,7 +45,7 @@ public class Constants {
 
     public static final int WHEEL_OF_FORTUNE_MOTOR_PORT = 5;
 
-    public static final int WHEEL_OF_FORTUNE_DEPLOY_SOLENOID_PORT = 3;
+    public static final int WHEEL_OF_FORTUNE_DEPLOY_SOLENOID_PORT = 2;
 
     public static final int CLIMBER_DEPLOY_SOLENOID_PORT = 1;
     public static final int CLIMBER_EXTEND_SOLENOID_1_PORT = 6;
@@ -60,7 +60,7 @@ public class Constants {
     private static final double DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET_COMPETITION = -Math.toRadians(201.1);
     private static final double SHOOTER_HOOD_MIN_ANGLE_COMPETITION = Math.toRadians(26.90);
     private static final double SHOOTER_HOOD_MAX_ANGLE_COMPETITION = Math.toRadians(64.54);
-    private static final double SHOOTER_HOOD_OFFSET_COMPETITION = Math.toRadians(55.91) + SHOOTER_HOOD_MAX_ANGLE_COMPETITION;
+    private static final double SHOOTER_HOOD_OFFSET_COMPETITION = Math.toRadians(50.9) + SHOOTER_HOOD_MAX_ANGLE_COMPETITION;
     private static final double SHOOTER_HOOD_GEAR_RATIO_COMPETITION = 22.0 / 72.0;
 
     private static final double DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET_PRACTICE = -Math.toRadians(75.5);

@@ -29,6 +29,7 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
     private static final double SPINNER_POSITION_COEFFICIENT = 0.0;
     private static final double SPINNER_INTEGRAL_COEFFICIENT = 0.0;
     private static final double SPINNER_DERIVATIVE_COEFFICIENT = 0.0;
+//    private static final double SENSOR_COEFFICIENT = 9.0 * (32.0 / 2.0);
     private static final double SENSOR_COEFFICIENT = 1.0;
 
     private static final int PROXIMITY_CUTOFF_VALUE = 1024;
@@ -62,6 +63,9 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
                 .withPosition(0,0)
                 .withSize(1,1)
                 .getEntry();
+        tab.addNumber("encoder position", () -> getEncoderPosition())
+                .withPosition(1, 0)
+                .withSize(1, 1);
     }
 
     @Override
