@@ -1,5 +1,9 @@
 package org.frcteam2910.c2020.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ColorSensorV3;
@@ -16,6 +20,8 @@ import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.c2020.util.DetectedColor;
 import org.frcteam2910.common.robot.UpdateManager;
 import edu.wpi.first.wpilibj.util.Color;
+
+import javax.naming.ldap.Control;
 
 public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatable {
 
@@ -35,14 +41,15 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
     private static final int PROXIMITY_CUTOFF_VALUE = 1024;
 
     public static final double SPINNER_REVOLUTIONS_PER_WHEEL_SECTION = 1.0;
+//
+//    private final I2C.Port i2cPort = I2C.Port.kOnboard;
+//    private final ColorSensorV3 COLOR_SENSOR = new ColorSensorV3(i2cPort);
 
-    private final I2C.Port i2cPort = I2C.Port.kOnboard;
-    private final ColorSensorV3 COLOR_SENSOR = new ColorSensorV3(i2cPort);
-
-    private CANSparkMax motor = new CANSparkMax(Constants.WHEEL_OF_FORTUNE_MOTOR_PORT, MotorType.kBrushless);
-
-    private CANEncoder encoder =  motor.getEncoder();
-    private CANPIDController pidController = motor.getPIDController();
+//    private CANSparkMax motor = new CANSparkMax(Constants.WHEEL_OF_FORTUNE_MOTOR_PORT, MotorType.kBrushless);
+//
+//    private CANEncoder encoder =  motor.getEncoder();
+//    private CANPIDController pidController = motor.getPIDController();
+    private TalonSRX motor = new TalonSRX(Constants.WHEEL_OF_FORTUNE_MOTOR_PORT);
 
     private Solenoid deploySolenoid = new Solenoid(Constants.WHEEL_OF_FORTUNE_DEPLOY_SOLENOID_PORT);
 
@@ -52,11 +59,19 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
     private int proximityValue;
 
     public WheelOfFortuneSubsystem(){
-        encoder.setPositionConversionFactor(SENSOR_COEFFICIENT);
+//        encoder.setPositionConversionFactor(SENSOR_COEFFICIENT);
+//
+//        pidController.setP(SPINNER_POSITION_COEFFICIENT);
+//        pidController.setI(SPINNER_INTEGRAL_COEFFICIENT);
+//        pidController.setD(SPINNER_DERIVATIVE_COEFFICIENT);
+        TalonSRXConfiguration configuration = new TalonSRXConfiguration();
+        configuration.primaryPID.selectedFeedbackSensor = FeedbackDevice.CTRE_MagEncoder_Relative;
+        configuration.primaryPID.selectedFeedbackCoefficient = SENSOR_COEFFICIENT;
+        configuration.slot0.kP = SPINNER_POSITION_COEFFICIENT;
+        configuration.slot0.kI = SPINNER_INTEGRAL_COEFFICIENT;
+        configuration.slot0.kD = SPINNER_DERIVATIVE_COEFFICIENT;
 
-        pidController.setP(SPINNER_POSITION_COEFFICIENT);
-        pidController.setI(SPINNER_INTEGRAL_COEFFICIENT);
-        pidController.setD(SPINNER_DERIVATIVE_COEFFICIENT);
+        motor.configAllSettings(configuration);
 
         ShuffleboardTab tab = Shuffleboard.getTab("Wheel of Fortune");
         colorEntry = tab.add("Color", DetectedColor.GREEN.toString())
@@ -70,17 +85,20 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
 
     @Override
     public void periodic(){
-        Color colorFromSensor = COLOR_SENSOR.getColor();
+//        Color colorFromSensor = COLOR_SENSOR.getColor();
+        Color colorFromSensor = Color.kAqua;
         double hueColor  = calculateHue(colorFromSensor);
         detectedColor = calculateDetectedColor(hueColor);
-
-        proximityValue = COLOR_SENSOR.getProximity();
+//
+//        proximityValue = COLOR_SENSOR.getProximity();
+        proximityValue = 0;
 
         colorEntry.setString(detectedColor.toString());
     }
 
     public void spin(double numRevolutions) {
-        pidController.setReference(numRevolutions, ControlType.kPosition);
+//        pidController.setReference(numRevolutions, ControlType.kPosition);
+        motor.set(ControlMode.MotionMagic, numRevolutions);
     }
 
     public boolean isCloseToColorSensor() {
@@ -88,19 +106,19 @@ public class WheelOfFortuneSubsystem implements Subsystem, UpdateManager.Updatab
     }
 
     public void setMotorSpeed(double speed) {
-        motor.set(speed);
+        motor.set(ControlMode.PercentOutput, speed);
     }
 
     public void stopMotor() {
-        motor.stopMotor();
+        motor.set(ControlMode.PercentOutput, 0.0);
     }
 
     public void resetEncoderPosition() {
-        encoder.setPosition(0.0);
+        motor.setSelectedSensorPosition(0);
     }
 
     public double getEncoderPosition() {
-        return encoder.getPosition();
+        return motor.getSelectedSensorPosition();
     }
 
     private double calculateHue(Color colorFromSensor){
