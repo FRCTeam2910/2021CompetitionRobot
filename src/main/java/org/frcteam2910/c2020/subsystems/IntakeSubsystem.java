@@ -1,5 +1,7 @@
 package org.frcteam2910.c2020.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
@@ -14,7 +16,7 @@ import static org.frcteam2910.c2020.Constants.INTAKE_EXTENSION_SOLENOID;
 import static org.frcteam2910.c2020.Constants.INTAKE_MOTOR;
 
 public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
-    private CANSparkMax motor = new CANSparkMax(INTAKE_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless);
+    private TalonFX motor = new TalonFX(INTAKE_MOTOR);
     private Solenoid extensionSolenoid = new Solenoid(INTAKE_EXTENSION_SOLENOID);
 
     private final Object stateLock = new Object();
@@ -27,6 +29,8 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
     private final NetworkTableEntry isExtendedEntry;
 
     public IntakeSubsystem() {
+        motor.setInverted(true);
+
         ShuffleboardTab tab = Shuffleboard.getTab("Intake");
         motorSpeedEntry = tab.add("Motor Speed", 0.0)
                 .withPosition(0, 0)
@@ -47,7 +51,7 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
             localExtended = extended;
         }
 
-        motor.set(localMotorOutput);
+        motor.set(ControlMode.PercentOutput, localMotorOutput);
         if (localExtended != extensionSolenoid.get()) {
             extensionSolenoid.set(localExtended);
         }
@@ -73,7 +77,7 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public double getMotorOutput() {
         synchronized (stateLock) {
-            return motor.get();
+            return motor.getMotorOutputPercent();
         }
     }
 
