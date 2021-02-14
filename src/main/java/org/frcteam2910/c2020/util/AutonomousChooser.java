@@ -22,10 +22,7 @@ public class AutonomousChooser {
         ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous settings");
 
         autonomousModeChooser = new SendableChooser<>();
-        autonomousModeChooser.setDefaultOption("8 Ball Auto", AutonomousMode.EIGHT_BALL);
-        autonomousModeChooser.addOption("8 Ball Compatible", AutonomousMode.EIGHT_BALL_COMPATIBLE);
-        autonomousModeChooser.addOption("10 Ball Auto", AutonomousMode.TEN_BALL);
-        autonomousModeChooser.addOption("Circuit 10 Ball Auto", AutonomousMode.TEN_BALL_CIRCUIT);
+        autonomousModeChooser.addOption("Barrel Racing - AutoNav",AutonomousMode.BARREL_RACING_AUTO_NAV);
         autoTab.add("Mode", autonomousModeChooser)
         .withSize(3, 1);
     }
@@ -34,83 +31,24 @@ public class AutonomousChooser {
         this.trajectories = trajectories;
     }
 
-    private SequentialCommandGroup get10BallAutoCommand(RobotContainer container) {
+    public Command getBarrelRacingAutoNavCommand(RobotContainer container){
         SequentialCommandGroup command = new SequentialCommandGroup();
 
-        resetRobotPose(command, container, trajectories.getTenBallAutoPartOne());
-        followAndIntake(command, container, trajectories.getTenBallAutoPartOne());
-        shootAtTarget(command, container);
-        //command.addCommands(new FollowTrajectoryCommand(drivetrainSubsystem, trajectories.getTenBallAutoPartTwo()));
-        //command.addCommands(new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, xboxController));
-
-        return command;
-    }
-
-    private Command get8BallAutoCommand(RobotContainer container) {
-        SequentialCommandGroup command = new SequentialCommandGroup();
-
-        //reset robot pose
-        resetRobotPose(command, container, trajectories.getEightBallAutoPartOne());
-        //follow first trajectory and shoot
-        follow(command, container, trajectories.getEightBallAutoPartOne());
-        shootAtTarget(command, container, 1.5);
-        //follow second trajectory and shoot
-        followAndIntake(command, container, trajectories.getEightBallAutoPartTwo());
-
-        follow(command, container, trajectories.getEightBallAutoPartThree());
-        shootAtTarget(command, container);
-
-        return command;
-    }
-
-    private Command get8BallCompatibleCommand(RobotContainer container) {
-        SequentialCommandGroup command = new SequentialCommandGroup();
-
-        //reset robot pose
-        resetRobotPose(command, container, trajectories.getEightBallCompatiblePartOne());
-        //follow first trajectory and shoot
-        follow(command, container, trajectories.getEightBallCompatiblePartOne());
-        shootAtTarget(command, container);
-        //follow second trajectory and shoot
-        followAndIntake(command, container, trajectories.getEightBallCompatiblePartTwo());
-
-        follow(command, container, trajectories.getEightBallCompatiblePartThree());
-        shootAtTarget(command, container);
-
-        return command;
-    }
-
-    public Command getCircuit10BallAutoCommand(RobotContainer container) {
-        SequentialCommandGroup command = new SequentialCommandGroup();
-
-        // Reset the robot pose
-        resetRobotPose(command, container, trajectories.getCircuitTenBallAutoPartOne());
-        // Pickup the first balls and shoot
-        followAndIntake(command, container, trajectories.getCircuitTenBallAutoPartOne());
-        followAndIntake(command, container, trajectories.getCircuitTenBallAutoPartTwo());
-        shootAtTarget(command, container);
-
-        // Grab from trench
-        followAndIntake(command, container, trajectories.getEightBallAutoPartTwo());
-        followAndIntake(command, container, trajectories.getEightBallAutoPartThree());
-        shootAtTarget(command, container);
+        //Reset robot pose
+        resetRobotPose(command, container, trajectories.getBarrelRacingAutoNavPartOne());
+        //Set the auto path
+        follow(command,container, trajectories.getBarrelRacingAutoNavPartTwo());
 
         return command;
     }
 
     public Command getCommand(RobotContainer container) {
         switch (autonomousModeChooser.getSelected()) {
-            case EIGHT_BALL:
-                return get8BallAutoCommand(container);
-            case EIGHT_BALL_COMPATIBLE:
-                return get8BallCompatibleCommand(container);
-            case TEN_BALL:
-                return get10BallAutoCommand(container);
-            case TEN_BALL_CIRCUIT:
-                return getCircuit10BallAutoCommand(container);
+            case BARREL_RACING_AUTO_NAV:
+                return getBarrelRacingAutoNavCommand(container);
         }
 
-        return get10BallAutoCommand(container);
+        return getBarrelRacingAutoNavCommand(container);//default command
     }
 
     private void shootAtTarget(SequentialCommandGroup command, RobotContainer container) {
@@ -153,9 +91,6 @@ public class AutonomousChooser {
     }
 
     private enum AutonomousMode {
-        EIGHT_BALL,
-        EIGHT_BALL_COMPATIBLE,
-        TEN_BALL,
-        TEN_BALL_CIRCUIT
+        BARREL_RACING_AUTO_NAV
     }
 }
