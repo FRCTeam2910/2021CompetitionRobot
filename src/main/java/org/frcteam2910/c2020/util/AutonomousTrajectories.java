@@ -1,5 +1,6 @@
 package org.frcteam2910.c2020.util;
 
+import org.frcteam2910.c2020.RobotContainer;
 import org.frcteam2910.common.control.*;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
@@ -18,6 +19,9 @@ public class AutonomousTrajectories {
     private Trajectory bouncePathPartTwo;
     private Trajectory bouncePathPartThree;
     private Trajectory bouncePathPartFour;
+
+    private Trajectory slalomPathPartOne;
+    private Trajectory slalomPathPartTwo;
 
     public AutonomousTrajectories(TrajectoryConstraint[] trajectoryConstraints) throws IOException {
         TrajectoryConstraint[] slowConstraints = Arrays.copyOf(trajectoryConstraints, trajectoryConstraints.length + 1);
@@ -85,6 +89,31 @@ public class AutonomousTrajectories {
                 trajectoryConstraints,SAMPLE_DISTANCE
         );
 
+        slalomPathPartOne = new Trajectory(
+                new SimplePathBuilder(new Vector2(30,30),Rotation2.ZERO)
+                .lineTo(new Vector2(60,30))
+                .build(),
+                trajectoryConstraints,SAMPLE_DISTANCE
+        );
+
+        slalomPathPartTwo = new Trajectory(
+                new SimplePathBuilder(new Vector2(60,30),Rotation2.ZERO)
+                .arcTo(new Vector2(90,60),new Vector2(60,60))
+                .arcTo(new Vector2(120,90),new Vector2(120,60))
+                .lineTo(new Vector2(240,90))
+                .arcTo(new Vector2(270,60),new Vector2(240,60))
+                .arcTo(new Vector2(315,34.02),new Vector2(300,60))
+                .arcTo(new Vector2(315,85.98),new Vector2(300,60))
+                .arcTo(new Vector2(270,60),new Vector2(300,60))
+                .arcTo(new Vector2(240,30),new Vector2(240,60))
+                .lineTo(new Vector2(120,30))
+                .arcTo(new Vector2(90,60),new Vector2(120,60))
+                .arcTo(new Vector2(60,90),new Vector2(60,60))
+                .lineTo(new Vector2(30,90))
+                .build(),
+                trajectoryConstraints,SAMPLE_DISTANCE
+        );
+
     }
 
     public Trajectory getBarrelRacingAutoNavPartOne(){
@@ -109,5 +138,13 @@ public class AutonomousTrajectories {
 
     public Trajectory getBouncePathPartFour() {
         return bouncePathPartFour;
+    }
+
+    public Trajectory getSlalomPathPartOne() {
+        return slalomPathPartOne;
+    }
+
+    public Trajectory getSlalomPathPartTwo() {
+        return slalomPathPartTwo;
     }
 }

@@ -46,11 +46,24 @@ public class AutonomousChooser {
     public Command getBouncePathCommand(RobotContainer container){
         SequentialCommandGroup command = new SequentialCommandGroup();
 
+        //Reset robot pos
         resetRobotPose(command,container,trajectories.getBouncePathPartOne());
 
+        //Follow the rest of the path
         simpleFollow(command,container,trajectories.getBouncePathPartTwo());
         simpleFollow(command,container,trajectories.getBouncePathPartThree());
         simpleFollow(command,container,trajectories.getBouncePathPartFour());
+
+        return command;
+    }
+
+    public Command getSlalomCommand(RobotContainer container){
+        SequentialCommandGroup command = new SequentialCommandGroup();
+
+        //Reset robot pos
+        resetRobotPose(command,container,trajectories.getSlalomPathPartOne());
+        //Follow the rest of the path
+        simpleFollow(command,container,trajectories.getSlalomPathPartTwo());
 
         return command;
     }
@@ -61,6 +74,8 @@ public class AutonomousChooser {
                 return getBarrelRacingAutoNavCommand(container);
             case BOUNCE_PATH:
                 return getBouncePathCommand(container);
+            case SLALOM:
+                return getSlalomCommand(container);
         }
 
         return getBarrelRacingAutoNavCommand(container);//default command
@@ -111,6 +126,7 @@ public class AutonomousChooser {
 
     private enum AutonomousMode {
         BARREL_RACING_AUTO_NAV,
-        BOUNCE_PATH
+        BOUNCE_PATH,
+        SLALOM
     }
 }
