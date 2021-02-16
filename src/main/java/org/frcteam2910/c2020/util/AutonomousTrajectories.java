@@ -14,6 +14,11 @@ public class AutonomousTrajectories {
     private Trajectory barrelRacingAutoNavPartOne;
     private Trajectory barrelRacingAutoNavPartTwo;
 
+    private Trajectory bouncePathPartOne;
+    private Trajectory bouncePathPartTwo;
+    private Trajectory bouncePathPartThree;
+    private Trajectory bouncePathPartFour;
+
     public AutonomousTrajectories(TrajectoryConstraint[] trajectoryConstraints) throws IOException {
         TrajectoryConstraint[] slowConstraints = Arrays.copyOf(trajectoryConstraints, trajectoryConstraints.length + 1);
         slowConstraints[slowConstraints.length - 1] = new MaxVelocityConstraint(6.0 * 12.0);
@@ -42,6 +47,44 @@ public class AutonomousTrajectories {
             trajectoryConstraints, SAMPLE_DISTANCE
         );
 
+        bouncePathPartOne = new Trajectory(
+                new SimplePathBuilder(new Vector2(30,90),Rotation2.ZERO)
+                .lineTo(new Vector2(60,90))
+                .arcTo(new Vector2(90,120),new Vector2(60,120))
+                .lineTo(new Vector2(90,125.38))
+                .build(),
+                trajectoryConstraints,SAMPLE_DISTANCE
+        );
+
+        bouncePathPartTwo = new Trajectory(
+                new SimplePathBuilder(new Vector2(90,125.38),Rotation2.ZERO)
+                .lineTo(new Vector2(122.34,48.38))
+                .arcTo(new Vector2(150,30),new Vector2(15,60))
+                .arcTo(new Vector2(180,60),new Vector2(15,60))
+                .lineTo(new Vector2(180,125.38))
+                .build(),
+                trajectoryConstraints,SAMPLE_DISTANCE
+        );
+
+        bouncePathPartThree = new Trajectory(
+                new SimplePathBuilder(new Vector2(180,125.38),Rotation2.ZERO)
+                .lineTo(new Vector2(180,67.04))
+                .arcTo(new Vector2(225,22.04),new Vector2(225,67.04))
+                .arcTo(new Vector2(270,67.04), new Vector2(225,67.04))
+                .lineTo(new Vector2(270,125.38))
+                .build(),
+                trajectoryConstraints,SAMPLE_DISTANCE
+        );
+
+        bouncePathPartFour = new Trajectory(
+                new SimplePathBuilder(new Vector2(270,125.38),Rotation2.ZERO)
+                .lineTo(new Vector2(270,120))
+                .arcTo(new Vector2(300,90), new Vector2(300,120))
+                .lineTo(new Vector2(330,90))
+                .build(),
+                trajectoryConstraints,SAMPLE_DISTANCE
+        );
+
     }
 
     public Trajectory getBarrelRacingAutoNavPartOne(){
@@ -50,5 +93,21 @@ public class AutonomousTrajectories {
 
     public Trajectory getBarrelRacingAutoNavPartTwo(){
         return barrelRacingAutoNavPartTwo;
+    }
+
+    public Trajectory getBouncePathPartOne() {
+        return bouncePathPartOne;
+    }
+
+    public Trajectory getBouncePathPartTwo() {
+        return bouncePathPartTwo;
+    }
+
+    public Trajectory getBouncePathPartThree() {
+        return bouncePathPartThree;
+    }
+
+    public Trajectory getBouncePathPartFour() {
+        return bouncePathPartFour;
     }
 }

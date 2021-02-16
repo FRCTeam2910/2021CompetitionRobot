@@ -23,6 +23,7 @@ public class AutonomousChooser {
 
         autonomousModeChooser = new SendableChooser<>();
         autonomousModeChooser.addOption("Barrel Racing - AutoNav",AutonomousMode.BARREL_RACING_AUTO_NAV);
+        autonomousModeChooser.addOption("Bounce Path (7'' markers)",AutonomousMode.BOUNCE_PATH);
         autoTab.add("Mode", autonomousModeChooser)
         .withSize(3, 1);
     }
@@ -37,7 +38,19 @@ public class AutonomousChooser {
         //Reset robot pose
         resetRobotPose(command, container, trajectories.getBarrelRacingAutoNavPartOne());
         //Set the auto path
-        follow(command,container, trajectories.getBarrelRacingAutoNavPartTwo());
+        simpleFollow(command,container, trajectories.getBarrelRacingAutoNavPartTwo());
+
+        return command;
+    }
+
+    public Command getBouncePathCommand(RobotContainer container){
+        SequentialCommandGroup command = new SequentialCommandGroup();
+
+        resetRobotPose(command,container,trajectories.getBouncePathPartOne());
+
+        simpleFollow(command,container,trajectories.getBouncePathPartTwo());
+        simpleFollow(command,container,trajectories.getBouncePathPartThree());
+        simpleFollow(command,container,trajectories.getBouncePathPartFour());
 
         return command;
     }
@@ -46,6 +59,8 @@ public class AutonomousChooser {
         switch (autonomousModeChooser.getSelected()) {
             case BARREL_RACING_AUTO_NAV:
                 return getBarrelRacingAutoNavCommand(container);
+            case BOUNCE_PATH:
+                return getBouncePathCommand(container);
         }
 
         return getBarrelRacingAutoNavCommand(container);//default command
@@ -90,7 +105,12 @@ public class AutonomousChooser {
                 new RigidTransform2(trajectory.calculate(0.0).getPathState().getPosition(), Rotation2.ZERO))));
     }
 
+    private void simpleFollow(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory){
+        command.addCommands(new FollowTrajectoryCommand(container.getDrivetrainSubsystem(),trajectory));
+    }
+
     private enum AutonomousMode {
-        BARREL_RACING_AUTO_NAV
+        BARREL_RACING_AUTO_NAV,
+        BOUNCE_PATH
     }
 }
