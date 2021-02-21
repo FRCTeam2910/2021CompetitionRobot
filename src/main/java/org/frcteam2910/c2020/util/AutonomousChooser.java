@@ -22,8 +22,9 @@ public class AutonomousChooser {
         ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous settings");
 
         autonomousModeChooser = new SendableChooser<>();
-        autonomousModeChooser.addOption("Barrel Racing - AutoNav",AutonomousMode.BARREL_RACING_AUTO_NAV);
-        autonomousModeChooser.addOption("Bounce Path (7'' markers)",AutonomousMode.BOUNCE_PATH);
+        autonomousModeChooser.addOption("Barrel Racing",AutonomousMode.BARREL_RACING);
+        autonomousModeChooser.addOption("Bounce Path",AutonomousMode.BOUNCE_PATH);
+        autonomousModeChooser.addOption("Slalom Path", AutonomousMode.SLALOM);
         autoTab.add("Mode", autonomousModeChooser)
         .withSize(3, 1);
     }
@@ -35,10 +36,10 @@ public class AutonomousChooser {
     public Command getBarrelRacingAutoNavCommand(RobotContainer container){
         SequentialCommandGroup command = new SequentialCommandGroup();
 
-        //Reset robot pose
-        resetRobotPose(command, container, trajectories.getBarrelRacingAutoNavPartOne());
-        //Set the auto path
-        simpleFollow(command,container, trajectories.getBarrelRacingAutoNavPartTwo());
+        //Reset robot pos
+        resetRobotPose(command,container,trajectories.getBarrelRacingMK2Part1());
+        //Follow the rest of the path
+        simpleFollow(command,container,trajectories.getBarrelRacingMk2Part2());
 
         return command;
     }
@@ -53,6 +54,7 @@ public class AutonomousChooser {
         simpleFollow(command,container,trajectories.getBouncePathPartTwo());
         simpleFollow(command,container,trajectories.getBouncePathPartThree());
         simpleFollow(command,container,trajectories.getBouncePathPartFour());
+        simpleFollow(command,container,trajectories.getBouncePathPartFive());
 
         return command;
     }
@@ -70,7 +72,7 @@ public class AutonomousChooser {
 
     public Command getCommand(RobotContainer container) {
         switch (autonomousModeChooser.getSelected()) {
-            case BARREL_RACING_AUTO_NAV:
+            case BARREL_RACING:
                 return getBarrelRacingAutoNavCommand(container);
             case BOUNCE_PATH:
                 return getBouncePathCommand(container);
@@ -125,8 +127,8 @@ public class AutonomousChooser {
     }
 
     private enum AutonomousMode {
-        BARREL_RACING_AUTO_NAV,
+        BARREL_RACING,
         BOUNCE_PATH,
-        SLALOM
+        SLALOM,
     }
 }

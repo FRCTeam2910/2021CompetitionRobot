@@ -44,12 +44,12 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public static final DrivetrainFeedforwardConstants FEEDFORWARD_CONSTANTS = new DrivetrainFeedforwardConstants(
             0.0584,
-            0.00519,
+            0.00519,//0.00519
             0.665
     );
 
-    private static final double GEAR_REDUCTION = 190.0 / 27.0;
-    private static final double WHEEL_DIAMETER = 4.0;
+    private static final double GEAR_REDUCTION = (40*18*60) / (16*26*15);
+    private static final double WHEEL_DIAMETER = 4.1 * 0.94;//That second number is a fudge factor
     private static final PidConstants MODULE_ANGLE_PID_CONSTANTS = new PidConstants(0.5, 0.0, 0.0001);
 
     public static final TrajectoryConstraint[] TRAJECTORY_CONSTRAINTS = {
