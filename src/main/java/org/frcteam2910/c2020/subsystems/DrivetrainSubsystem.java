@@ -48,8 +48,8 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             0.665
     );
 
-    private static final double GEAR_REDUCTION = (40*18*60) / (16*26*15);
-    private static final double WHEEL_DIAMETER = 4.1 * 0.94;//That second number is a fudge factor
+    private static final double GEAR_REDUCTION = (40.0*18.0*60.0) / (16.0*26.0*15.0);
+    private static final double WHEEL_DIAMETER = 3.854;
     private static final PidConstants MODULE_ANGLE_PID_CONSTANTS = new PidConstants(0.5, 0.0, 0.0001);
 
     public static final TrajectoryConstraint[] TRAJECTORY_CONSTRAINTS = {
