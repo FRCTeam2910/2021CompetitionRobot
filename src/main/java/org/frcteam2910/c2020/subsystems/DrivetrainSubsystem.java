@@ -144,6 +144,9 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final NetworkTableEntry odometryYEntry;
     private final NetworkTableEntry odometryAngleEntry;
 
+    private final NetworkTableEntry errorX;
+    private final NetworkTableEntry errorY;
+
     private final NetworkTableEntry[] moduleAngleEntries = new NetworkTableEntry[modules.length];
 
     public DrivetrainSubsystem() {
@@ -164,6 +167,15 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withPosition(0, 2)
                 .withSize(1, 1)
                 .getEntry();
+        errorX = tab.add("Error X",0.0)
+                .withPosition(1,3)
+                .withPosition(1,1)
+                .getEntry();
+        errorY = tab.add("Error Y",0.0)
+                .withPosition(1,4)
+                .withPosition(1,1)
+                .getEntry();
+
         tab.addNumber("Trajectory X", () -> {
             if (follower.getLastState() == null) {
                 return 0.0;
@@ -343,6 +355,11 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         odometryXEntry.setDouble(pose.translation.x);
         odometryYEntry.setDouble(pose.translation.y);
         odometryAngleEntry.setDouble(getPose().rotation.toDegrees());
+
+        if (follower.getLastState() != null) {
+            errorX.setDouble(follower.getLastState().getPathState().getPosition().x - pose.translation.x);
+            errorY.setDouble(follower.getLastState().getPathState().getPosition().y - pose.translation.y);
+        }
 
         for (int i = 0; i < modules.length; i++) {
             moduleAngleEntries[i].setDouble(Math.toDegrees(modules[i].getCurrentAngle()));

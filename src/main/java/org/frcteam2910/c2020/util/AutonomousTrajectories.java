@@ -34,10 +34,11 @@ public class AutonomousTrajectories {
         bouncePathConstraints[bouncePathConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
         bouncePathConstraints[bouncePathConstraints.length - 3] = new CentripetalAccelerationConstraint(5.0 * 12);
 
+
         TrajectoryConstraint[] slalomPathConstraints = Arrays.copyOf(trajectoryConstraints, trajectoryConstraints.length + 2);
-        slalomPathConstraints[slalomPathConstraints.length - 1] = new MaxVelocityConstraint(5.0 * 12.0);
-        slalomPathConstraints[slalomPathConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
-        slalomPathConstraints[slalomPathConstraints.length - 3] = new CentripetalAccelerationConstraint(5.0 * 12);
+        slalomPathConstraints[slalomPathConstraints.length - 1] = new MaxVelocityConstraint(17.0 * 12.0);//17
+        slalomPathConstraints[slalomPathConstraints.length - 2] = new MaxAccelerationConstraint(20.0 * 12.0);//20
+        slalomPathConstraints[slalomPathConstraints.length - 3] = new CentripetalAccelerationConstraint(15.0 * 12);//15
 
 
 
@@ -48,141 +49,105 @@ public class AutonomousTrajectories {
                 barrelRacingConstraints,SAMPLE_DISTANCE
         );
 
-        double xOffset = -18.0;
+        double xOffsetBarrel = -18.0;
 
         barrelRacingMk2Part2 = new Trajectory(
                 new SimplePathBuilder(new Vector2(43,90),Rotation2.ZERO)
-                        .lineTo(new Vector2(150 + xOffset,90))//linear line to circle 1
-                        .arcTo(new Vector2(175.98 + xOffset,45),new Vector2(150 + xOffset,60))//circle 1
-                        .arcTo(new Vector2(124.09 + xOffset,45),new Vector2(150 + xOffset,60))//circle 1
-                        .arcTo(new Vector2(150 + xOffset,90),new Vector2(150 + xOffset,60))//circle 1
-                        .lineTo(new Vector2(231.02 + xOffset,82.37))//line to circle 2
-                        .arcTo(new Vector2(270.76 + xOffset,142.80),new Vector2(240 + xOffset,120))//circle 2
-                        .arcTo(new Vector2(205.06 + xOffset,135.69), new Vector2(240 + xOffset,120))//circle 2
-                        .arcTo(new Vector2(211.99 + xOffset,93.86), new Vector2(240 + xOffset,120))//circle 2
-                        .lineTo(new Vector2(264.11 + xOffset,39.33))//linear line to circle 3
-                        .arcTo(new Vector2(326.30 + xOffset,60), new Vector2(291.92 + xOffset,60))//circle 3
-                        .arcTo(new Vector2(291.92 + xOffset,94.38), new Vector2(291.92 + xOffset,60))//circle 3
+                        .lineTo(new Vector2(150 + xOffsetBarrel,90))//linear line to circle 1
+                        .arcTo(new Vector2(175.98 + xOffsetBarrel,45),new Vector2(150 + xOffsetBarrel,60))//circle 1
+                        .arcTo(new Vector2(124.09 + xOffsetBarrel,45),new Vector2(150 + xOffsetBarrel,60))//circle 1
+                        .arcTo(new Vector2(150 + xOffsetBarrel,90),new Vector2(150 + xOffsetBarrel,60))//circle 1
+                        .lineTo(new Vector2(231.02 + xOffsetBarrel,82.37))//line to circle 2
+                        .arcTo(new Vector2(270.76 + xOffsetBarrel,142.80),new Vector2(240 + xOffsetBarrel,120))//circle 2
+                        .arcTo(new Vector2(205.06 + xOffsetBarrel,135.69), new Vector2(240 + xOffsetBarrel,120))//circle 2
+                        .arcTo(new Vector2(211.99 + xOffsetBarrel,93.86), new Vector2(240 + xOffsetBarrel,120))//circle 2
+                        .lineTo(new Vector2(264.11 + xOffsetBarrel,39.33))//linear line to circle 3
+                        .arcTo(new Vector2(326.30 + xOffsetBarrel,60), new Vector2(291.92 + xOffsetBarrel,60))//circle 3
+                        .arcTo(new Vector2(291.92 + xOffsetBarrel,94.38), new Vector2(291.92 + xOffsetBarrel,60))//circle 3
                         .lineTo(new Vector2(-24,110))//back home
                         .build(),
                 barrelRacingConstraints,SAMPLE_DISTANCE
         );
 
-
-//        barrelRacingMk2Part2 = new Trajectory(
-//                new SimplePathBuilder(new Vector2(43,90),Rotation2.ZERO)
-//                .lineTo(new Vector2(146.22,99.82))//linear line to circle 1
-//                .arcTo(new Vector2(180.64,40),new Vector2(150,60))//circle 1
-//                .arcTo(new Vector2(115.36,40),new Vector2(150,60))//circle 1
-//                .arcTo(new Vector2(159.68,98.81),new Vector2(150,60))//circle 1
-//                .lineTo(new Vector2(230.91,81.17))//line to circle 2
-//                .arcTo(new Vector2(272.03,143.73),new Vector2(240,120))//circle 2
-//                .arcTo(new Vector2(203.63,136.34), new Vector2(240,120))//circle 2
-//                .arcTo(new Vector2(210.86,92.78), new Vector2(240,120))//circle 2
-//                .lineTo(new Vector2(262.35,37.57))//linear line to circle 3
-//                .arcTo(new Vector2(328.84,60), new Vector2(291.92,60))//circle 3
-//                .arcTo(new Vector2(291.92,96.91), new Vector2(291.92,60))//circle 3
-//                .lineTo(new Vector2(-24,102))//back home
-//                .build(),
-//                barrelRacingConstraints,SAMPLE_DISTANCE
-//        );
-
+        double xOffsetBounce = 0.0;
+        double yOffsetBounce = 0.0;
 
         bouncePathPartOne = new Trajectory(
-                new SimplePathBuilder(new Vector2(30,90),Rotation2.ZERO)
-                .lineTo(new Vector2(30.25,90))//do the strange path thing
+                new SimplePathBuilder(new Vector2(48,90),Rotation2.ZERO)
+                .lineTo(new Vector2(48.25,90))//do the strange path thing
                 .build(),
                 bouncePathConstraints,SAMPLE_DISTANCE
         );
 
         bouncePathPartTwo = new Trajectory(//first ball
-                new SimplePathBuilder(new Vector2(30.25,90),Rotation2.ZERO)
+                new SimplePathBuilder(new Vector2(48.25,90),Rotation2.ZERO)
                 .lineTo(new Vector2(60,90))
                 .arcTo(new Vector2(90,120),new Vector2(60,120))//arc to the ball
-                .lineTo(new Vector2(90,137.38))//touches the 7 inch thing
+                .lineTo(new Vector2(90,125.38 + 12.0))//touches the 7 inch thing
                 .build(),
                 bouncePathConstraints,SAMPLE_DISTANCE
         );
 
         bouncePathPartThree = new Trajectory(//second ball
-                new SimplePathBuilder(new Vector2(90,137.38),Rotation2.ZERO)
-                .lineTo(new Vector2(102.34,60.38))//go down from ball 1
-                .arcTo(new Vector2(132,42), new Vector2(132,72))//arc to ball 2
-                .arcTo(new Vector2(172,72), new Vector2(132,72))//arc to ball 2
-                .lineTo(new Vector2(172,155.38))//travel upwards to ball 2
+                new SimplePathBuilder(new Vector2(90,125.38 + 12.0),Rotation2.ZERO)
+                .lineTo(new Vector2(122.34 + xOffsetBounce,48.38 + yOffsetBounce))//go down from ball 1
+                .arcTo(new Vector2(150 + xOffsetBounce,30 + yOffsetBounce), new Vector2(150 + xOffsetBounce,60 + yOffsetBounce))//arc to ball 2
+                .arcTo(new Vector2(180 + xOffsetBounce,60 + yOffsetBounce), new Vector2(150 + xOffsetBounce,60 + yOffsetBounce))//arc to ball 2
+                .lineTo(new Vector2(180 + xOffsetBounce,125.38 + 18.0))//travel upwards to ball 2
                 .build(),
                 bouncePathConstraints,SAMPLE_DISTANCE
         );
 
         bouncePathPartFour = new Trajectory(//third ball
-                new SimplePathBuilder(new Vector2(172,155.38),Rotation2.ZERO)
-                .lineTo(new Vector2(172,103.04))//travel down to postion the robot for arc to the third ball
-                .arcTo(new Vector2(255,58.04),new Vector2(225,103.04))//22.04 center y 67.04
-                .arcTo(new Vector2(270,103.04),new Vector2(225,103.04))//67.04 center y67.04
-                .lineTo(new Vector2(270,161.38))
+                new SimplePathBuilder(new Vector2(180 + xOffsetBounce,125.38 + 18.0),Rotation2.ZERO)
+                .lineTo(new Vector2(180 + xOffsetBounce,67.04))//travel down to postion the robot for arc to the third ball
+                .arcTo(new Vector2(255 + xOffsetBounce,22.04),new Vector2(225 + xOffsetBounce,67.04))//22.04 center y 67.04
+                .arcTo(new Vector2(270 + xOffsetBounce,67.04),new Vector2(225 + xOffsetBounce,67.04))//67.04 center y67.04
+                .lineTo(new Vector2(270 + xOffsetBounce,125.38 + 48.0))
                 .build(),
                 bouncePathConstraints,SAMPLE_DISTANCE
         );
 
         bouncePathPartFive = new Trajectory(//home
-                new SimplePathBuilder(new Vector2(197,125.38),Rotation2.ZERO)
-                .lineTo(new Vector2(252,120))
-                .arcTo(new Vector2(270,102),new Vector2(300,132))
-                .lineTo(new Vector2(300,9102))
+                new SimplePathBuilder(new Vector2(270 + xOffsetBounce,125.38 + 48.0),Rotation2.ZERO)
+                .lineTo(new Vector2(270 + xOffsetBounce,120 + 24))
+                .arcTo(new Vector2(300 + xOffsetBounce,90),new Vector2(300,120))
+                .lineTo(new Vector2(330 + xOffsetBounce,90))
                 .build(),
                 bouncePathConstraints,SAMPLE_DISTANCE
         );
 
+        double yOffsetSlalom = 0;
+        double xOffsetSlalom = -18;
+
         slalomPathPartOne = new Trajectory(
-                new SimplePathBuilder(new Vector2(30,30),Rotation2.ZERO)
-                .lineTo(new Vector2(30.25,30))
+                new SimplePathBuilder(new Vector2(40,30),Rotation2.ZERO)
+                .lineTo(new Vector2(40.25,30))
                 .build(),
                 slalomPathConstraints,SAMPLE_DISTANCE
         );
 
         slalomPathPartTwo = new Trajectory(
-                new SimplePathBuilder(new Vector2(30.25,30),Rotation2.ZERO)
-                .lineTo(new Vector2(60,30))
-                .arcTo(new Vector2(90,60),new Vector2(60,60))
-                .arcTo(new Vector2(120,90),new Vector2(120,60))
-                .lineTo(new Vector2(240,90))
-                .arcTo(new Vector2(270,60), new Vector2(240,60))
-                .arcTo(new Vector2(315,34.02),new Vector2(300,60))
-                .arcTo(new Vector2(315,85.98),new Vector2(300,60))
-                .arcTo(new Vector2(270,60), new Vector2(300,60))
-                .arcTo(new Vector2(240,30), new Vector2(240,60))
-                .lineTo(new Vector2(120,30))
-                .arcTo(new Vector2(90,60), new Vector2(120,60))
-                .arcTo(new Vector2(60,90), new Vector2(60,60))
-                .lineTo(new Vector2(30,90))
+                new SimplePathBuilder(new Vector2(40.25,30),Rotation2.ZERO)
+                .lineTo(new Vector2(60 - 10,30))//exit starting zone
+                .arcTo(new Vector2(90 - 10,60),new Vector2(60 - 10,60))//arc left
+                .arcTo(new Vector2(120 - 10,90),new Vector2(120 - 10,60))//arc right
+                .lineTo(new Vector2(250 + xOffsetSlalom,90))//go forwards
+                .arcTo(new Vector2(278.87 + xOffsetSlalom,60), new Vector2(240 + xOffsetSlalom,60))//arc down
+                .arcTo(new Vector2(310.56 + xOffsetSlalom,41.70),new Vector2(300 + xOffsetSlalom,60))////circle 1
+                .arcTo(new Vector2(310.56 + xOffsetSlalom,78.29),new Vector2(300 + xOffsetSlalom,60))//circle 1
+                .arcTo(new Vector2(278.87 + xOffsetSlalom,60), new Vector2(300 + xOffsetSlalom,60))//circle 1
+                .arcTo(new Vector2(250 + xOffsetSlalom,30), new Vector2(240 + xOffsetSlalom,60))//circle 1
+                .lineTo(new Vector2(120 + xOffsetSlalom + 6,30))//go forwards to home
+
+                .arcTo(new Vector2(90 + xOffsetSlalom + 6,60),new Vector2(120 + xOffsetSlalom + 6,60))
+
+                .lineTo(new Vector2(90 + xOffsetSlalom + 6,72))
+                .arcTo(new Vector2(68.37 + xOffsetSlalom + 6,93.63),new Vector2(68.37 + xOffsetSlalom + 6,72))
+                .lineTo(new Vector2(30 + xOffsetSlalom - 6,90 + 6))
                 .build(),
                 slalomPathConstraints,SAMPLE_DISTANCE
         );
-
-//        slalomPathPartOne = new Trajectory(
-//                new SimplePathBuilder(new Vector2(30,30),Rotation2.ZERO)
-//                .lineTo(new Vector2(60,30))
-//                .build(),
-//                trajectoryConstraints,SAMPLE_DISTANCE
-//        );
-//
-//        slalomPathPartTwo = new Trajectory(
-//                new SimplePathBuilder(new Vector2(60,30),Rotation2.ZERO)
-//                .arcTo(new Vector2(90,60),new Vector2(60,60))
-//                .arcTo(new Vector2(120,90),new Vector2(120,60))
-//                .lineTo(new Vector2(240,90))
-//                .arcTo(new Vector2(270,60),new Vector2(240,60))
-//                .arcTo(new Vector2(315,34.02),new Vector2(300,60))
-//                .arcTo(new Vector2(315,85.98),new Vector2(300,60))
-//                .arcTo(new Vector2(270,60),new Vector2(300,60))
-//                .arcTo(new Vector2(240,30),new Vector2(240,60))
-//                .lineTo(new Vector2(120,30))
-//                .arcTo(new Vector2(90,60),new Vector2(120,60))
-//                .arcTo(new Vector2(60,90),new Vector2(60,60))
-//                .lineTo(new Vector2(30,90))
-//                .build(),
-//                trajectoryConstraints,SAMPLE_DISTANCE
-//        );
 
     }
 

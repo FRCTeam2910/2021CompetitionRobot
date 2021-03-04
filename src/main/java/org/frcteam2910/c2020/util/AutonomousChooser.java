@@ -54,7 +54,7 @@ public class AutonomousChooser {
         simpleFollow(command,container,trajectories.getBouncePathPartTwo());
         simpleFollow(command,container,trajectories.getBouncePathPartThree());
         simpleFollow(command,container,trajectories.getBouncePathPartFour());
-        //simpleFollow(command,container,trajectories.getBouncePathPartFive());
+        simpleFollow(command,container,trajectories.getBouncePathPartFive());
 
         return command;
     }
