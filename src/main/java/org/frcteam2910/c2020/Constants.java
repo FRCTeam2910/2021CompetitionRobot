@@ -54,9 +54,9 @@ public class Constants {
     public static final int FEEDER_IS_FULL_SENSOR_PORT = 0;
     public static final int FEEDER_INTAKE_BALL_SENSOR_PORT = 1;
 
-    private static final double DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET_COMPETITION = -Math.toRadians(68.0);//68.2
+    private static final double DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET_COMPETITION = -Math.toRadians(21.9);//68.2
     private static final double DRIVETRAIN_FRONT_RIGHT_ENCODER_OFFSET_COMPETITION = -Math.toRadians(167.7);//51.8
-    private static final double DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET_COMPETITION = -Math.toRadians(148.1);
+    private static final double DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET_COMPETITION = -Math.toRadians(147.1);
     private static final double DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET_COMPETITION = -Math.toRadians(200.9);//200.25
     private static final double SHOOTER_HOOD_MIN_ANGLE_COMPETITION = Math.toRadians(26.90);
     private static final double SHOOTER_HOOD_MAX_ANGLE_COMPETITION = Math.toRadians(64.54);
