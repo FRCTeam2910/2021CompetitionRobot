@@ -1,40 +1,52 @@
 package org.frcteam2910.c2020.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.common.robot.UpdateManager;
 
-import static org.frcteam2910.c2020.Constants.INTAKE_EXTENSION_SOLENOID;
-import static org.frcteam2910.c2020.Constants.INTAKE_MOTOR;
 
 public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
-    private TalonFX motor = new TalonFX(INTAKE_MOTOR);
-    private Solenoid extensionSolenoid = new Solenoid(INTAKE_EXTENSION_SOLENOID);
+    private TalonFX left_intake_motor = new TalonFX(Constants.LEFT_INTAKE_MOTOR_PORT);
+    private TalonFX right_intake_motor = new TalonFX(Constants.RIGHT_INTAKE_MOTOR_PORT);
+    private Solenoid extensionTopSolenoid = new Solenoid(Constants.TOP_INTAKE_EXTENSION_SOLENOID);
+    private Solenoid extensionBottomSolenoid = new Solenoid(Constants.BOTTOM_INTAKE_EXTENSION_SOLENOID);
 
     private final Object stateLock = new Object();
     @GuardedBy("stateLock")
     private double motorOutput = 0.0;
     @GuardedBy("stateLock")
-    private boolean extended = false;
+    private boolean topExtended = false;
+    @GuardedBy("stateLock")
+    private boolean bottomExtended = false;
 
-    private final NetworkTableEntry motorSpeedEntry;
+    private final NetworkTableEntry leftMotorSpeedEntry;
+    private final NetworkTableEntry rightMotorSpeedEntry;
     private final NetworkTableEntry isExtendedEntry;
 
     public IntakeSubsystem() {
-        motor.setInverted(true);
+        right_intake_motor.follow(left_intake_motor);
+        right_intake_motor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
+        right_intake_motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
+
+        left_intake_motor.setInverted(true);
 
         ShuffleboardTab tab = Shuffleboard.getTab("Intake");
-        motorSpeedEntry = tab.add("Motor Speed", 0.0)
+        leftMotorSpeedEntry = tab.add("Left Motor Speed", 0.0)
                 .withPosition(0, 0)
                 .withSize(1, 1)
+                .getEntry();
+        rightMotorSpeedEntry = tab.add("Right Motor Speed",0.0)
+                .withPosition(1,0)
+                .withSize(1,1)
                 .getEntry();
         isExtendedEntry = tab.add("Is Extended", false)
                 .withPosition(0, 1)
@@ -45,27 +57,34 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
     @Override
     public void update(double time, double dt) {
         double localMotorOutput;
-        boolean localExtended;
+        boolean localTopExtended;
+        boolean localBottomExtended;
         synchronized (stateLock) {
             localMotorOutput = motorOutput;
-            localExtended = extended;
+            localTopExtended = topExtended;
+            localBottomExtended = bottomExtended;
         }
 
-        motor.set(ControlMode.PercentOutput, localMotorOutput);
-        if (localExtended != extensionSolenoid.get()) {
-            extensionSolenoid.set(localExtended);
+        left_intake_motor.set(ControlMode.PercentOutput, localMotorOutput);
+//        right_intake_motor.set(ControlMode.PercentOutput,localMotorOutput);
+        if (localTopExtended != extensionTopSolenoid.get()) {
+            extensionTopSolenoid.set(localTopExtended);
+        }
+//        if(localBottomExtended != extensionBottomSolenoid.get()){
+            extensionBottomSolenoid.set(localBottomExtended);
+//        }
+
+    }
+
+    public boolean isTopExtended() {
+        synchronized (stateLock) {
+            return topExtended;
         }
     }
 
-    public boolean isExtended() {
+    public void setTopExtended(boolean topExtended) {
         synchronized (stateLock) {
-            return extended;
-        }
-    }
-
-    public void setExtended(boolean extended) {
-        synchronized (stateLock) {
-            this.extended = extended;
+            this.topExtended = topExtended;
         }
     }
 
@@ -75,15 +94,28 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
-    public double getMotorOutput() {
+    public double getLeftMotorOutput() {
         synchronized (stateLock) {
-            return motor.getMotorOutputPercent();
+            return left_intake_motor.getMotorOutputPercent();
+        }
+    }
+
+    public double getRightMotorOutput(){
+        synchronized (stateLock){
+            return right_intake_motor.getMotorOutputPercent();
+        }
+    }
+
+    public void setBottomExtended(boolean extended){
+        synchronized (stateLock){
+            bottomExtended = extended;
         }
     }
 
     @Override
     public void periodic() {
-        motorSpeedEntry.setDouble(getMotorOutput());
-        isExtendedEntry.setBoolean(isExtended());
+        leftMotorSpeedEntry.setDouble(getLeftMotorOutput());
+        rightMotorSpeedEntry.setDouble(getRightMotorOutput());
+        isExtendedEntry.setBoolean(isTopExtended());
     }
 }

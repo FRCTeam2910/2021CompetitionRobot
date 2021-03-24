@@ -133,7 +133,7 @@ public class AutonomousChooser {
     }
 
     private void followAndIntake(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {
-        command.addCommands(new InstantCommand(() -> container.getIntakeSubsystem().setExtended(true)));
+        command.addCommands(new InstantCommand(() -> container.getIntakeSubsystem().setTopExtended(true)));
         command.addCommands(
                 new FollowTrajectoryCommand(container.getDrivetrainSubsystem(), trajectory)
                         .deadlineWith(
@@ -143,7 +143,7 @@ public class AutonomousChooser {
                                                         .alongWith(
                                                                 new FeederIntakeWhenNotFullCommand(container.getFeederSubsystem(), 1.0)
                                                         ))));
-        command.addCommands(new InstantCommand(() -> container.getIntakeSubsystem().setExtended(false)));
+        command.addCommands(new InstantCommand(() -> container.getIntakeSubsystem().setTopExtended(false)));
     }
 
     private void resetRobotPose(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {

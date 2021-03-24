@@ -13,7 +13,7 @@ import java.util.OptionalDouble;
 
 public class VisionSubsystem implements Subsystem {
     private static final double TARGET_HEIGHT = 98.25;
-    private static final double LIMELIGHT_HEIGHT = 24.1;
+    private static final double LIMELIGHT_HEIGHT = 22.0;
 
     private static final double INNER_TARGET_RANGE_ANGLE = Math.toRadians(10.0); // "Theoretical": 18.0
     private static final double INNER_TARGET_DEPTH = 29.25;
@@ -24,7 +24,7 @@ public class VisionSubsystem implements Subsystem {
 
     private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(2.0);
 
-    private static final Limelight LIMELIGHT = new Limelight();
+    private static final Limelight LIMELIGHT = new Limelight("shooter");
     private final DrivetrainSubsystem drivetrain;
 
     private final NetworkTableEntry distanceToTargetEntry;

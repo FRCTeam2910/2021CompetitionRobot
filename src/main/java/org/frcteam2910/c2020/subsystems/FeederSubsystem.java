@@ -1,8 +1,10 @@
 package org.frcteam2910.c2020.subsystems;
 
+import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -12,9 +14,9 @@ import org.frcteam2910.common.robot.UpdateManager;
 
 public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
 
-    private TalonFX  motor  = new TalonFX(Constants.FEEDER_MOTOR_PORT);
-    private DigitalInput fullSensor = new DigitalInput(Constants.FEEDER_IS_FULL_SENSOR_PORT);
-    private DigitalInput intakeBallSensor = new DigitalInput(Constants.FEEDER_INTAKE_BALL_SENSOR_PORT);
+    private TalonFX motor  = new TalonFX(Constants.FEEDER_MOTOR_PORT);
+    private AnalogInput fullSensor = new AnalogInput(Constants.FEEDER_IS_FULL_SENSOR_PORT);
+    private AnalogInput intakeBallSensor = new AnalogInput(Constants.FEEDER_INTAKE_BALL_SENSOR_PORT);
 
     private final NetworkTableEntry fullEntry;
     private final NetworkTableEntry hasBallEntry;
@@ -22,6 +24,10 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public FeederSubsystem() {
         motor.setInverted(true);
+        motor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
+        motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0,255);
+
+
         ShuffleboardTab tab = Shuffleboard.getTab("Feeder");
         fullEntry = tab.add("Is feeder full", false)
                 .withPosition(0, 0)
@@ -42,7 +48,7 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     }
 
     public boolean isFull(){
-        return !fullSensor.get();
+        return fullSensor.getVoltage() < 0.1;
     }
 
     public boolean shouldAdvance(){
@@ -67,6 +73,13 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     }
 
     public boolean isBallAtIntake() {
-        return !intakeBallSensor.get();
+        return intakeBallSensor.getVoltage() < 0.1;
+    }
+
+    public boolean isFifthBallAtIntake(){
+        if(isFull() && isBallAtIntake()){
+            return true;
+        }
+        return false;
     }
 }

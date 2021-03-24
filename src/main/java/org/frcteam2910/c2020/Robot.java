@@ -3,6 +3,7 @@ package org.frcteam2910.c2020;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.frcteam2910.c2020.commands.CharacterizeFlywheelCommand;
 import org.frcteam2910.c2020.commands.TestModeShooterCommand;
 import org.frcteam2910.common.Logger;
 import org.frcteam2910.common.math.RigidTransform2;
@@ -34,8 +35,6 @@ public class Robot extends TimedRobot {
     private UpdateManager updateManager = new UpdateManager(
             robotContainer.getDrivetrainSubsystem(),
             robotContainer.getFeederSubsystem(),
-//            robotContainer.getWheelOfFortuneSubsystem(),
-//            robotContainer.getClimberSubsystem(),
             robotContainer.getIntakeSubsystem(),
             robotContainer.getShooterSubsystem()
     );
@@ -136,30 +135,32 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.DEFAULT);
+        //robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.DEFAULT);
         robotContainer.getDrivetrainSubsystem().resetPose(RigidTransform2.ZERO);
         robotContainer.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO);
 
-        robotContainer.getAutonomousCommand().schedule();
+        new CharacterizeFlywheelCommand(robotContainer.getShooterSubsystem()).schedule();
+
+        //robotContainer.getAutonomousCommand().schedule();
     }
 
     @Override
     public void testInit() {
-        new TestModeShooterCommand(robotContainer.getShooterSubsystem()).schedule();
+        //new TestModeShooterCommand(robotContainer.getShooterSubsystem()).schedule();
     }
 
     @Override
     public void testPeriodic() {
-        robotContainer.getShooterSubsystem().disableHood();
+        //robotContainer.getShooterSubsystem().disableHood();
     }
 
     @Override
     public void disabledPeriodic() {
-        robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.OFF);
+        //robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.OFF);
     }
 
     @Override
     public void teleopInit() {
-        robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.DEFAULT);
+        //robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.DEFAULT);
     }
 }

@@ -27,9 +27,12 @@ public class FeedBallsToShooterCommand extends CommandBase {
         addRequirements(feederSubsystem);
     }
 
+
+
     @Override
     public void initialize() {
         feederSubsystem.spinMotor(FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getFlywheelTargetVelocity())).value);
+        //feederSubsystem.spinMotor(1.0);
     }
 
     @Override
