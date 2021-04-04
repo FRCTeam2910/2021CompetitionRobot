@@ -11,15 +11,19 @@ import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 public class CharacterizeFlywheelCommand extends CommandBase {
     private final ShooterSubsystem shooter;
 
     private final NetworkTableEntry autoSpeedEntry =
-            NetworkTableInstance.getDefault().getEntry("/robot/autospeed");
+            NetworkTableInstance.getDefault().getEntry("/SmartDashboard/SysIdAutoSpeed");
     private final NetworkTableEntry telemetryEntry =
-            NetworkTableInstance.getDefault().getEntry("/robot/telemetry");
+            NetworkTableInstance.getDefault().getEntry("/SmartDashboard/SysIdTelemetry");
 
-    private final Number[] telemetryData = new Number[6];
+    private final List<Double> telemetry = new ArrayList<>();
 
     private double priorAutospeed = 0.0;
 
@@ -31,15 +35,15 @@ public class CharacterizeFlywheelCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        shooter.resetFlywheelPosition();
+        shooter.resetTopFlywheelPosition();
         NetworkTableInstance.getDefault().setUpdateRate(10.0e-3);
     }
 
     @Override
     public void execute() {
         double now = Timer.getFPGATimestamp();
-        double position = shooter.getFlywheelPosition();
-        double velocity = shooter.getFlywheelVelocity();
+        double position = shooter.getTopFlywheelPosition();
+        double velocity = shooter.getTopFlywheelVelocity();
 
         double battery = RobotController.getBatteryVoltage();
         double motorVoltage = battery * Math.abs(priorAutospeed);
@@ -49,18 +53,24 @@ public class CharacterizeFlywheelCommand extends CommandBase {
 
         shooter.setFlywheelOutput(autospeed);
 
-        telemetryData[0] = now;
-        telemetryData[1] = battery;
-        telemetryData[2] = autospeed;
-        telemetryData[3] = motorVoltage;
-        telemetryData[4] = position;
-        telemetryData[5] = velocity;
+        telemetry.add(now);
+        telemetry.add(autospeed * RobotController.getInputVoltage());
+        telemetry.add(position);
+        telemetry.add(velocity);
 
-        telemetryEntry.setNumberArray(telemetryData);
     }
 
     @Override
     public void end(boolean interrupted) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < telemetry.size(); ++i) {
+            if (i != 0)
+                b.append(", ");
+            b.append(telemetry.get(i));
+        }
+
+        telemetryEntry.setString(b.toString());
+
         shooter.stopFlywheel();
     }
 }

@@ -14,10 +14,10 @@ public class FeedBallsToShooterCommand extends CommandBase {
 
 
     static {
-        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4700.0), new InterpolatingDouble(1.0));
-        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5000.0), new InterpolatingDouble(0.7));
-        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5500.0), new InterpolatingDouble(0.5));
-        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5700.0), new InterpolatingDouble(0.4));
+        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4700.0), new InterpolatingDouble(0.3));
+        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5000.0), new InterpolatingDouble(0.3));
+        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5500.0), new InterpolatingDouble(0.3));
+        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5700.0), new InterpolatingDouble(0.3));
     }
 
     public FeedBallsToShooterCommand(FeederSubsystem feederSubsystem, ShooterSubsystem shooterSubsystem) {
@@ -30,8 +30,8 @@ public class FeedBallsToShooterCommand extends CommandBase {
 
 
     @Override
-    public void initialize() {
-        feederSubsystem.spinMotor(FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getFlywheelTargetVelocity())).value);
+    public void execute() {
+        feederSubsystem.spinMotor(FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getTopFlywheelTargetVelocity())).value);
         //feederSubsystem.spinMotor(1.0);
     }
 

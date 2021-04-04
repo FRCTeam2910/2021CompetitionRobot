@@ -13,12 +13,19 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
+import org.frcteam2910.c2020.Pigeon;
 import org.frcteam2910.c2020.Robot;
 import org.frcteam2910.c2020.RobotContainer;
 import org.frcteam2910.common.control.*;
@@ -31,15 +38,12 @@ import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.UpdateManager;
-import org.frcteam2910.common.robot.drivers.Mk2SwerveModuleBuilder;
 import org.frcteam2910.common.robot.drivers.Mk3SwerveModule;
-import org.frcteam2910.common.robot.drivers.NavX;
 import org.frcteam2910.common.util.DrivetrainFeedforwardConstants;
 import org.frcteam2910.common.util.HolonomicDriveSignal;
 import org.frcteam2910.common.util.InterpolatingDouble;
 import org.frcteam2910.common.util.InterpolatingTreeMap;
 import org.frcteam2910.common.util.HolonomicFeedforward;
-
 import java.util.Optional;
 
 
@@ -49,24 +53,30 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     public static final double STEER_GEAR_RATIO = 12.8;
     public static final double DRIVE_GEAR_RATIO = 6.86;
 
-    //TODO figure out new feedfoward cosntants
 
     public static final DrivetrainFeedforwardConstants FEEDFORWARD_CONSTANTS = new DrivetrainFeedforwardConstants(
-            0.0584,
-            0.00519,
-            0.665
+            0.060602,
+            0.0070246,
+            0.53955
     );
 
-    private static final double WHEEL_DIAMETER = 4.0;
+    private static final double WHEEL_DIAMETER = 3.8;
     private static final PidConstants MODULE_ANGLE_PID_CONSTANTS = new PidConstants(0.5, 0.0, 0.0001);
 
     public static final TrajectoryConstraint[] TRAJECTORY_CONSTRAINTS = {
             new FeedforwardConstraint(11.0, FEEDFORWARD_CONSTANTS.getVelocityConstant(), FEEDFORWARD_CONSTANTS.getAccelerationConstant(), false),
-            new MaxAccelerationConstraint(6.0 * 12.0),
-            new CentripetalAccelerationConstraint(20.0 * 12.0)
+            new MaxAccelerationConstraint(15.0 * 12.0),
+            new CentripetalAccelerationConstraint(15 * 12.0)
     };
 
     private static final int MAX_LATENCY_COMPENSATION_MAP_ENTRIES = 25;
+
+    private final double HEADING_TO_HOLD = 0;
+
+    private boolean shouldHoldHeading = false;
+
+    private final PidConstants HOLD_HEADING_PID_CONSTANTS = new PidConstants(0.005,0,0.0);
+    private  PidController holdHeadingPIDController = new PidController(HOLD_HEADING_PID_CONSTANTS);
 
 
     private final HolonomicMotionProfiledTrajectoryFollower follower = new HolonomicMotionProfiledTrajectoryFollower(
@@ -82,11 +92,25 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             new Vector2(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0)        //back right
     );
 
+    private final SwerveDriveKinematics wpi_driveKinematics = new SwerveDriveKinematics(
+            new Translation2d(-TRACKWIDTH / 2.0,WHEELBASE / 2.0), //front left
+            new Translation2d(TRACKWIDTH / 2.0,WHEELBASE / 2.0), //front right
+            new Translation2d(-TRACKWIDTH / 2.0,-WHEELBASE / 2.0), // back left
+            new Translation2d(TRACKWIDTH / 2.0,-WHEELBASE / 2.0) // back right
+    );
+
+    @GuardedBy("kinematicsLock")
+    private final SwerveDriveOdometry wpi_driveOdometry = new SwerveDriveOdometry(wpi_driveKinematics, new Rotation2d());
+
+    private Pose2d wpi_pose = new Pose2d();
+
+
     private SwerveModule[] modules;
 
     private final Object sensorLock = new Object();
     @GuardedBy("sensorLock")
-    private Gyroscope gyroscope = new NavX(SerialPort.Port.kUSB);
+    private Gyroscope gyroscope = new Pigeon(Constants.PIGEON_PORT);
+
 
     private final Object kinematicsLock = new Object();
     @GuardedBy("kinematicsLock")
@@ -109,12 +133,19 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final NetworkTableEntry odometryYEntry;
     private final NetworkTableEntry odometryAngleEntry;
 
+    private final NetworkTableEntry wpiOdometryXEntry;
+    private final NetworkTableEntry wpiOdometryYEntry;
+
+
     private final NetworkTableEntry[] moduleAngleEntries;
 
     public DrivetrainSubsystem() {
         synchronized (sensorLock) {
-            gyroscope.setInverted(true);
+            gyroscope.setInverted(false);
         }
+
+        holdHeadingPIDController.setContinuous(true);
+        holdHeadingPIDController.setInputRange(0,360);
 
 
         TalonFX frontLeftDriveMotor = new TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR);
@@ -222,6 +253,10 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withPosition(1, 1)
                 .withSize(1, 1);
 
+        tab.addBoolean("Hold Heading", () -> shouldHoldHeading)
+        .withPosition(1,2)
+        .withSize(1,1);
+
         ShuffleboardLayout[] moduleLayouts = {
                 tab.getLayout("Front Left Module", BuiltInLayouts.kList),
                 tab.getLayout("Front Right Module", BuiltInLayouts.kList),
@@ -246,11 +281,28 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
             return signal.getRotation() * RobotController.getBatteryVoltage();
         });
+
+
+        wpiOdometryXEntry = tab.add("Wpi X",0.0)
+                .withPosition(0,3)
+                .withSize(1,1)
+                .getEntry();
+
+        wpiOdometryYEntry = tab.add("Wpi Y",0.0)
+                .withPosition(1,3)
+                .withSize(1,1)
+                .getEntry();
     }
 
     public RigidTransform2 getPose() {
         synchronized (kinematicsLock) {
             return pose;
+        }
+    }
+
+    public Pose2d getWpi_pose(){
+        synchronized (kinematicsLock){
+            return wpi_pose;
         }
     }
 
@@ -266,9 +318,16 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
-    public void drive(Vector2 translationalVelocity, double rotationalVelocity, boolean isFieldOriented) {
+    public void drive(Vector2 translationalVelocity, double rotationalVelocity, boolean isFieldOriented,boolean shouldHoldHeading) {
         synchronized (stateLock) {
+
+            if(shouldHoldHeading){
+                holdHeadingPIDController.setSetpoint(HEADING_TO_HOLD);
+                rotationalVelocity = holdHeadingPIDController.calculate(getPose().rotation.toDegrees(), 0.2);
+            }
+
             driveSignal = new HolonomicDriveSignal(translationalVelocity, rotationalVelocity, isFieldOriented);
+
         }
     }
 
@@ -276,6 +335,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         synchronized (kinematicsLock) {
             this.pose = pose;
             swerveOdometry.resetPose(pose);
+            wpi_driveOdometry.resetPosition(new Pose2d(pose.translation.x,pose.translation.y,new Rotation2d(pose.rotation.toRadians())),new Rotation2d());
         }
     }
 
@@ -289,11 +349,13 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private void updateOdometry(double time, double dt) {
         Vector2[] moduleVelocities = new Vector2[modules.length];
+        SwerveModuleState[] swerveModuleStates = new SwerveModuleState[modules.length];
         for (int i = 0; i < modules.length; i++) {
             var module = modules[i];
             module.updateSensors();
 
             moduleVelocities[i] = Vector2.fromAngle(Rotation2.fromRadians(module.getCurrentAngle())).scale(module.getCurrentVelocity());
+            swerveModuleStates[i] = new SwerveModuleState(module.getCurrentVelocity(),new Rotation2d(module.getCurrentAngle()));
         }
 
         Rotation2 angle;
@@ -306,6 +368,9 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         ChassisVelocity velocity = swerveKinematics.toChassisVelocity(moduleVelocities);
 
         synchronized (kinematicsLock) {
+
+            this.wpi_pose = wpi_driveOdometry.update(Rotation2d.fromDegrees(angle.toDegrees()),swerveModuleStates);
+
             this.pose = swerveOdometry.update(angle, dt, moduleVelocities);
             if (latencyCompensationMap.size() > MAX_LATENCY_COMPENSATION_MAP_ENTRIES) {
                 latencyCompensationMap.remove(latencyCompensationMap.firstKey());
@@ -385,6 +450,10 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         odometryYEntry.setDouble(pose.translation.y);
         odometryAngleEntry.setDouble(getPose().rotation.toDegrees());
 
+        Pose2d wpiPose = getWpi_pose();
+        wpiOdometryXEntry.setDouble(wpiPose.getTranslation().getX());
+        wpiOdometryYEntry.setDouble(wpiPose.getTranslation().getY());
+
         for (int i = 0; i < modules.length; i++) {
             moduleAngleEntries[i].setDouble(Math.toDegrees(modules[i].getCurrentAngle()));
         }
@@ -393,4 +462,11 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     public TrajectoryFollower<HolonomicDriveSignal> getFollower() {
         return follower;
     }
+
+
+    public void setShouldHoldHeading(){
+        shouldHoldHeading = !shouldHoldHeading;
+    }
+
+
 }

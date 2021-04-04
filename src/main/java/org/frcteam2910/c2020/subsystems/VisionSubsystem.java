@@ -20,7 +20,7 @@ public class VisionSubsystem implements Subsystem {
     // The distance from the inner target to the apex of the triangle we use to find the distance
     private static final double DISTANCE_FROM_INNER_TO_APEX = 16.92;
 
-    private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(34.0);
+    private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(29.0);
 
     private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(2.0);
 

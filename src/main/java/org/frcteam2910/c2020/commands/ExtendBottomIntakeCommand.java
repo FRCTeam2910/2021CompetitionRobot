@@ -1,6 +1,8 @@
 package org.frcteam2910.c2020.commands;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import org.frcteam2910.c2020.Robot;
 import org.frcteam2910.c2020.subsystems.IntakeSubsystem;
 
 public class ExtendBottomIntakeCommand extends CommandBase {
@@ -15,7 +17,12 @@ public class ExtendBottomIntakeCommand extends CommandBase {
 
     @Override
     public void execute() {
-        intake.setBottomExtended(true);
+        if (Robot.getInstance().isAutonomous()) {
+            intake.setBottomExtended(false);
+        }
+        else {
+            intake.setBottomExtended(true);
+        }
     }
 
     @Override

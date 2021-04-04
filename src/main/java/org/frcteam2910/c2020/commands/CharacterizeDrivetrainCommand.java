@@ -10,15 +10,19 @@ import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CharacterizeDrivetrainCommand extends CommandBase {
     private final DrivetrainSubsystem drivetrain;
 
     private final NetworkTableEntry autoSpeedEntry =
-            NetworkTableInstance.getDefault().getEntry("/robot/autospeed");
+            NetworkTableInstance.getDefault().getEntry("/SmartDashboard/SysIdAutoSpeed");
     private final NetworkTableEntry telemetryEntry =
-            NetworkTableInstance.getDefault().getEntry("/robot/telemetry");
+            NetworkTableInstance.getDefault().getEntry("/SmartDashboard/SysIdTelemetry");
 
-    private final Number[] telemetryData = new Number[6];
+    private List<Double> telemetryData = new ArrayList<>();
+
 
     private double priorAutospeed = 0.0;
 
@@ -48,20 +52,26 @@ public class CharacterizeDrivetrainCommand extends CommandBase {
         double autospeed = autoSpeedEntry.getDouble(0.0);
         priorAutospeed = autospeed;
 
-        drivetrain.drive(new Vector2(autospeed, 0.0), 0.0, false);
+        drivetrain.drive(new Vector2(autospeed, 0.0), 0.0, false,false);
 
-        telemetryData[0] = now;
-        telemetryData[1] = battery;
-        telemetryData[2] = autospeed;
-        telemetryData[3] = motorVoltage;
-        telemetryData[4] = position;
-        telemetryData[5] = velocity;
+        telemetryData.add(now);
+        telemetryData.add(autospeed * RobotController.getInputVoltage());
+        telemetryData.add(position);
+        telemetryData.add(velocity);
 
-        telemetryEntry.setNumberArray(telemetryData);
     }
 
     @Override
     public void end(boolean interrupted) {
-        drivetrain.drive(Vector2.ZERO, 0.0, false);
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < telemetryData.size(); ++i) {
+            if (i != 0)
+                b.append(", ");
+            b.append(telemetryData.get(i));
+        }
+
+        telemetryEntry.setString(b.toString());
+
+        drivetrain.drive(Vector2.ZERO, 0.0, false,false);
     }
 }

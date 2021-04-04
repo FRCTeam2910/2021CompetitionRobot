@@ -1,5 +1,6 @@
 package org.frcteam2910.c2020.subsystems;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
@@ -26,6 +27,8 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
         motor.setInverted(true);
         motor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
         motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0,255);
+
+        motor.setNeutralMode(NeutralMode.Brake);
 
 
         ShuffleboardTab tab = Shuffleboard.getTab("Feeder");

@@ -3,9 +3,12 @@ package org.frcteam2910.c2020;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.frcteam2910.c2020.commands.CharacterizeDrivetrainCommand;
 import org.frcteam2910.c2020.commands.CharacterizeFlywheelCommand;
+import org.frcteam2910.c2020.commands.HomeHoodMotorCommand;
 import org.frcteam2910.c2020.commands.TestModeShooterCommand;
 import org.frcteam2910.common.Logger;
+import org.frcteam2910.common.control.Trajectory;
 import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.robot.UpdateManager;
@@ -19,6 +22,8 @@ import java.util.Enumeration;
 import java.util.List;
 
 public class Robot extends TimedRobot {
+    private static Robot instance = null;
+
     private static final Logger LOGGER = new Logger(Robot.class);
 
     private static final byte[] COMPETITION_BOT_MAC_ADDRESS = new byte[]{
@@ -79,6 +84,14 @@ public class Robot extends TimedRobot {
         SmartDashboard.putBoolean("Competition Bot", competitionBot);
     }
 
+    public Robot() {
+        instance = this;
+    }
+
+    public static Robot getInstance() {
+        return instance;
+    }
+
     public static boolean isCompetitionBot() {
         return competitionBot;
     }
@@ -130,18 +143,54 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        CommandScheduler.getInstance().run();
+        double distFromARedAngle = robotContainer.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(180).inverse()).toRadians();
+        double distFromABlueAngle = robotContainer.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(90).inverse()).toRadians();
+        double distFromBRedAngle = robotContainer.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(45).inverse()).toRadians();
+        double distFromBBlueAngle = robotContainer.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(-45).inverse()).toRadians();
+
+        if(distFromARedAngle > Math.PI){
+            distFromARedAngle = 360 - distFromARedAngle;
+        }
+        if(distFromABlueAngle > Math.PI){
+            distFromABlueAngle = 360 - distFromABlueAngle;
+        }
+        if(distFromBRedAngle > Math.PI){
+            distFromBRedAngle = 360 - distFromBRedAngle;
+        }
+        if(distFromBBlueAngle > Math.PI){
+            distFromBBlueAngle = 360 - distFromBBlueAngle;
+        }
+
+        double smallestDist = Math.min(distFromARedAngle,Math.min(distFromABlueAngle,Math.min(distFromBBlueAngle,distFromBRedAngle)));
+
+        Trajectory trajectory = null;
+
+        if(distFromARedAngle == smallestDist){
+            SmartDashboard.putString("Autonomous settings","Path A Red");
+        }
+        else if(distFromABlueAngle == smallestDist){
+            SmartDashboard.putString("Autonomous settings","Path A Blue");
+        }
+        else if(distFromBRedAngle == smallestDist){
+            SmartDashboard.putString("Autonomous settings","Path B Red");
+        }
+        else if(distFromBBlueAngle == smallestDist){
+            SmartDashboard.putString("Autonomous settings","Path B Blue");
+        }
     }
 
     @Override
     public void autonomousInit() {
+        new HomeHoodMotorCommand(robotContainer.getShooterSubsystem()).schedule();
+
         //robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.DEFAULT);
         robotContainer.getDrivetrainSubsystem().resetPose(RigidTransform2.ZERO);
-        robotContainer.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO);
+        //robotContainer.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO);
 
-        new CharacterizeFlywheelCommand(robotContainer.getShooterSubsystem()).schedule();
+        //new CharacterizeFlywheelCommand(robotContainer.getShooterSubsystem()).schedule();
+        //new CharacterizeDrivetrainCommand(robotContainer.getDrivetrainSubsystem()).schedule();
 
-        //robotContainer.getAutonomousCommand().schedule();
+        robotContainer.getAutonomousCommand().schedule();
     }
 
     @Override
@@ -161,6 +210,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        //robotContainer.getVisionSubsystem().setLedMode(Limelight.LedMode.DEFAULT);
+        if(!robotContainer.getShooterSubsystem().isHoodHomed()){
+            new HomeHoodMotorCommand(robotContainer.getShooterSubsystem()).schedule();
+        }
     }
 }

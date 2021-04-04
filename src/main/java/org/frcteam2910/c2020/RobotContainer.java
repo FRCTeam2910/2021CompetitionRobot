@@ -42,14 +42,14 @@ public class RobotContainer {
 
         CommandScheduler.getInstance().registerSubsystem(drivetrainSubsystem);
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
-        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.7));
+        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 1.0));
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
         CommandScheduler.getInstance().registerSubsystem(shooterSubsystem);
         //CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new ManuallyAdjustShooterCommand(shooterSubsystem));
-        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new DefaultShooterCommand(shooterSubsystem, 6000, Constants.SHOOTER_HOOD_MAX_ANGLE));
+        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new DefaultShooterCommand(shooterSubsystem, 4000, Constants.SHOOTER_HOOD_MAX_ANGLE));
         CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem, new ExtendBottomIntakeCommand(intakeSubsystem));
         CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
-        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem,new HoldFifthBallCommand(feederSubsystem,intakeSubsystem));
+        //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem,new HoldFifthBallCommand(feederSubsystem,intakeSubsystem));
 
         configureButtonBindings();
     }
@@ -96,9 +96,17 @@ public class RobotContainer {
         );
         primaryController.getAButton().whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
 
-        primaryController.getBButton().whileHeld(new IntakeCommand(intakeSubsystem, feederSubsystem, -1.0, true));
+        primaryController.getBButton().whileHeld(new IntakeCommand(intakeSubsystem, feederSubsystem, -1, true));
+
+        //primaryController.getXButton().whileHeld(new TranslationalDriveCommand(drivetrainSubsystem,getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
+
+        primaryController.getXButton().toggleWhenPressed(new TranslationalDriveCommand(drivetrainSubsystem,getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
+
 //
-        //        primaryController.getAButton().whileHeld(new ManuallyAdjustShooterCommand(shooterSubsystem).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true))));
+        primaryController.getAButton().whileHeld(new ManuallyAdjustShooterCommand(shooterSubsystem).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true))));
+
+        primaryController.getYButton().whenPressed(new HomeHoodMotorCommand(shooterSubsystem));
+
 
         // Manual hood adjustment
 //        primaryController.getDPadButton(DPadButton.Direction.DOWN).whenPressed(
@@ -110,10 +118,10 @@ public class RobotContainer {
 //
 //        // Manual flywheel adjustment
 //        primaryController.getDPadButton(DPadButton.Direction.RIGHT).whenPressed(
-//                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getFlywheelTargetVelocity() + FLYWHEEL_MANUAL_ADJUST_INTERVAL)
+//                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getBottomFlywheelTargetVelocity() + FLYWHEEL_MANUAL_ADJUST_INTERVAL)
 //        );
 //        primaryController.getDPadButton(DPadButton.Direction.LEFT).whenPressed(
-//                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getFlywheelTargetVelocity() - FLYWHEEL_MANUAL_ADJUST_INTERVAL)
+//                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getBottomFlywheelTargetVelocity() - FLYWHEEL_MANUAL_ADJUST_INTERVAL)
 //        );
 //
 //        secondaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(
