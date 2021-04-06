@@ -143,6 +143,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        CommandScheduler.getInstance().run();
+
         double distFromARedAngle = robotContainer.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(180).inverse()).toRadians();
         double distFromABlueAngle = robotContainer.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(90).inverse()).toRadians();
         double distFromBRedAngle = robotContainer.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(45).inverse()).toRadians();
@@ -162,8 +164,6 @@ public class Robot extends TimedRobot {
         }
 
         double smallestDist = Math.min(distFromARedAngle,Math.min(distFromABlueAngle,Math.min(distFromBBlueAngle,distFromBRedAngle)));
-
-        Trajectory trajectory = null;
 
         if(distFromARedAngle == smallestDist){
             SmartDashboard.putString("Autonomous settings","Path A Red");

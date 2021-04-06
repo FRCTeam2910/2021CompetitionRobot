@@ -50,7 +50,8 @@ public class RobotContainer {
         CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem, new ExtendBottomIntakeCommand(intakeSubsystem));
         CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
         //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem,new HoldFifthBallCommand(feederSubsystem,intakeSubsystem));
-
+        CommandScheduler.getInstance().run();
+        CommandScheduler.getInstance().enable();
         configureButtonBindings();
     }
 
