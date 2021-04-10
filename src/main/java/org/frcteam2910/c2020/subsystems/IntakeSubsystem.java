@@ -30,7 +30,8 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private final NetworkTableEntry leftMotorSpeedEntry;
     private final NetworkTableEntry rightMotorSpeedEntry;
-    private final NetworkTableEntry isExtendedEntry;
+    private final NetworkTableEntry isTopExtendedEntry;
+    private final NetworkTableEntry isBottomExtendedEntry;
 
     public IntakeSubsystem() {
         right_intake_motor.follow(left_intake_motor);
@@ -48,8 +49,12 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withPosition(1,0)
                 .withSize(1,1)
                 .getEntry();
-        isExtendedEntry = tab.add("Is Extended", false)
+        isTopExtendedEntry = tab.add("Is Top Extended", false)
                 .withPosition(0, 1)
+                .withSize(1, 1)
+                .getEntry();
+        isBottomExtendedEntry = tab.add("Is Bottom Extended", false)
+                .withPosition(1, 1)
                 .withSize(1, 1)
                 .getEntry();
     }
@@ -112,10 +117,17 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
+    public boolean isBottomExtended(){
+        synchronized (stateLock){
+            return bottomExtended;
+        }
+    }
+
     @Override
     public void periodic() {
         leftMotorSpeedEntry.setDouble(getLeftMotorOutput());
         rightMotorSpeedEntry.setDouble(getRightMotorOutput());
-        isExtendedEntry.setBoolean(isTopExtended());
+        isTopExtendedEntry.setBoolean(isTopExtended());
+        isBottomExtendedEntry.setBoolean(isBottomExtended());
     }
 }

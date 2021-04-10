@@ -24,6 +24,20 @@ public class TargetWithShooterCommand extends CommandBase {
     private final XboxController primaryController;
 
     static {
+        //2d port
+//        SHOOTER_TUNING.put(new InterpolatingDouble(127.6),new Vector2(Math.toRadians(43.0),2979));
+//        SHOOTER_TUNING.put(new InterpolatingDouble(185.0),new Vector2(Math.toRadians(35.5),3228));
+//        SHOOTER_TUNING.put(new InterpolatingDouble(258.5),new Vector2(Math.toRadians(27.0),3774));
+//        SHOOTER_TUNING.put(new InterpolatingDouble(315.0),new Vector2(Math.toRadians(22.0),4469));
+
+
+
+        //power port
+//        SHOOTER_TUNING.put(new InterpolatingDouble(1.0),new Vector2(Math.toRadians(25.24),4400));
+//        SHOOTER_TUNING.put(new InterpolatingDouble(1000.0),new Vector2(Math.toRadians(25.24),4400));
+
+
+        //Good numbers for 3d port
         SHOOTER_TUNING.put(new InterpolatingDouble(86.0),new Vector2(Math.toRadians(52.19),2431));
         SHOOTER_TUNING.put(new InterpolatingDouble(124.25),new Vector2(Math.toRadians(43.3),2778.6));
         SHOOTER_TUNING.put(new InterpolatingDouble(152.0),new Vector2(Math.toRadians(37.7),3076));
@@ -36,15 +50,6 @@ public class TargetWithShooterCommand extends CommandBase {
         SHOOTER_TUNING.put(new InterpolatingDouble(409.0),new Vector2(Math.toRadians(17.2),5211.5));
         SHOOTER_TUNING.put(new InterpolatingDouble(491.0),new Vector2(Math.toRadians(15.2),5509.5));
 
-
-//        SHOOTER_TUNING.put(new InterpolatingDouble(88.39),new Vector2(Math.toRadians(52.69),2400));
-//        SHOOTER_TUNING.put(new InterpolatingDouble(125.7),new Vector2(Math.toRadians(42.67),2866));
-//        SHOOTER_TUNING.put(new InterpolatingDouble(154.0),new Vector2(Math.toRadians(35.65),3313));
-//        SHOOTER_TUNING.put(new InterpolatingDouble(193.37),new Vector2(Math.toRadians(32.12),3610));
-//        SHOOTER_TUNING.put(new InterpolatingDouble(232.6),new Vector2(Math.toRadians(27.1),4000));
-//        SHOOTER_TUNING.put(new InterpolatingDouble(284.0),new Vector2(Math.toRadians(24.5),4320));
-//        SHOOTER_TUNING.put(new InterpolatingDouble(331.5),new Vector2(Math.toRadians(21.41),4965));
-//        SHOOTER_TUNING.put(new InterpolatingDouble(455.0),new Vector2(Math.toRadians(17.4),6060));
 
     }
 

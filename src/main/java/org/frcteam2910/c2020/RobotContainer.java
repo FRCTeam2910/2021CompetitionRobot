@@ -40,6 +40,8 @@ public class RobotContainer {
         primaryController.getLeftXAxis().setInverted(true);
         primaryController.getRightXAxis().setInverted(true);
 
+
+
         CommandScheduler.getInstance().registerSubsystem(drivetrainSubsystem);
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
         CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 1.0));
@@ -50,8 +52,8 @@ public class RobotContainer {
         CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem, new ExtendBottomIntakeCommand(intakeSubsystem));
         CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
         //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem,new HoldFifthBallCommand(feederSubsystem,intakeSubsystem));
-        CommandScheduler.getInstance().run();
-        CommandScheduler.getInstance().enable();
+
+
         configureButtonBindings();
     }
 
@@ -65,6 +67,7 @@ public class RobotContainer {
 
 
         primaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setTopExtended(true));
+
         primaryController.getLeftBumperButton().whileHeld(
                 new SimpleIntakeCommand(intakeSubsystem, -1.0).withTimeout(0.25)
                         .andThen(new SimpleIntakeCommand(intakeSubsystem, 1.0)));
@@ -86,7 +89,9 @@ public class RobotContainer {
         //primaryController.getLeftTriggerAxis().getButton(0.5).whenReleased(new ReindexFeederCommand(feederSubsystem, -1.0).withTimeout(5.0));
 //
 //
+        //primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
         primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
+
         //primaryController.getRightBumperButton().whileHeld(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true)));
         primaryController.getRightBumperButton().whileHeld(
                 new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, primaryController).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true)))
@@ -116,7 +121,7 @@ public class RobotContainer {
 //        primaryController.getDPadButton(DPadButton.Direction.UP).whenPressed(
 //                () -> shooterSubsystem.setHoodTargetAngle(shooterSubsystem.getHoodTargetAngle().orElse(Constants.SHOOTER_HOOD_MAX_ANGLE) - HOOD_MANUAL_ADJUST_INTERVAL)
 //        );
-//
+
 //        // Manual flywheel adjustment
 //        primaryController.getDPadButton(DPadButton.Direction.RIGHT).whenPressed(
 //                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getBottomFlywheelTargetVelocity() + FLYWHEEL_MANUAL_ADJUST_INTERVAL)
@@ -124,7 +129,7 @@ public class RobotContainer {
 //        primaryController.getDPadButton(DPadButton.Direction.LEFT).whenPressed(
 //                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getBottomFlywheelTargetVelocity() - FLYWHEEL_MANUAL_ADJUST_INTERVAL)
 //        );
-//
+
 //        secondaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(
 //                new ReindexFeederCommand(feederSubsystem, -0.5)
 //        );

@@ -17,12 +17,14 @@ public class ExtendBottomIntakeCommand extends CommandBase {
 
     @Override
     public void execute() {
-        if (Robot.getInstance().isAutonomous()) {
-            intake.setBottomExtended(false);
-        }
-        else {
-            intake.setBottomExtended(true);
-        }
+        intake.setBottomExtended(true);
+
+//        if (Robot.getInstance().isAutonomous()) {
+//            intake.setBottomExtended(false);
+//        }
+//        else {
+//            intake.setBottomExtended(true);
+//        }
     }
 
     @Override

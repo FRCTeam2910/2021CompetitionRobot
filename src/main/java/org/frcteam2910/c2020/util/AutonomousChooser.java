@@ -106,46 +106,87 @@ public class AutonomousChooser {
     }
 
     public Command getGalacticPath(RobotContainer container){
+//        SequentialCommandGroup sequentialCommandGroup = new SequentialCommandGroup();
+//        ParallelCommandGroup parallelCommand = new ParallelCommandGroup();
+//
+//        double distFromARedAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(180).inverse()).toRadians();
+//        double distFromABlueAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(90).inverse()).toRadians();
+//        double distFromBRedAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(45).inverse()).toRadians();
+//        double distFromBBlueAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(-45).inverse()).toRadians();
+//
+//        if(distFromARedAngle > Math.PI){
+//            distFromARedAngle = (2 * Math.PI) - distFromARedAngle;
+//        }
+//        if(distFromABlueAngle > Math.PI){
+//            distFromABlueAngle = (2 * Math.PI) - distFromABlueAngle;
+//        }
+//        if(distFromBRedAngle > Math.PI){
+//            distFromBRedAngle = (2 * Math.PI) - distFromBRedAngle;
+//        }
+//        if(distFromBBlueAngle > Math.PI){
+//            distFromBBlueAngle = (2 * Math.PI) - distFromBBlueAngle;
+//        }
+//
+//        double smallestDist = Math.min(distFromARedAngle,Math.min(distFromABlueAngle,Math.min(distFromBBlueAngle,distFromBRedAngle)));
+//
+//        Trajectory trajectory = null;
+//
+//        if(distFromARedAngle == smallestDist){
+//            //trajectory = trajectories.getPathARed();
+//            //SmartDashboard.putString("Autonomous settings","Path A Red");
+//        }
+//        else if(distFromABlueAngle == smallestDist){
+//            trajectory = trajectories.getPathABlue();
+//            //SmartDashboard.putString("Autonomous settings","Path A Blue");
+//        }
+//        else if(distFromBRedAngle == smallestDist){
+//            //trajectory = trajectories.getPathBRed();
+//            //SmartDashboard.putString("Autonomous settings","Path B Red");
+//        }
+//        else if(distFromBBlueAngle == smallestDist){
+//            //trajectory = trajectories.getPathBBlue();
+//            //SmartDashboard.putString("Autonomous settings","Path B Blue");
+//        }
+//
+//        if(trajectory != null){
+//            resetRobotPose(sequentialCommandGroup,container,trajectory);
+//            simpleFollow(sequentialCommandGroup,container,trajectory);
+//
+//            deployIntake(parallelCommand,container,trajectory);
+//
+//            parallelCommand.addCommands(sequentialCommandGroup);
+//
+//        }
+//        return parallelCommand;
+
         SequentialCommandGroup sequentialCommandGroup = new SequentialCommandGroup();
         ParallelCommandGroup parallelCommand = new ParallelCommandGroup();
 
-        double distFromARedAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(180).inverse()).toRadians();
-        double distFromABlueAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(90).inverse()).toRadians();
-        double distFromBRedAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(45).inverse()).toRadians();
-        double distFromBBlueAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(-45).inverse()).toRadians();
-
-        if(distFromARedAngle > Math.PI){
-            distFromARedAngle = 360 - distFromARedAngle;
-        }
-        if(distFromABlueAngle > Math.PI){
-            distFromABlueAngle = 360 - distFromABlueAngle;
-        }
-        if(distFromBRedAngle > Math.PI){
-            distFromBRedAngle = 360 - distFromBRedAngle;
-        }
-        if(distFromBBlueAngle > Math.PI){
-            distFromBBlueAngle = 360 - distFromBBlueAngle;
-        }
-
-        double smallestDist = Math.min(distFromARedAngle,Math.min(distFromABlueAngle,Math.min(distFromBBlueAngle,distFromBRedAngle)));
-
         Trajectory trajectory = null;
 
-        if(distFromARedAngle == smallestDist){
-            trajectory = trajectories.getPathARed();
-            SmartDashboard.putString("Autonomous settings","Path A Red");
-        }
-        else if(distFromABlueAngle == smallestDist){
+        double gyroAngle = container.getDrivetrainSubsystem().getPose().rotation.toDegrees();
+        System.out.println("angle" + gyroAngle);
+
+
+        if(gyroAngle > 67.5 && gyroAngle < 135){//A blue
             trajectory = trajectories.getPathABlue();
-            SmartDashboard.putString("Autonomous settings","Path A Blue");
+            System.out.println("A Blue from chooser");
         }
-        else if(distFromBRedAngle == smallestDist){
-            trajectory = trajectories.getPathBRed();
-            SmartDashboard.putString("Autonomous settings","Path B Red");
+        else if(gyroAngle > 135 && gyroAngle < 270){//A red
+            trajectory = trajectories.getPathARed();
+            System.out.println("A Red from chooser");
         }
-        else if(distFromBBlueAngle == smallestDist){
+        else if(gyroAngle > 270 && gyroAngle < 360){//b blue
             trajectory = trajectories.getPathBBlue();
-            SmartDashboard.putString("Autonomous settings","Path B Blue");
+            System.out.println("B Blue from chooser");
+        }
+        else if(gyroAngle < 67.5 && gyroAngle > 0){//b red
+            trajectory = trajectories.getPathBRed();
+            System.out.println("B Red from chooser");
+        }
+        else {
+            trajectory = trajectories.getPathBBlue();
+            System.out.println("chose nothing");
         }
 
         if(trajectory != null){
@@ -157,6 +198,7 @@ public class AutonomousChooser {
             parallelCommand.addCommands(sequentialCommandGroup);
 
         }
+
         return parallelCommand;
     }
 

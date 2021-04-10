@@ -212,18 +212,18 @@ public class AutonomousTrajectories {
 
         pathABlue = new Trajectory(
                 new SimplePathBuilder(new Vector2(44.25,30),Rotation2.fromDegrees(90))
-                        .lineTo(new Vector2(158.871,30),Rotation2.fromDegrees(27.84 + 180))
-                        .arcTo(new Vector2(198.79,67.456),new Vector2(158.871,70),Rotation2.fromDegrees(10 + 180))
-                        .lineTo(new Vector2(200.79,98.839),Rotation2.fromDegrees(50 + 180))
-                        .arcTo(new Vector2(233.471,113),new Vector2(220.75,97.567),Rotation2.fromDegrees(0 + 180))
-                        .arcTo(new Vector2(314.54,90),new Vector2(220.75,97.567),Rotation2.fromDegrees(-16.22 + 180))
-                        .lineTo(new Vector2(360,96.243),Rotation2.fromDegrees(-45 + 180))
+                        .lineTo(new Vector2(165.25,30),Rotation2.fromDegrees(23.61 + 180))
+                        .arcTo(new Vector2(199,63.75),new Vector2(165.25,63.75),Rotation2.fromDegrees(23.61 + 180))
+                        .lineTo(new Vector2(199,96),Rotation2.fromDegrees(24 + 180))
+                        .arcTo(new Vector2(242.565,112.744),new Vector2(224,96),Rotation2.fromDegrees(20.26 + 180))
+                        .arcTo(new Vector2(307.269,86.5),new Vector2(301.971,166.324),Rotation2.fromDegrees(-22.73 + 180))
+                        .lineTo(new Vector2(360,90),Rotation2.fromDegrees(-45 + 180))
                         .build(),
                 trajectoryConstraints,SAMPLE_DISTANCE
         );
 
         pathBRed = new Trajectory(
-                new SimplePathBuilder(new Vector2(48.153,150),Rotation2.fromDegrees(-45))
+                new SimplePathBuilder(new Vector2(48.153,150),Rotation2.fromDegrees(45))
                         .lineTo(new Vector2(133,75.022),Rotation2.fromDegrees(-45 + 180))
                         .arcTo(new Vector2(197.499,92.542),new Vector2(159.487,104.996),Rotation2.fromDegrees(-25 + 180))
                         .arcTo(new Vector2(243,130),new Vector2(249.765,75.417),Rotation2.fromDegrees(45 + 180))
@@ -233,11 +233,11 @@ public class AutonomousTrajectories {
         );
 
         pathBBlue = new Trajectory(
-                new SimplePathBuilder(new Vector2(44.25,30),Rotation2.fromDegrees(45))
-                        .lineTo(new Vector2(172,56),Rotation2.fromDegrees(10 + 180))
+                new SimplePathBuilder(new Vector2(44.25,30),Rotation2.fromDegrees(-45))
+                        .lineTo(new Vector2(172,56),Rotation2.fromDegrees(21.77 + 180))
                         .arcTo(new Vector2(209.663,90.072),new Vector2(161.936,104.977),Rotation2.fromDegrees(45 + 180))
-                        .arcTo(new Vector2(271,102),new Vector2(243.549,79.49),Rotation2.fromDegrees(10 + 180))
-                        .lineTo(new Vector2(354.642,0),Rotation2.fromDegrees(-45 + 180))
+                        .arcTo(new Vector2(271,102),new Vector2(243.549,79.49),Rotation2.fromDegrees(5.09 + 180))
+                        .lineTo(new Vector2(354.642,0),Rotation2.fromDegrees(-50.49 + 180))
                         .build(),
                 trajectoryConstraints,SAMPLE_DISTANCE
         );

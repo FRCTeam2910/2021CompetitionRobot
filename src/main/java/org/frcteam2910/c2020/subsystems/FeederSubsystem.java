@@ -19,6 +19,8 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     private AnalogInput fullSensor = new AnalogInput(Constants.FEEDER_IS_FULL_SENSOR_PORT);
     private AnalogInput intakeBallSensor = new AnalogInput(Constants.FEEDER_INTAKE_BALL_SENSOR_PORT);
 
+    private boolean specialFeederFlag = true;
+
     private final NetworkTableEntry fullEntry;
     private final NetworkTableEntry hasBallEntry;
     private final NetworkTableEntry motorSpeedEntry;
@@ -84,5 +86,14 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
             return true;
         }
         return false;
+    }
+
+
+    public void setSpecialFeederFlag(boolean target){
+        this.specialFeederFlag = target;
+    }
+
+    public boolean getSpecialFeederFlag(){
+        return specialFeederFlag;
     }
 }

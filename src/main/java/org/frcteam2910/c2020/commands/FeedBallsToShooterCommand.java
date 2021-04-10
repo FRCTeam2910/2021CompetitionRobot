@@ -7,17 +7,23 @@ import org.frcteam2910.common.util.InterpolatingDouble;
 import org.frcteam2910.common.util.InterpolatingTreeMap;
 
 public class FeedBallsToShooterCommand extends CommandBase {
-    private static final InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> FEEDER_OUTPUT_MAP = new InterpolatingTreeMap<>();
+    private static final InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> FAST_FEEDER_OUTPUT_MAP = new InterpolatingTreeMap<>();
+    private static final InterpolatingTreeMap<InterpolatingDouble, InterpolatingDouble> SLOW_FEEDER_OUTPUT_MAP = new InterpolatingTreeMap<>();
 
     private final FeederSubsystem feederSubsystem;
     private final ShooterSubsystem shooterSubsystem;
 
 
     static {
-        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4700.0), new InterpolatingDouble(0.3));
-        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5000.0), new InterpolatingDouble(0.3));
-        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5500.0), new InterpolatingDouble(0.3));
-        FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5700.0), new InterpolatingDouble(0.3));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4700.0), new InterpolatingDouble(1.0));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5000.0), new InterpolatingDouble(1.0));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5500.0), new InterpolatingDouble(1.0));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5700.0), new InterpolatingDouble(1.0));
+
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4700.0), new InterpolatingDouble(0.5));//0.5 for slow
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5000.0), new InterpolatingDouble(0.5));
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5500.0), new InterpolatingDouble(0.5));
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5700.0), new InterpolatingDouble(0.5));
     }
 
     public FeedBallsToShooterCommand(FeederSubsystem feederSubsystem, ShooterSubsystem shooterSubsystem) {
@@ -28,11 +34,24 @@ public class FeedBallsToShooterCommand extends CommandBase {
     }
 
 
+    @Override
+    public void initialize() {
+        feederSubsystem.setSpecialFeederFlag(true);
+    }
 
     @Override
     public void execute() {
-        feederSubsystem.spinMotor(FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getTopFlywheelTargetVelocity())).value);
-        //feederSubsystem.spinMotor(1.0);
+        if(feederSubsystem.isFull()){
+            feederSubsystem.setSpecialFeederFlag(false);
+        }
+
+        if(feederSubsystem.getSpecialFeederFlag()){//move at 100% speed
+            feederSubsystem.spinMotor(FAST_FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getTopFlywheelTargetVelocity())).value);
+        }
+        else {
+            feederSubsystem.spinMotor(SLOW_FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getTopFlywheelTargetVelocity())).value);
+        }
+
     }
 
     @Override
