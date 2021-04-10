@@ -24,62 +24,42 @@ import java.util.OptionalDouble;
 
 
 public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
-    private static final double HOOD_SENSOR_COEFFICIENT = ((2.0 * Math.PI) * Constants.SHOOTER_HOOD_GEAR_RATIO / 5.0);
 
     private static final double FLYWHEEL_POSITION_SENSOR_COEFFICIENT = 1.0 / 2048.0 * Constants.FLYWHEEL_GEAR_RATIO;
-    private static final double FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT = FLYWHEEL_POSITION_SENSOR_COEFFICIENT * (1000.0 / 100.0) * (60.0 / 1.0);//in terms of talonfx counts
+    private static final double FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT = FLYWHEEL_POSITION_SENSOR_COEFFICIENT * (1000.0 / 100.0) * (60.0);//in terms of talonfx counts
 
-    private static final double BOTTOM_FLYWHEEL_P = 0.5;
-    private static final double BOTTOM_FLYWHEEL_I = 0.0;
-    private static final double BOTTOM_FLYWHEEL_D = 0.0;
+    private static final double FLYWHEEL_ALLOWABLE_ERROR = 200.0;
 
     private static final double TOP_FLYWHEEL_P = 0.05;
     private static final double TOP_FLYWHEEL_I = 0.0;
     private static final double TOP_FLYWHEEL_D = 0.0;
 
-
-    /**
-     * Flywheel regression constants
-     * <p>
-     * Found by doing an exponential regression using the following points:
-     * (0.25, 1480)
-     * (0.3, 1780)
-     * (0.5, 3000)
-     * (0.6, 3600)
-     * (0.7, 4235)
-     * (0.8, 4835)
-     */
-    private static final double BOTTOM_FLYWHEEL_FF_CONSTANT = 0.0012148;
-    private static final double BOTTOM_FLYWHEEL_STATIC_FRICTION_CONSTANT = 0.5445;
+    private static final double BOTTOM_FLYWHEEL_P = 0.5;
+    private static final double BOTTOM_FLYWHEEL_I = 0.0;
+    private static final double BOTTOM_FLYWHEEL_D = 0.0;
 
     private static final double TOP_FLYWHEEL_FF_CONSTANT = 0.00127;
     private static final double TOP_FLYWHEEL_STATIC_FRICTION_CONSTANT = 0.67002;
+
+    private static final double BOTTOM_FLYWHEEL_FF_CONSTANT = 0.0012148;
+    private static final double BOTTOM_FLYWHEEL_STATIC_FRICTION_CONSTANT = 0.5445;
 
     private static final double HOOD_ANGLE_P = 0.5;
     private static final double HOOD_ANGLE_I = 0;
     private static final double HOOD_ANGLE_D = 5;
 
-    @Deprecated
-    private final PidController hoodController = new PidController(new PidConstants(5.0, 0.0, 0.0));
-
     private static final double BOTTOM_FLYWHEEL_CURRENT_LIMIT = 10.0;
     private static final int HOOD_CURRENT_LIMIT = 15;
-
-    private boolean isHoodHomed;
-
-    private static final double FLYWHEEL_ALLOWABLE_ERROR = 200.0;
 
     private final TalonFX bottomFlywheelPrimaryMotor = new TalonFX(Constants.TOP_RIGHT_SHOOTER_MOTOR_PORT);
     private final TalonFX bottomFlywheelSecondaryMotor = new TalonFX(Constants.BOTTOM_RIGHT_SHOOTER_MOTOR_PORT);
     private final TalonFX topFlywheelMotor = new TalonFX(Constants.BOTTOM_LEFT_SHOOTER_MOTOR_PORT);
 
     private final TalonFX hoodAngleMotor = new TalonFX(Constants.HOOD_MOTOR_PORT);
-    @Deprecated
-    private final AnalogInput hoodAngleEncoder = new AnalogInput(Constants.HOOD_ANGLE_ENCODER);
 
     private final NetworkTableEntry hoodAngleEntry;
 
-    private final NetworkTableEntry hoodAngleVoltage;
+    private boolean isHoodHomed;
 
     private HoodControlMode hoodControlMode = HoodControlMode.DISABLED;
     private OptionalDouble hoodTargetPosition = OptionalDouble.empty();
@@ -88,15 +68,11 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     public ShooterSubsystem() {
         isHoodHomed = false;
 
+        topFlywheelMotor.configFactoryDefault();
         bottomFlywheelPrimaryMotor.configFactoryDefault();
         bottomFlywheelSecondaryMotor.configFactoryDefault();
-        topFlywheelMotor.configFactoryDefault();
 
-        //topFlywheelMotor.setInverted(true);
-
-        bottomFlywheelSecondaryMotor.follow(bottomFlywheelPrimaryMotor);
-
-        //Save CAN stuff
+        //Save CAN bandwidth
         bottomFlywheelSecondaryMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
         bottomFlywheelSecondaryMotor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
 
@@ -105,6 +81,20 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
         hoodAngleMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
         hoodAngleMotor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
+
+        TalonFXConfiguration topFlyWheelConfiguration = new TalonFXConfiguration();
+        topFlyWheelConfiguration.slot0.kP = TOP_FLYWHEEL_P;
+        topFlyWheelConfiguration.slot0.kI = TOP_FLYWHEEL_I;
+        topFlyWheelConfiguration.slot0.kD = TOP_FLYWHEEL_D;
+        topFlyWheelConfiguration.primaryPID.selectedFeedbackSensor = TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice();
+        topFlyWheelConfiguration.supplyCurrLimit.currentLimit = BOTTOM_FLYWHEEL_CURRENT_LIMIT;
+        topFlyWheelConfiguration.supplyCurrLimit.enable = true;
+        topFlyWheelConfiguration.voltageCompSaturation = 11.5;
+
+        topFlywheelMotor.configAllSettings(topFlyWheelConfiguration);
+        topFlywheelMotor.enableVoltageCompensation(false);
+
+
 
         TalonFXConfiguration bottomFlyWheelConfiguration = new TalonFXConfiguration();
         bottomFlyWheelConfiguration.slot0.kP = BOTTOM_FLYWHEEL_P;
@@ -121,18 +111,8 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         bottomFlywheelPrimaryMotor.enableVoltageCompensation(false);
         bottomFlywheelSecondaryMotor.enableVoltageCompensation(false);
 
+        bottomFlywheelSecondaryMotor.follow(bottomFlywheelPrimaryMotor);
 
-        TalonFXConfiguration topFlyWheelConfiguration = new TalonFXConfiguration();
-        topFlyWheelConfiguration.slot0.kP = TOP_FLYWHEEL_P;
-        topFlyWheelConfiguration.slot0.kI = TOP_FLYWHEEL_I;
-        topFlyWheelConfiguration.slot0.kD = TOP_FLYWHEEL_D;
-        topFlyWheelConfiguration.primaryPID.selectedFeedbackSensor = TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice();
-        topFlyWheelConfiguration.supplyCurrLimit.currentLimit = BOTTOM_FLYWHEEL_CURRENT_LIMIT;
-        topFlyWheelConfiguration.supplyCurrLimit.enable = true;
-        topFlyWheelConfiguration.voltageCompSaturation = 11.5;
-
-        topFlywheelMotor.configAllSettings(topFlyWheelConfiguration);
-        topFlywheelMotor.enableVoltageCompensation(false);
 
 
         TalonFXConfiguration hoodConfiguration = new TalonFXConfiguration();
@@ -143,9 +123,6 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         hoodConfiguration.supplyCurrLimit.currentLimit = HOOD_CURRENT_LIMIT;
         hoodConfiguration.supplyCurrLimit.enable = true;
 
-        hoodController.setInputRange(Constants.SHOOTER_HOOD_MIN_ANGLE, Constants.SHOOTER_HOOD_MAX_ANGLE);
-        hoodController.setOutputRange(-0.75, 0.5);
-
         hoodAngleMotor.configAllSettings(hoodConfiguration);
         hoodAngleMotor.setNeutralMode(NeutralMode.Coast);
         hoodAngleMotor.setSensorPhase(false);
@@ -153,10 +130,6 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
 
         ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
-        hoodAngleVoltage = tab.add("Hood Encoder Voltage", 0.0)
-                .withPosition(5, 0)
-                .withSize(1, 1)
-                .getEntry();
         hoodAngleEntry = tab.add("hood angle", 0.0)
                 .withPosition(0, 0)
                 .withSize(1, 1)
@@ -202,11 +175,6 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         bottomFlywheelSecondaryMotor.configSupplyCurrentLimit(config, 0);
         topFlywheelMotor.configSupplyCurrentLimit(config, 0);
     }
-
-//    @Deprecated
-//    public double getHoodAngle() {
-//        return Constants.SHOOTER_HOOD_MAX_ANGLE - (hoodAngleEncoder.getVoltage() * HOOD_SENSOR_COEFFICIENT + Constants.SHOOTER_HOOD_OFFSET);
-//    }
 
     public OptionalDouble getHoodTargetAngle() {
         return hoodTargetPosition;
@@ -258,10 +226,8 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
                     double targetAngle = getHoodTargetAngle().getAsDouble();
                     targetAngle = MathUtils.clamp(targetAngle, Constants.SHOOTER_HOOD_MIN_ANGLE, Constants.SHOOTER_HOOD_MAX_ANGLE);
 
-
                     hoodAngleMotor.set(TalonFXControlMode.Position, angleToTalonUnits(targetAngle));
-                    hoodController.setSetpoint(targetAngle);
-                    //hoodAngleMotor.set(TalonFXControlMode.PercentOutput, hoodController.calculate(getHoodAngle(), 0.02),DemandType.ArbitraryFeedForward,-0.05);
+
                 }
                 break;
             case PERCENT_OUTPUT:
@@ -270,7 +236,6 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
         }
 
         hoodAngleEntry.setDouble(Math.toDegrees(getHoodMotorAngle()));
-        hoodAngleVoltage.setDouble(hoodAngleEncoder.getVoltage());
     }
 
     public double getTopFlywheelPosition() {
@@ -367,7 +332,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     }
 
     public void setHoodHomed(boolean target) {
-        this.isHoodHomed = true;
+        this.isHoodHomed = target;
     }
 
     public double getHoodMotorAngle() {

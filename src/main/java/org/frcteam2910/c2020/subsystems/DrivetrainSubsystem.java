@@ -26,8 +26,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.c2020.Pigeon;
-import org.frcteam2910.c2020.Robot;
-import org.frcteam2910.c2020.RobotContainer;
 import org.frcteam2910.common.control.*;
 import org.frcteam2910.common.drivers.Gyroscope;
 import org.frcteam2910.common.drivers.SwerveModule;
@@ -75,7 +73,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private boolean shouldHoldHeading = false;
 
-    private final PidConstants HOLD_HEADING_PID_CONSTANTS = new PidConstants(0.005,0,0.0);
+    private final PidConstants HOLD_HEADING_PID_CONSTANTS = new PidConstants(0.007,0,0.0);
     private  PidController holdHeadingPIDController = new PidController(HOLD_HEADING_PID_CONSTANTS);
 
 
@@ -98,11 +96,6 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             new Translation2d(-TRACKWIDTH / 2.0,-WHEELBASE / 2.0), // back left
             new Translation2d(TRACKWIDTH / 2.0,-WHEELBASE / 2.0) // back right
     );
-
-    @GuardedBy("kinematicsLock")
-    private final SwerveDriveOdometry wpi_driveOdometry = new SwerveDriveOdometry(wpi_driveKinematics, new Rotation2d());
-
-    private Pose2d wpi_pose = new Pose2d();
 
 
     private SwerveModule[] modules;
@@ -132,9 +125,6 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final NetworkTableEntry odometryXEntry;
     private final NetworkTableEntry odometryYEntry;
     private final NetworkTableEntry odometryAngleEntry;
-
-    private final NetworkTableEntry wpiOdometryXEntry;
-    private final NetworkTableEntry wpiOdometryYEntry;
 
 
     private final NetworkTableEntry[] moduleAngleEntries;
@@ -282,27 +272,11 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             return signal.getRotation() * RobotController.getBatteryVoltage();
         });
 
-
-        wpiOdometryXEntry = tab.add("Wpi X",0.0)
-                .withPosition(0,3)
-                .withSize(1,1)
-                .getEntry();
-
-        wpiOdometryYEntry = tab.add("Wpi Y",0.0)
-                .withPosition(1,3)
-                .withSize(1,1)
-                .getEntry();
     }
 
     public RigidTransform2 getPose() {
         synchronized (kinematicsLock) {
             return pose;
-        }
-    }
-
-    public Pose2d getWpi_pose(){
-        synchronized (kinematicsLock){
-            return wpi_pose;
         }
     }
 
@@ -335,7 +309,6 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         synchronized (kinematicsLock) {
             this.pose = pose;
             swerveOdometry.resetPose(pose);
-            wpi_driveOdometry.resetPosition(new Pose2d(pose.translation.x,pose.translation.y,new Rotation2d(pose.rotation.toRadians())),new Rotation2d());
         }
     }
 
@@ -349,13 +322,11 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private void updateOdometry(double time, double dt) {
         Vector2[] moduleVelocities = new Vector2[modules.length];
-        SwerveModuleState[] swerveModuleStates = new SwerveModuleState[modules.length];
         for (int i = 0; i < modules.length; i++) {
             var module = modules[i];
             module.updateSensors();
 
             moduleVelocities[i] = Vector2.fromAngle(Rotation2.fromRadians(module.getCurrentAngle())).scale(module.getCurrentVelocity());
-            swerveModuleStates[i] = new SwerveModuleState(module.getCurrentVelocity(),new Rotation2d(module.getCurrentAngle()));
         }
 
         Rotation2 angle;
@@ -368,8 +339,6 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         ChassisVelocity velocity = swerveKinematics.toChassisVelocity(moduleVelocities);
 
         synchronized (kinematicsLock) {
-
-            this.wpi_pose = wpi_driveOdometry.update(Rotation2d.fromDegrees(angle.toDegrees()),swerveModuleStates);
 
             this.pose = swerveOdometry.update(angle, dt, moduleVelocities);
             if (latencyCompensationMap.size() > MAX_LATENCY_COMPENSATION_MAP_ENTRIES) {
@@ -449,10 +418,6 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         odometryXEntry.setDouble(pose.translation.x);
         odometryYEntry.setDouble(pose.translation.y);
         odometryAngleEntry.setDouble(getPose().rotation.toDegrees());
-
-        Pose2d wpiPose = getWpi_pose();
-        wpiOdometryXEntry.setDouble(wpiPose.getTranslation().getX());
-        wpiOdometryYEntry.setDouble(wpiPose.getTranslation().getY());
 
         for (int i = 0; i < modules.length; i++) {
             moduleAngleEntries[i].setDouble(Math.toDegrees(modules[i].getCurrentAngle()));

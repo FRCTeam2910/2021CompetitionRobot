@@ -36,16 +36,16 @@ public class FeedBallsToShooterCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        feederSubsystem.setSpecialFeederFlag(true);
+        feederSubsystem.setMoveFirstBallFast(true);
     }
 
     @Override
     public void execute() {
         if(feederSubsystem.isFull()){
-            feederSubsystem.setSpecialFeederFlag(false);
+            feederSubsystem.setMoveFirstBallFast(false);
         }
 
-        if(feederSubsystem.getSpecialFeederFlag()){//move at 100% speed
+        if(feederSubsystem.getMoveFirstBallFast()){//move at 100% speed
             feederSubsystem.spinMotor(FAST_FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getTopFlywheelTargetVelocity())).value);
         }
         else {

@@ -41,7 +41,6 @@ public class RobotContainer {
         primaryController.getRightXAxis().setInverted(true);
 
 
-
         CommandScheduler.getInstance().registerSubsystem(drivetrainSubsystem);
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
         CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 1.0));
@@ -74,25 +73,13 @@ public class RobotContainer {
         primaryController.getLeftBumperButton().whenReleased(new InstantCommand(() -> intakeSubsystem.setTopExtended(false)));
 
 
-//        primaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setExtended(true));
-//        primaryController.getLeftBumperButton().whileHeld(
-//                new IntakeCommand(intakeSubsystem, feederSubsystem, -1.0).withTimeout(0.25)
-//                        .andThen(new IntakeCommand(intakeSubsystem, feederSubsystem, 1.0)));
-//        primaryController.getLeftBumperButton().whenReleased(
-//                new InstantCommand(() -> intakeSubsystem.setExtended(false))
-//        .andThen(new ReindexFeederCommand(feederSubsystem, -0.5).withTimeout(5.0)));
-
-
-
 
         primaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(new SpinFeederCommand(feederSubsystem, -0.5));
-        //primaryController.getLeftTriggerAxis().getButton(0.5).whenReleased(new ReindexFeederCommand(feederSubsystem, -1.0).withTimeout(5.0));
-//
-//
-        //primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
+
+
         primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
 
-        //primaryController.getRightBumperButton().whileHeld(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true)));
+
         primaryController.getRightBumperButton().whileHeld(
                 new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, primaryController).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true)))
         );
@@ -104,12 +91,9 @@ public class RobotContainer {
 
         primaryController.getBButton().whileHeld(new IntakeCommand(intakeSubsystem, feederSubsystem, -1, true));
 
-        //primaryController.getXButton().whileHeld(new TranslationalDriveCommand(drivetrainSubsystem,getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
-
         primaryController.getXButton().toggleWhenPressed(new TranslationalDriveCommand(drivetrainSubsystem,getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
 
-//
-        primaryController.getAButton().whileHeld(new ManuallyAdjustShooterCommand(shooterSubsystem).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true))));
+        //primaryController.getAButton().whileHeld(new ManuallyAdjustShooterCommand(shooterSubsystem).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true))));
 
         primaryController.getYButton().whenPressed(new HomeHoodMotorCommand(shooterSubsystem));
 
@@ -129,16 +113,6 @@ public class RobotContainer {
 //        primaryController.getDPadButton(DPadButton.Direction.LEFT).whenPressed(
 //                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getBottomFlywheelTargetVelocity() - FLYWHEEL_MANUAL_ADJUST_INTERVAL)
 //        );
-
-//        secondaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(
-//                new ReindexFeederCommand(feederSubsystem, -0.5)
-//        );
-//
-//        secondaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setExtended(true));
-//        secondaryController.getLeftBumperButton().whileHeld(new WaitCommand(0.5).andThen(new IntakeCommand(intakeSubsystem, feederSubsystem, 1.0)));
-//        secondaryController.getLeftBumperButton().whenReleased(() -> intakeSubsystem.setExtended(false));
-//
-//
     }
 
     public Command getAutonomousCommand() {

@@ -71,13 +71,11 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
         }
 
         left_intake_motor.set(ControlMode.PercentOutput, localMotorOutput);
-//        right_intake_motor.set(ControlMode.PercentOutput,localMotorOutput);
         if (localTopExtended != extensionTopSolenoid.get()) {
             extensionTopSolenoid.set(localTopExtended);
         }
-//        if(localBottomExtended != extensionBottomSolenoid.get()){
-            extensionBottomSolenoid.set(localBottomExtended);
-//        }
+
+        extensionBottomSolenoid.set(localBottomExtended);
 
     }
 
@@ -127,7 +125,7 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
     public void periodic() {
         leftMotorSpeedEntry.setDouble(getLeftMotorOutput());
         rightMotorSpeedEntry.setDouble(getRightMotorOutput());
-        isTopExtendedEntry.setBoolean(isTopExtended());
-        isBottomExtendedEntry.setBoolean(isBottomExtended());
+        isTopExtendedEntry.setBoolean(extensionTopSolenoid.get());
+        isBottomExtendedEntry.setBoolean(extensionBottomSolenoid.get());
     }
 }

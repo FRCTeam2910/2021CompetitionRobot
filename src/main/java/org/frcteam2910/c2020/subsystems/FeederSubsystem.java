@@ -6,7 +6,6 @@ import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -19,7 +18,7 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     private AnalogInput fullSensor = new AnalogInput(Constants.FEEDER_IS_FULL_SENSOR_PORT);
     private AnalogInput intakeBallSensor = new AnalogInput(Constants.FEEDER_INTAKE_BALL_SENSOR_PORT);
 
-    private boolean specialFeederFlag = true;
+    private boolean moveFirstBallFast = true;
 
     private final NetworkTableEntry fullEntry;
     private final NetworkTableEntry hasBallEntry;
@@ -82,18 +81,15 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     }
 
     public boolean isFifthBallAtIntake(){
-        if(isFull() && isBallAtIntake()){
-            return true;
-        }
-        return false;
+        return isFull() && isBallAtIntake();
     }
 
 
-    public void setSpecialFeederFlag(boolean target){
-        this.specialFeederFlag = target;
+    public void setMoveFirstBallFast(boolean target){
+        this.moveFirstBallFast = target;
     }
 
-    public boolean getSpecialFeederFlag(){
-        return specialFeederFlag;
+    public boolean getMoveFirstBallFast(){
+        return moveFirstBallFast;
     }
 }
