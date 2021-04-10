@@ -8,7 +8,6 @@ import org.frcteam2910.c2020.util.AutonomousTrajectories;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.Axis;
-import org.frcteam2910.common.robot.input.DPadButton;
 import org.frcteam2910.common.robot.input.XboxController;
 
 import java.io.IOException;
@@ -47,7 +46,7 @@ public class RobotContainer {
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
         CommandScheduler.getInstance().registerSubsystem(shooterSubsystem);
         //CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new ManuallyAdjustShooterCommand(shooterSubsystem));
-        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new DefaultShooterCommand(shooterSubsystem, 4000, Constants.SHOOTER_HOOD_MAX_ANGLE));
+        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new DefaultShooterCommand(shooterSubsystem, 4000, Constants.HOOD_MAX_ANGLE));
         CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem, new ExtendBottomIntakeCommand(intakeSubsystem));
         CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
         //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem,new HoldFifthBallCommand(feederSubsystem,intakeSubsystem));

@@ -3,7 +3,6 @@ package org.frcteam2910.c2020.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -17,8 +16,8 @@ import org.frcteam2910.common.robot.UpdateManager;
 public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
     private TalonFX left_intake_motor = new TalonFX(Constants.LEFT_INTAKE_MOTOR_PORT);
     private TalonFX right_intake_motor = new TalonFX(Constants.RIGHT_INTAKE_MOTOR_PORT);
-    private Solenoid extensionTopSolenoid = new Solenoid(Constants.TOP_INTAKE_EXTENSION_SOLENOID);
-    private Solenoid extensionBottomSolenoid = new Solenoid(Constants.BOTTOM_INTAKE_EXTENSION_SOLENOID);
+    private Solenoid topExtentionSolenoid = new Solenoid(Constants.TOP_INTAKE_EXTENSION_SOLENOID);
+    private Solenoid bottomExtensionSolenoid = new Solenoid(Constants.BOTTOM_INTAKE_EXTENSION_SOLENOID);
 
     private final Object stateLock = new Object();
     @GuardedBy("stateLock")
@@ -71,11 +70,11 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
         }
 
         left_intake_motor.set(ControlMode.PercentOutput, localMotorOutput);
-        if (localTopExtended != extensionTopSolenoid.get()) {
-            extensionTopSolenoid.set(localTopExtended);
+        if (localTopExtended != topExtentionSolenoid.get()) {
+            topExtentionSolenoid.set(localTopExtended);
         }
 
-        extensionBottomSolenoid.set(localBottomExtended);
+        bottomExtensionSolenoid.set(localBottomExtended);
 
     }
 
@@ -125,7 +124,7 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
     public void periodic() {
         leftMotorSpeedEntry.setDouble(getLeftMotorOutput());
         rightMotorSpeedEntry.setDouble(getRightMotorOutput());
-        isTopExtendedEntry.setBoolean(extensionTopSolenoid.get());
-        isBottomExtendedEntry.setBoolean(extensionBottomSolenoid.get());
+        isTopExtendedEntry.setBoolean(topExtentionSolenoid.get());
+        isBottomExtendedEntry.setBoolean(bottomExtensionSolenoid.get());
     }
 }

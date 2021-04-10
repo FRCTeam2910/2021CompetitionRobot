@@ -4,28 +4,20 @@ import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
-import org.frcteam2910.common.control.MotionProfileFollower;
-import org.frcteam2910.common.control.PidConstants;
-import org.frcteam2910.common.control.PidController;
 import org.frcteam2910.common.math.MathUtils;
-import org.frcteam2910.common.motion.MotionProfile;
-import org.frcteam2910.common.motion.TrapezoidalMotionProfile;
 import org.frcteam2910.common.robot.UpdateManager;
-import org.opencv.core.Mat;
 
 import java.util.OptionalDouble;
 
 
 public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
-    private static final double FLYWHEEL_POSITION_SENSOR_COEFFICIENT = 1.0 / 2048.0 * Constants.FLYWHEEL_GEAR_RATIO;
+    private static final double FLYWHEEL_POSITION_SENSOR_COEFFICIENT = 1.0 / 2048.0 * Constants.BOTTOM_FLYWHEEL_GEAR_RATIO;
     private static final double FLYWHEEL_VELOCITY_SENSOR_COEFFICIENT = FLYWHEEL_POSITION_SENSOR_COEFFICIENT * (1000.0 / 100.0) * (60.0);//in terms of talonfx counts
 
     private static final double FLYWHEEL_ALLOWABLE_ERROR = 200.0;
@@ -51,9 +43,9 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     private static final double BOTTOM_FLYWHEEL_CURRENT_LIMIT = 10.0;
     private static final int HOOD_CURRENT_LIMIT = 15;
 
-    private final TalonFX bottomFlywheelPrimaryMotor = new TalonFX(Constants.TOP_RIGHT_SHOOTER_MOTOR_PORT);
-    private final TalonFX bottomFlywheelSecondaryMotor = new TalonFX(Constants.BOTTOM_RIGHT_SHOOTER_MOTOR_PORT);
-    private final TalonFX topFlywheelMotor = new TalonFX(Constants.BOTTOM_LEFT_SHOOTER_MOTOR_PORT);
+    private final TalonFX bottomFlywheelPrimaryMotor = new TalonFX(Constants.BOTTOM_FLYWHEEL_PRIMARY_MOTOR_PORT);
+    private final TalonFX bottomFlywheelSecondaryMotor = new TalonFX(Constants.BOTTOM_FLYWHEEL_SECONDARY_MOTOR_PORT);
+    private final TalonFX topFlywheelMotor = new TalonFX(Constants.TOP_FLYWHEEL_MOTOR_PORT);
 
     private final TalonFX hoodAngleMotor = new TalonFX(Constants.HOOD_MOTOR_PORT);
 
@@ -142,22 +134,22 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withSize(1, 1);
         tab.addBoolean("Is Top Flywheel at Target", this::isTopFlywheelAtTargetVelocity)
                 .withPosition(4, 1)
-                .withSize(1, 1);
+                .withSize(2, 1);
         tab.addNumber("Top Flywheel Target", this::getTopFlywheelTargetVelocity)
                 .withPosition(4, 0)
-                .withSize(1, 1);
+                .withSize(2, 1);
         tab.addNumber("Top Flywheel Speed", this::getTopFlywheelVelocity)
                 .withPosition(4, 2)
-                .withSize(1, 1);
+                .withSize(2, 1);
         tab.addBoolean("Is Bottom Flywheel at Target", this::isBottomFlywheelAtTargetVelocity)
                 .withPosition(2, 1)
-                .withSize(1, 1);
+                .withSize(2, 1);
         tab.addNumber("Bottom Flywheel Target", this::getBottomFlywheelTargetVelocity)
                 .withPosition(2, 0)
-                .withSize(1, 1);
+                .withSize(2, 1);
         tab.addNumber("Bottom Flywheel Speed", this::getBottomFlywheelVelocity)
                 .withPosition(2, 2)
-                .withSize(1, 1);
+                .withSize(2, 1);
         tab.addNumber("Angle Error", this::angleTargetError)
                 .withPosition(1, 1)
                 .withSize(1, 1);
@@ -224,7 +216,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
                     hoodAngleMotor.set(TalonFXControlMode.Disabled, 0.0);
                 } else {
                     double targetAngle = getHoodTargetAngle().getAsDouble();
-                    targetAngle = MathUtils.clamp(targetAngle, Constants.SHOOTER_HOOD_MIN_ANGLE, Constants.SHOOTER_HOOD_MAX_ANGLE);
+                    targetAngle = MathUtils.clamp(targetAngle, Constants.HOOD_MIN_ANGLE, Constants.HOOD_MAX_ANGLE);
 
                     hoodAngleMotor.set(TalonFXControlMode.Position, angleToTalonUnits(targetAngle));
 
@@ -307,7 +299,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     public void zeroHoodMotor() {
         this.isHoodHomed = true;
 
-        double sensorPosition = (Constants.SHOOTER_HOOD_MAX_ANGLE + Math.toRadians(1)) * 2048 / (2 * Math.PI) * Constants.HOOD_MOTOR_TO_HOOD_GEAR_RATIO;
+        double sensorPosition = (Constants.HOOD_MAX_ANGLE + Math.toRadians(1)) * 2048 / (2 * Math.PI) * Constants.HOOD_MOTOR_TO_HOOD_GEAR_RATIO;
         hoodAngleMotor.setSelectedSensorPosition((int) sensorPosition);
     }
 

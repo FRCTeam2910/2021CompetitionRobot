@@ -21,21 +21,21 @@ public class Constants {
     public static final double DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET = Math.toRadians(122.25);
     public static final double DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET = Math.toRadians(39.81);
 
-    public static final int HOOD_ANGLE_ENCODER = 0;
-    public static final double HOOD_MOTOR_TO_HOOD_GEAR_RATIO = (16.0) * (32.0/18.0) * (48.0/16.0);
     public static final int HOOD_MOTOR_PORT = 5;
 
-    public static final double SHOOTER_HOOD_MIN_ANGLE = Math.toRadians(9.5);
-    public static final double SHOOTER_HOOD_MAX_ANGLE = Math.toRadians(75);
-    public static final double SHOOTER_HOOD_GEAR_RATIO = 51 / (16.0 * 15);
-    public static final double FLYWHEEL_GEAR_RATIO = 1.5;
+    public static final double HOOD_MOTOR_TO_HOOD_GEAR_RATIO = (16.0) * (32.0/18.0) * (48.0/16.0);
+
+    public static final double HOOD_MIN_ANGLE = Math.toRadians(9.5);
+    public static final double HOOD_MAX_ANGLE = Math.toRadians(75);
+
+    public static final double BOTTOM_FLYWHEEL_GEAR_RATIO = 1.5;
 
     public static final int LEFT_INTAKE_MOTOR_PORT = 0;
     public static final int RIGHT_INTAKE_MOTOR_PORT = 2;
 
-    public static final int TOP_RIGHT_SHOOTER_MOTOR_PORT = 11;
-    public static final int BOTTOM_RIGHT_SHOOTER_MOTOR_PORT = 13;
-    public static final int BOTTOM_LEFT_SHOOTER_MOTOR_PORT = 12;
+    public static final int BOTTOM_FLYWHEEL_PRIMARY_MOTOR_PORT = 11;
+    public static final int BOTTOM_FLYWHEEL_SECONDARY_MOTOR_PORT = 13;
+    public static final int TOP_FLYWHEEL_MOTOR_PORT = 12;
 
     public static final int BOTTOM_INTAKE_EXTENSION_SOLENOID = 0;
     public static final int TOP_INTAKE_EXTENSION_SOLENOID = 1;
