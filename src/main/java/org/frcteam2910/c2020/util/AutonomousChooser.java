@@ -159,7 +159,7 @@ public class AutonomousChooser {
     }
 
     private void deployIntake(ParallelCommandGroup command, RobotContainer container, Trajectory trajectory){
-        command.addCommands(new SimpleIntakeCommand(container.getIntakeSubsystem(),1.0));
+        command.addCommands(new SimpleIntakeCommand(container.getIntakeSubsystem(), container.getFeederSubsystem(), 1.0,0.9));
     }
 
     private void resetRobotPoseAndGyro(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {

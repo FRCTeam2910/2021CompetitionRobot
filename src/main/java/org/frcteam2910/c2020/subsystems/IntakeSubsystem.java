@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -26,13 +27,24 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
     private boolean topExtended = false;
     @GuardedBy("stateLock")
     private boolean bottomExtended = false;
+    @GuardedBy("stateLock")
+    private boolean intakeCurrentThreshHoldPassed = false;
 
     private final NetworkTableEntry leftMotorSpeedEntry;
     private final NetworkTableEntry rightMotorSpeedEntry;
     private final NetworkTableEntry isTopExtendedEntry;
     private final NetworkTableEntry isBottomExtendedEntry;
+    private final NetworkTableEntry leftMotorCurrent;
+
+    private Timer fifthBallTimer;
+    private boolean isTimerRunning;
+
+
 
     public IntakeSubsystem() {
+        fifthBallTimer = new Timer();
+        this.isTimerRunning = false;
+
         right_intake_motor.follow(left_intake_motor);
         right_intake_motor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
         right_intake_motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
@@ -56,6 +68,10 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withPosition(1, 1)
                 .withSize(1, 1)
                 .getEntry();
+        leftMotorCurrent = tab.add("Left Motor Current",0.0)
+                .withPosition(0,2)
+                .withSize(1,1)
+                .getEntry();
     }
 
     @Override
@@ -64,6 +80,23 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
         boolean localTopExtended;
         boolean localBottomExtended;
         synchronized (stateLock) {
+            if(left_intake_motor.getStatorCurrent() > 20){
+                if(!isTimerRunning){
+                    fifthBallTimer.start();
+                    isTimerRunning = true;
+                }
+            }
+            else {
+                fifthBallTimer.stop();
+                fifthBallTimer.reset();
+                isTimerRunning = false;
+                intakeCurrentThreshHoldPassed = false;
+            }
+
+            if(fifthBallTimer.get() > 0.25){
+                intakeCurrentThreshHoldPassed = true;
+            }
+
             localMotorOutput = motorOutput;
             localTopExtended = topExtended;
             localBottomExtended = bottomExtended;
@@ -75,6 +108,8 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
         }
 
         bottomExtensionSolenoid.set(localBottomExtended);
+
+
 
     }
 
@@ -120,11 +155,24 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
+    public boolean hasIntakeMotorPassedCurrentThreshHold(){
+        synchronized (stateLock){
+            return intakeCurrentThreshHoldPassed;
+        }
+    }
+
+    public double getLeftMotorCurrent(){
+        synchronized (stateLock){
+            return left_intake_motor.getStatorCurrent();
+        }
+    }
+
     @Override
     public void periodic() {
         leftMotorSpeedEntry.setDouble(getLeftMotorOutput());
         rightMotorSpeedEntry.setDouble(getRightMotorOutput());
         isTopExtendedEntry.setBoolean(topExtentionSolenoid.get());
         isBottomExtendedEntry.setBoolean(bottomExtensionSolenoid.get());
+        leftMotorCurrent.setDouble(getLeftMotorCurrent());
     }
 }

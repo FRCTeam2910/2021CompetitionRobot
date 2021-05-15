@@ -39,17 +39,21 @@ public class RobotContainer {
         primaryController.getLeftXAxis().setInverted(true);
         primaryController.getRightXAxis().setInverted(true);
 
-
-        CommandScheduler.getInstance().registerSubsystem(drivetrainSubsystem);
-        CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
-        CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 1.0));
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
         CommandScheduler.getInstance().registerSubsystem(shooterSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(drivetrainSubsystem);
+        CommandScheduler.getInstance().registerSubsystem(feederSubsystem);
+
+        CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
+        //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.9));
+
         //CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new ManuallyAdjustShooterCommand(shooterSubsystem));
         CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new DefaultShooterCommand(shooterSubsystem, 4000, Constants.HOOD_MAX_ANGLE));
-        CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem, new ExtendBottomIntakeCommand(intakeSubsystem));
-        CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
-        //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem,new HoldFifthBallCommand(feederSubsystem,intakeSubsystem));
+        CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem, new ExtendBottomIntakeCommand(intakeSubsystem));//Remove this command as it is not needed; make the field true in the intake subsystem
+        CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem,new DefaultIntakeCommand(intakeSubsystem,feederSubsystem));
+
+        //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem,new RetractTopIntakeWhenNoFifthBallCommand(feederSubsystem,intakeSubsystem));
 
 
         configureButtonBindings();
@@ -66,14 +70,16 @@ public class RobotContainer {
 
         primaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setTopExtended(true));
 
-        primaryController.getLeftBumperButton().whileHeld(
-                new SimpleIntakeCommand(intakeSubsystem, -1.0).withTimeout(0.25)
-                        .andThen(new SimpleIntakeCommand(intakeSubsystem, 1.0)));
-        primaryController.getLeftBumperButton().whenReleased(new InstantCommand(() -> intakeSubsystem.setTopExtended(false)));
+        primaryController.getLeftBumperButton().whileHeld(new SimpleIntakeCommand(intakeSubsystem, feederSubsystem,1.0,0.9));
+
+//        primaryController.getLeftBumperButton().whileHeld(
+//                new SimpleIntakeCommand(intakeSubsystem,feederSubsystem, -1.0,0.9).withTimeout(0.25)
+//                        .andThen(new SimpleIntakeCommand(intakeSubsystem, feederSubsystem,1.0,0.9)));
+        //primaryController.getLeftBumperButton().whenReleased(new InstantCommand(() -> intakeSubsystem.setTopExtended(feederSubsystem.isBallAtIntake())));
 
 
 
-        primaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(new SpinFeederCommand(feederSubsystem, -0.5));
+        primaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(new SpinFeederCommand(feederSubsystem, intakeSubsystem ,-0.5));
 
 
         primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
