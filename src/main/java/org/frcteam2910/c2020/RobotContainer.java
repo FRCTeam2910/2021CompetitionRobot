@@ -70,7 +70,7 @@ public class RobotContainer {
 
         primaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setTopExtended(true));
 
-        primaryController.getLeftBumperButton().whileHeld(new SimpleIntakeCommand(intakeSubsystem, feederSubsystem,1.0,0.9));
+        primaryController.getLeftBumperButton().whileHeld(new SimpleIntakeCommand(intakeSubsystem, feederSubsystem, primaryController,1.0,0.9));
 
 //        primaryController.getLeftBumperButton().whileHeld(
 //                new SimpleIntakeCommand(intakeSubsystem,feederSubsystem, -1.0,0.9).withTimeout(0.25)
