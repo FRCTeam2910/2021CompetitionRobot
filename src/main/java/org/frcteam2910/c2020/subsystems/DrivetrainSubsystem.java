@@ -1,6 +1,7 @@
 package org.frcteam2910.c2020.subsystems;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -166,6 +167,15 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
         frontRightDriveMotor.setInverted(true);
         backRightDriveMotor.setInverted(true);
+
+        StatorCurrentLimitConfiguration currentConfig = new StatorCurrentLimitConfiguration();
+        currentConfig.currentLimit = 15;
+
+        frontLeftDriveMotor.configStatorCurrentLimit(currentConfig);
+        frontRightDriveMotor.configStatorCurrentLimit(currentConfig);
+        backLeftDriveMotor.configStatorCurrentLimit(currentConfig);
+        backRightDriveMotor.configStatorCurrentLimit(currentConfig);
+
 
         Mk3SwerveModule frontLeftModule = new Mk3SwerveModule(
                 new Vector2(TRACKWIDTH / 2.0, WHEELBASE / 2.0),
