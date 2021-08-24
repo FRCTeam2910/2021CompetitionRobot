@@ -18,6 +18,11 @@ public class DefaultShooterCommand extends CommandBase {
     }
 
     @Override
+    public void initialize() {
+        shooter.setFlywheelCurrentLimitEnabled(false);
+    }
+
+    @Override
     public void execute() {
         if(!Robot.getInstance().isAutonomous()){
             shooter.shootFlywheel(flywheelRpm);

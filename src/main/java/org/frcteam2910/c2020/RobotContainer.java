@@ -8,6 +8,7 @@ import org.frcteam2910.c2020.util.AutonomousTrajectories;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.Axis;
+import org.frcteam2910.common.robot.input.DPadButton;
 import org.frcteam2910.common.robot.input.XboxController;
 
 import java.io.IOException;
@@ -102,15 +103,17 @@ public class RobotContainer {
 
         primaryController.getYButton().whenPressed(new HomeHoodMotorCommand(shooterSubsystem));
 
+        secondaryController.getAButton().whileHeld(new SetHoodAngle(shooterSubsystem, Constants.HOOD_MIN_ANGLE));
 
-        // Manual hood adjustment
+
+//        // Manual hood adjustment
 //        primaryController.getDPadButton(DPadButton.Direction.DOWN).whenPressed(
-//                () -> shooterSubsystem.setHoodTargetAngle(shooterSubsystem.getHoodTargetAngle().orElse(Constants.SHOOTER_HOOD_MAX_ANGLE) + HOOD_MANUAL_ADJUST_INTERVAL)
+//                () -> shooterSubsystem.setHoodTargetAngle(shooterSubsystem.getHoodTargetAngle().orElse(Constants.HOOD_MAX_ANGLE) + HOOD_MANUAL_ADJUST_INTERVAL)
 //        );
 //        primaryController.getDPadButton(DPadButton.Direction.UP).whenPressed(
-//                () -> shooterSubsystem.setHoodTargetAngle(shooterSubsystem.getHoodTargetAngle().orElse(Constants.SHOOTER_HOOD_MAX_ANGLE) - HOOD_MANUAL_ADJUST_INTERVAL)
+//                () -> shooterSubsystem.setHoodTargetAngle(shooterSubsystem.getHoodTargetAngle().orElse(Constants.HOOD_MAX_ANGLE) - HOOD_MANUAL_ADJUST_INTERVAL)
 //        );
-
+//
 //        // Manual flywheel adjustment
 //        primaryController.getDPadButton(DPadButton.Direction.RIGHT).whenPressed(
 //                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getBottomFlywheelTargetVelocity() + FLYWHEEL_MANUAL_ADJUST_INTERVAL)

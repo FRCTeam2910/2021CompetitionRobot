@@ -19,7 +19,7 @@ public class SpinFlywheelCommand extends CommandBase {
 
     @Override
     public void execute() {
-        if (shooter.getTopFlywheelVelocity() < targetVelocity * 0.5) {
+        if (shooter.getBottomFlywheelPosition() < targetVelocity * 0.5) {
             shooter.setFlywheelOutput(1.0);
         } else {
             shooter.shootFlywheel(targetVelocity);

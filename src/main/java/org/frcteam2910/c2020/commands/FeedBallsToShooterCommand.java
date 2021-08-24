@@ -46,10 +46,10 @@ public class FeedBallsToShooterCommand extends CommandBase {
         }
 
         if(feederSubsystem.getMoveFirstBallFast()){//move at 100% speed
-            feederSubsystem.spinMotor(FAST_FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getTopFlywheelTargetVelocity())).value);
+            feederSubsystem.spinMotor(FAST_FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getBottomFlywheelVelocity())).value);
         }
         else {
-            feederSubsystem.spinMotor(SLOW_FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getTopFlywheelTargetVelocity())).value);
+            feederSubsystem.spinMotor(SLOW_FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getBottomFlywheelVelocity())).value);
         }
 
     }

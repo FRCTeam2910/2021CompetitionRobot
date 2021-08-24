@@ -42,8 +42,8 @@ public class CharacterizeFlywheelCommand extends CommandBase {
     @Override
     public void execute() {
         double now = Timer.getFPGATimestamp();
-        double position = shooter.getTopFlywheelPosition();
-        double velocity = shooter.getTopFlywheelVelocity();
+        double position = shooter.getBottomFlywheelPosition();
+        double velocity = shooter.getBottomFlywheelVelocity();
 
         double battery = RobotController.getBatteryVoltage();
         double motorVoltage = battery * Math.abs(priorAutospeed);

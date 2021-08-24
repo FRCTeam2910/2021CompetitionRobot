@@ -169,7 +169,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         backRightDriveMotor.setInverted(true);
 
         StatorCurrentLimitConfiguration currentConfig = new StatorCurrentLimitConfiguration();
-        currentConfig.currentLimit = 15;
+        currentConfig.currentLimit = 100;
 
         frontLeftDriveMotor.configStatorCurrentLimit(currentConfig);
         frontRightDriveMotor.configStatorCurrentLimit(currentConfig);

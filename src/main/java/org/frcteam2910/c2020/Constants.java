@@ -25,8 +25,8 @@ public class Constants {
 
     public static final double HOOD_MOTOR_TO_HOOD_GEAR_RATIO = (16.0) * (32.0/18.0) * (48.0/16.0);
 
-    public static final double HOOD_MIN_ANGLE = Math.toRadians(9.5);
-    public static final double HOOD_MAX_ANGLE = Math.toRadians(75);
+    public static final double HOOD_MIN_ANGLE = Math.toRadians(0);
+    public static final double HOOD_MAX_ANGLE = Math.toRadians(61.59);
 
     public static final double BOTTOM_FLYWHEEL_GEAR_RATIO = 1.5;
 

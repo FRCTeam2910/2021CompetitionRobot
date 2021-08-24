@@ -38,17 +38,12 @@ public class TargetWithShooterCommand extends CommandBase {
 
 
         //Good numbers for 3d port
-        SHOOTER_TUNING.put(new InterpolatingDouble(86.0),new Vector2(Math.toRadians(52.19),2431));
-        SHOOTER_TUNING.put(new InterpolatingDouble(124.25),new Vector2(Math.toRadians(43.3),2778.6));
-        SHOOTER_TUNING.put(new InterpolatingDouble(152.0),new Vector2(Math.toRadians(37.7),3076));
-        SHOOTER_TUNING.put(new InterpolatingDouble(186.2),new Vector2(Math.toRadians(31.68),3474));
-        SHOOTER_TUNING.put(new InterpolatingDouble(219.0),new Vector2(Math.toRadians(27.7),3821.5));
-        SHOOTER_TUNING.put(new InterpolatingDouble(242.3),new Vector2(Math.toRadians(24.7),4169));
-        SHOOTER_TUNING.put(new InterpolatingDouble(281.0),new Vector2(Math.toRadians(22.2),4467));
-        SHOOTER_TUNING.put(new InterpolatingDouble(324.0),new Vector2(Math.toRadians(20.2),4616));
-        SHOOTER_TUNING.put(new InterpolatingDouble(371.0),new Vector2(Math.toRadians(18.7),4863.8));
-        SHOOTER_TUNING.put(new InterpolatingDouble(409.0),new Vector2(Math.toRadians(17.2),5211.5));
-        SHOOTER_TUNING.put(new InterpolatingDouble(491.0),new Vector2(Math.toRadians(15.2),5509.5));
+        SHOOTER_TUNING.put(new InterpolatingDouble(89.13),new Vector2(Math.toRadians(49.59),2421));
+        SHOOTER_TUNING.put(new InterpolatingDouble(130.76),new Vector2(Math.toRadians(38.09),2918));
+        SHOOTER_TUNING.put(new InterpolatingDouble(184.69),new Vector2(Math.toRadians(27.59),3663));
+        SHOOTER_TUNING.put(new InterpolatingDouble(229.17),new Vector2(Math.toRadians(24.08),3861));
+        SHOOTER_TUNING.put(new InterpolatingDouble(286.86),new Vector2(Math.toRadians(21.58),4258));
+        SHOOTER_TUNING.put(new InterpolatingDouble(450.92),new Vector2(Math.toRadians(19.08),4556));
 
 
     }
@@ -72,7 +67,7 @@ public class TargetWithShooterCommand extends CommandBase {
 
         shooterSubsystem.shootFlywheel(angleAndSpeed.y);
         shooterSubsystem.setHoodTargetAngle(angleAndSpeed.x);
-        if (MathUtils.epsilonEquals(shooterSubsystem.getTopFlywheelVelocity(), angleAndSpeed.y, MAXIMUM_ALLOWABLE_VELOCITY_RANGE) && MathUtils.epsilonEquals(shooterSubsystem.getHoodMotorAngle(), angleAndSpeed.x, MAXIMUM_ALLOWABLE_ANGLE_RANGE)) {
+        if (MathUtils.epsilonEquals(shooterSubsystem.getBottomFlywheelVelocity(), angleAndSpeed.y, MAXIMUM_ALLOWABLE_VELOCITY_RANGE) && MathUtils.epsilonEquals(shooterSubsystem.getHoodMotorAngle(), angleAndSpeed.x, MAXIMUM_ALLOWABLE_ANGLE_RANGE)) {
             primaryController.getRawJoystick().setRumble(GenericHID.RumbleType.kRightRumble, 1.0);
         } else {
             primaryController.getRawJoystick().setRumble(GenericHID.RumbleType.kRightRumble, 0.0);

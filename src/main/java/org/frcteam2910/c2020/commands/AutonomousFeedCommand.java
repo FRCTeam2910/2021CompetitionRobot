@@ -22,7 +22,7 @@ public class AutonomousFeedCommand extends CommandBase {
 
     @Override
     public void execute() {
-        if(shooterSubsystem.isTopFlywheelAtTargetVelocity()
+        if(shooterSubsystem.isBottomFlywheelAtTargetVelocity()
                 && visionSubsystem.isOnTarget()) {
             feederSubsystem.spinMotor(0.75);
         }
