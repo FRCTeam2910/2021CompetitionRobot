@@ -87,7 +87,12 @@ public class RobotContainer {
 
 
         primaryController.getRightBumperButton().whileHeld(
-                new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, primaryController).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true)))
+                new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, primaryController)
+                        .alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem,
+                                () -> getDriveForwardAxis().get(true),
+                                () -> getDriveStrafeAxis().get(true)),
+                                new AutoFeedCommand(drivetrainSubsystem, feederSubsystem, shooterSubsystem, visionSubsystem)
+                        )
         );
 
         primaryController.getAButton().whenPressed(

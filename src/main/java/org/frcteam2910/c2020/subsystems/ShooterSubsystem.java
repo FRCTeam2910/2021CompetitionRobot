@@ -21,7 +21,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private static final double FLYWHEEL_ALLOWABLE_ERROR = 200.0;
 
-    private static final double BOTTOM_FLYWHEEL_P = 0.5;
+    private static final double BOTTOM_FLYWHEEL_P = 1.0;
     private static final double BOTTOM_FLYWHEEL_I = 0.0;
     private static final double BOTTOM_FLYWHEEL_D = 0.0;
 
@@ -119,6 +119,17 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withPosition(1, 0)
                 .withSize(1, 1);
 
+    }
+
+    public boolean isHoodAtTargetAngle(){
+        OptionalDouble targetAngle = getHoodTargetAngle();
+        double currentAngle = getHoodMotorAngle();
+
+        if (targetAngle.isEmpty()){
+            return false;
+        }
+
+        return MathUtils.epsilonEquals(targetAngle.getAsDouble(), currentAngle, Math.toRadians(0.5));
     }
 
     public void setFlywheelCurrentLimitEnabled(boolean enabled) {
