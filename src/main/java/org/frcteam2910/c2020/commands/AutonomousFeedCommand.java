@@ -1,11 +1,9 @@
 package org.frcteam2910.c2020.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import org.frcteam2910.c2020.subsystems.DrivetrainSubsystem;
 import org.frcteam2910.c2020.subsystems.FeederSubsystem;
 import org.frcteam2910.c2020.subsystems.ShooterSubsystem;
 import org.frcteam2910.c2020.subsystems.VisionSubsystem;
-import org.frcteam2910.common.math.MathUtils;
 
 public class AutonomousFeedCommand extends CommandBase {
     private ShooterSubsystem shooterSubsystem;
@@ -22,7 +20,7 @@ public class AutonomousFeedCommand extends CommandBase {
 
     @Override
     public void execute() {
-        if(shooterSubsystem.isBottomFlywheelAtTargetVelocity()
+        if(shooterSubsystem.isFlywheelAtTargetVelocity()
                 && visionSubsystem.isOnTarget()) {
             feederSubsystem.spinMotor(0.75);
         }

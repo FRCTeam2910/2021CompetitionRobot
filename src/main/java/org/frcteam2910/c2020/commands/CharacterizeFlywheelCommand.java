@@ -5,14 +5,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import org.frcteam2910.c2020.subsystems.DrivetrainSubsystem;
 import org.frcteam2910.c2020.subsystems.ShooterSubsystem;
-import org.frcteam2910.common.math.RigidTransform2;
-import org.frcteam2910.common.math.Rotation2;
-import org.frcteam2910.common.math.Vector2;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class CharacterizeFlywheelCommand extends CommandBase {
@@ -35,15 +30,15 @@ public class CharacterizeFlywheelCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        shooter.resetTopFlywheelPosition();
+        shooter.resetFlywheelPosition();
         NetworkTableInstance.getDefault().setUpdateRate(10.0e-3);
     }
 
     @Override
     public void execute() {
         double now = Timer.getFPGATimestamp();
-        double position = shooter.getBottomFlywheelPosition();
-        double velocity = shooter.getBottomFlywheelVelocity();
+        double position = shooter.getFlywheelPosition();
+        double velocity = shooter.getFlywheelVelocity();
 
         double battery = RobotController.getBatteryVoltage();
         double motorVoltage = battery * Math.abs(priorAutospeed);

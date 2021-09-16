@@ -23,7 +23,7 @@ public class Constants {
 
     public static final int HOOD_MOTOR_PORT = 5;
 
-    public static final double HOOD_MOTOR_TO_HOOD_GEAR_RATIO = (16.0) * (32.0/18.0) * (48.0/16.0);
+    public static final double HOOD_MOTOR_TO_HOOD_GEAR_RATIO = (16.0) * (32.0 / 18.0) * (48.0 / 16.0);
 
     public static final double HOOD_MIN_ANGLE = Math.toRadians(0);
     public static final double HOOD_MAX_ANGLE = Math.toRadians(61.59);
@@ -33,15 +33,14 @@ public class Constants {
     public static final int LEFT_INTAKE_MOTOR_PORT = 0;
     public static final int RIGHT_INTAKE_MOTOR_PORT = 2;
 
-    public static final int BOTTOM_FLYWHEEL_PRIMARY_MOTOR_PORT = 11;
-    public static final int BOTTOM_FLYWHEEL_SECONDARY_MOTOR_PORT = 13;
-    public static final int TOP_FLYWHEEL_MOTOR_PORT = 12;
+    public static final int FLYWHEEL_PRIMARY_MOTOR_PORT = 11;
+    public static final int FLYWHEEL_SECONDARY_MOTOR_PORT = 13;
+    public static final int FLYWHEEL_TERTIARY_MOTOR_PORT = 12;
 
     public static final int BOTTOM_INTAKE_EXTENSION_SOLENOID = 0;
     public static final int TOP_INTAKE_EXTENSION_SOLENOID = 1;
 
     public static final int PRIMARY_CONTROLLER_PORT = 0;
-    public static final int SECONDARY_CONTROLLER_PORT = 1;
 
     public static final int FEEDER_MOTOR_PORT = 18;
 

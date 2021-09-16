@@ -1,9 +1,7 @@
 package org.frcteam2910.c2020.commands;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.MedianFilter;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpiutil.CircularBuffer;
 import org.frcteam2910.c2020.subsystems.ShooterSubsystem;
 import org.frcteam2910.c2020.subsystems.VisionSubsystem;
 import org.frcteam2910.common.math.MathUtils;
@@ -11,7 +9,6 @@ import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.XboxController;
 import org.frcteam2910.common.util.InterpolatingDouble;
 import org.frcteam2910.common.util.InterpolatingTreeMap;
-import org.frcteam2910.common.util.MovingAverage;
 
 public class TargetWithShooterCommand extends CommandBase {
     private static final InterpolatingTreeMap<InterpolatingDouble, Vector2> SHOOTER_TUNING = new InterpolatingTreeMap<>();
@@ -67,7 +64,7 @@ public class TargetWithShooterCommand extends CommandBase {
 
         shooterSubsystem.shootFlywheel(angleAndSpeed.y);
         shooterSubsystem.setHoodTargetAngle(angleAndSpeed.x);
-        if (MathUtils.epsilonEquals(shooterSubsystem.getBottomFlywheelVelocity(), angleAndSpeed.y, MAXIMUM_ALLOWABLE_VELOCITY_RANGE) && MathUtils.epsilonEquals(shooterSubsystem.getHoodMotorAngle(), angleAndSpeed.x, MAXIMUM_ALLOWABLE_ANGLE_RANGE)) {
+        if (MathUtils.epsilonEquals(shooterSubsystem.getFlywheelVelocity(), angleAndSpeed.y, MAXIMUM_ALLOWABLE_VELOCITY_RANGE) && MathUtils.epsilonEquals(shooterSubsystem.getHoodMotorAngle(), angleAndSpeed.x, MAXIMUM_ALLOWABLE_ANGLE_RANGE)) {
             primaryController.getRawJoystick().setRumble(GenericHID.RumbleType.kRightRumble, 1.0);
         } else {
             primaryController.getRawJoystick().setRumble(GenericHID.RumbleType.kRightRumble, 0.0);

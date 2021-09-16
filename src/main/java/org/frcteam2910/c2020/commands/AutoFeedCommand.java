@@ -30,7 +30,7 @@ public class AutoFeedCommand extends CommandBase {
 
     @Override
     public void execute() {
-        if (visionSubsystem.isOnTarget()&& shooterSubsystem.isBottomFlywheelAtTargetVelocity() && shooterSubsystem.isHoodAtTargetAngle()){
+        if (visionSubsystem.isOnTarget()&& shooterSubsystem.isFlywheelAtTargetVelocity() && shooterSubsystem.isHoodAtTargetAngle()){
             timer.start();
             if(timer.hasElapsed(TIME_UNTIL_FEED)) {
                 feederSubsystem.spinMotor(1.0);
