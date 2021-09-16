@@ -18,8 +18,8 @@ public class RobotContainer {
     private static final double FLYWHEEL_MANUAL_ADJUST_INTERVAL = 50.0;
 
     private final XboxController primaryController = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
-    private final XboxController secondaryController = new XboxController(Constants.SECONDARY_CONTROLLER_PORT);
 
+    private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
     private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
     private final FeederSubsystem feederSubsystem = new FeederSubsystem();
     private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
@@ -40,12 +40,14 @@ public class RobotContainer {
         primaryController.getLeftXAxis().setInverted(true);
         primaryController.getRightXAxis().setInverted(true);
 
+        CommandScheduler.getInstance().registerSubsystem(climberSubsystem);
         CommandScheduler.getInstance().registerSubsystem(intakeSubsystem);
         CommandScheduler.getInstance().registerSubsystem(shooterSubsystem);
         CommandScheduler.getInstance().registerSubsystem(visionSubsystem);
         CommandScheduler.getInstance().registerSubsystem(drivetrainSubsystem);
         CommandScheduler.getInstance().registerSubsystem(feederSubsystem);
 
+        CommandScheduler.getInstance().setDefaultCommand(climberSubsystem, new DefaultClimberCommand(climberSubsystem));
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
         //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.9));
 
@@ -108,8 +110,9 @@ public class RobotContainer {
 
         primaryController.getYButton().whenPressed(new HomeHoodMotorCommand(shooterSubsystem));
 
-        secondaryController.getAButton().whileHeld(new SetHoodAngle(shooterSubsystem, Constants.HOOD_MIN_ANGLE));
-
+        // Climber movement
+        primaryController.getDPadButton(DPadButton.Direction.UP).whileHeld(new MoveClimberCommand(climberSubsystem, 0.5));
+        primaryController.getDPadButton(DPadButton.Direction.DOWN).whileHeld(new MoveClimberCommand(climberSubsystem, -0.5));
 
 //        // Manual hood adjustment
 //        primaryController.getDPadButton(DPadButton.Direction.DOWN).whenPressed(
@@ -156,7 +159,6 @@ public class RobotContainer {
         return intakeSubsystem;
     }
 
-
     public ShooterSubsystem getShooterSubsystem() {
         return shooterSubsystem;
     }
@@ -167,9 +169,5 @@ public class RobotContainer {
 
     public XboxController getPrimaryController() {
         return primaryController;
-    }
-
-    public XboxController getSecondaryController() {
-        return secondaryController;
     }
 }

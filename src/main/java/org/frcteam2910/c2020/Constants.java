@@ -48,5 +48,8 @@ public class Constants {
     public static final int FEEDER_IS_FULL_SENSOR_PORT = 2;
     public static final int FEEDER_INTAKE_BALL_SENSOR_PORT = 1;
 
+    public static final int CLIMBER_LOCK_SOLENOID_PORT = 4;
+    public static final int CLIMBER_MOTOR_PORT = 14;
+
     public static final int PIGEON_PORT = 20;
 }
