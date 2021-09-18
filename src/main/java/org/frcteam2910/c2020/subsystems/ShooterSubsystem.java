@@ -23,7 +23,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private static final double FLYWHEEL_ALLOWABLE_ERROR = 200.0;
 
-    private static final double FLYWHEEL_P = 1.0;
+    private static final double FLYWHEEL_P = 0.5;
     private static final double FLYWHEEL_I = 0.0;
     private static final double FLYWHEEL_D = 0.0;
 
@@ -80,7 +80,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
 
         flywheelSecondaryMotor.follow(flywheelPrimaryMotor);
         flywheelTertiaryMotor.follow(flywheelPrimaryMotor);
-        flywheelTertiaryMotor.setInverted(TalonFXInvertType.OpposeMaster);
+        flywheelTertiaryMotor.setInverted(TalonFXInvertType.Clockwise);
 
         TalonFXConfiguration hoodConfiguration = new TalonFXConfiguration();
         hoodConfiguration.slot0.kP = HOOD_ANGLE_P;

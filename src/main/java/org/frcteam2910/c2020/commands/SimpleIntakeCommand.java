@@ -57,7 +57,7 @@ public class SimpleIntakeCommand extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         feederSubsystem.spinMotor(0.0);
-        intake.setTopExtended(this.isFifthBallAtIntake);//Keep the top intake down if we have a fifth ball
+//        intake.setTopExtended(this.isFifthBallAtIntake);//Keep the top intake down if we have a fifth ball
         intake.setMotorOutput(0.0);
         this.isFifthBallAtIntake = false;
         controller.getRawJoystick().setRumble(GenericHID.RumbleType.kRightRumble,0.0);

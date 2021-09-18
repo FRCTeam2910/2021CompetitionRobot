@@ -19,7 +19,7 @@ public class DefaultShooterCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        shooter.setFlywheelCurrentLimitEnabled(false);
+        shooter.setFlywheelCurrentLimitEnabled(true);
     }
 
     @Override

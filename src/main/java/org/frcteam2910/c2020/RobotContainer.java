@@ -1,6 +1,7 @@
 package org.frcteam2910.c2020;
 
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.c2020.subsystems.*;
 import org.frcteam2910.c2020.util.AutonomousChooser;
@@ -19,6 +20,8 @@ public class RobotContainer {
 
     private final XboxController primaryController = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
 
+    private final Superstructure superstructure = new Superstructure();
+
     private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
     private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
     private final FeederSubsystem feederSubsystem = new FeederSubsystem();
@@ -31,7 +34,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         try {
-            autonomousTrajectories  = new AutonomousTrajectories(DrivetrainSubsystem.TRAJECTORY_CONSTRAINTS);
+            autonomousTrajectories = new AutonomousTrajectories(DrivetrainSubsystem.TRAJECTORY_CONSTRAINTS);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -51,10 +54,10 @@ public class RobotContainer {
         CommandScheduler.getInstance().setDefaultCommand(drivetrainSubsystem, new DriveCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
         //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem, new FeederIntakeWhenNotFullCommand(feederSubsystem, 0.9));
 
-        //CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new ManuallyAdjustShooterCommand(shooterSubsystem));
+//        CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new ManuallyAdjustShooterCommand(shooterSubsystem));
         CommandScheduler.getInstance().setDefaultCommand(shooterSubsystem, new DefaultShooterCommand(shooterSubsystem, 4000, Constants.HOOD_MAX_ANGLE));
         CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem, new ExtendBottomIntakeCommand(intakeSubsystem));//Remove this command as it is not needed; make the field true in the intake subsystem
-        CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem,new DefaultIntakeCommand(intakeSubsystem,feederSubsystem));
+        CommandScheduler.getInstance().setDefaultCommand(intakeSubsystem, new DefaultIntakeCommand(intakeSubsystem, feederSubsystem, superstructure));
 
         //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem,new RetractTopIntakeWhenNoFifthBallCommand(feederSubsystem,intakeSubsystem));
 
@@ -73,7 +76,9 @@ public class RobotContainer {
 
         primaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setTopExtended(true));
 
-        primaryController.getLeftBumperButton().whileHeld(new SimpleIntakeCommand(intakeSubsystem, feederSubsystem, primaryController,1.0,0.9));
+        primaryController.getLeftBumperButton().whileHeld(new SimpleIntakeCommand(intakeSubsystem, feederSubsystem, primaryController, 1.0, 0.9));
+        primaryController.getLeftBumperButton().whenReleased(
+                new RetractIntakeCommand(feederSubsystem, intakeSubsystem, superstructure).withTimeout(1.0));
 
 //        primaryController.getLeftBumperButton().whileHeld(
 //                new SimpleIntakeCommand(intakeSubsystem,feederSubsystem, -1.0,0.9).withTimeout(0.25)
@@ -81,8 +86,7 @@ public class RobotContainer {
         //primaryController.getLeftBumperButton().whenReleased(new InstantCommand(() -> intakeSubsystem.setTopExtended(feederSubsystem.isBallAtIntake())));
 
 
-
-        primaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(new SpinFeederCommand(feederSubsystem, intakeSubsystem ,-0.5));
+        primaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(new SpinFeederCommand(feederSubsystem, intakeSubsystem, -0.5));
 
 
         primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
@@ -91,8 +95,8 @@ public class RobotContainer {
         primaryController.getRightBumperButton().whileHeld(
                 new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, primaryController)
                         .alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem,
-                                () -> getDriveForwardAxis().get(true),
-                                () -> getDriveStrafeAxis().get(true)),
+                                        () -> getDriveForwardAxis().get(true),
+                                        () -> getDriveStrafeAxis().get(true)),
                                 new AutoFeedCommand(drivetrainSubsystem, feederSubsystem, shooterSubsystem, visionSubsystem)
                         )
         );
@@ -102,32 +106,37 @@ public class RobotContainer {
         );
         primaryController.getAButton().whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
 
-        primaryController.getBButton().whileHeld(new IntakeCommand(intakeSubsystem, feederSubsystem, -1, true));
+        primaryController.getXButton().whenPressed(new HomeHoodMotorCommand(shooterSubsystem));
 
-        primaryController.getXButton().toggleWhenPressed(new TranslationalDriveCommand(drivetrainSubsystem,getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
+        primaryController.getBButton().whenPressed(() -> {
+            Command command = CommandScheduler.getInstance().requiring(shooterSubsystem);
+            if (command != null) {
+                command.cancel();
+            }
+        });
 
         //primaryController.getAButton().whileHeld(new ManuallyAdjustShooterCommand(shooterSubsystem).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true))));
 
-        primaryController.getYButton().whenPressed(new HomeHoodMotorCommand(shooterSubsystem));
+        primaryController.getYButton().whenPressed(new ReverseClimbCommand(climberSubsystem, superstructure));
 
         // Climber movement
-        primaryController.getDPadButton(DPadButton.Direction.UP).whileHeld(new MoveClimberCommand(climberSubsystem, 0.5));
-        primaryController.getDPadButton(DPadButton.Direction.DOWN).whileHeld(new MoveClimberCommand(climberSubsystem, -0.5));
+        primaryController.getDPadButton(DPadButton.Direction.UP).whileHeld(new MoveClimberCommand(climberSubsystem, shooterSubsystem, 0.4));
+        primaryController.getDPadButton(DPadButton.Direction.DOWN).whileHeld(new MoveClimberCommand(climberSubsystem, shooterSubsystem, -1.0));
 
-//        // Manual hood adjustment
+        // Manual hood adjustment
 //        primaryController.getDPadButton(DPadButton.Direction.DOWN).whenPressed(
 //                () -> shooterSubsystem.setHoodTargetAngle(shooterSubsystem.getHoodTargetAngle().orElse(Constants.HOOD_MAX_ANGLE) + HOOD_MANUAL_ADJUST_INTERVAL)
 //        );
 //        primaryController.getDPadButton(DPadButton.Direction.UP).whenPressed(
 //                () -> shooterSubsystem.setHoodTargetAngle(shooterSubsystem.getHoodTargetAngle().orElse(Constants.HOOD_MAX_ANGLE) - HOOD_MANUAL_ADJUST_INTERVAL)
 //        );
-//
-//        // Manual flywheel adjustment
+
+        // Manual flywheel adjustment
 //        primaryController.getDPadButton(DPadButton.Direction.RIGHT).whenPressed(
-//                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getBottomFlywheelTargetVelocity() + FLYWHEEL_MANUAL_ADJUST_INTERVAL)
+//                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getFlywheelTargetVelocity() + FLYWHEEL_MANUAL_ADJUST_INTERVAL)
 //        );
 //        primaryController.getDPadButton(DPadButton.Direction.LEFT).whenPressed(
-//                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getBottomFlywheelTargetVelocity() - FLYWHEEL_MANUAL_ADJUST_INTERVAL)
+//                () -> shooterSubsystem.shootFlywheel(shooterSubsystem.getFlywheelTargetVelocity() - FLYWHEEL_MANUAL_ADJUST_INTERVAL)
 //        );
     }
 
@@ -151,11 +160,15 @@ public class RobotContainer {
         return drivetrainSubsystem;
     }
 
+    public Superstructure getSuperstructure() {
+        return superstructure;
+    }
+
     public FeederSubsystem getFeederSubsystem() {
         return feederSubsystem;
     }
 
-    public IntakeSubsystem getIntakeSubsystem(){
+    public IntakeSubsystem getIntakeSubsystem() {
         return intakeSubsystem;
     }
 
@@ -164,7 +177,7 @@ public class RobotContainer {
     }
 
     public VisionSubsystem getVisionSubsystem() {
-        return  visionSubsystem;
+        return visionSubsystem;
     }
 
     public XboxController getPrimaryController() {

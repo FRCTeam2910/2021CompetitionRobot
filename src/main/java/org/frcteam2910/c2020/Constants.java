@@ -1,7 +1,7 @@
 package org.frcteam2910.c2020;
 
 public class Constants {
-    public static final int DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR = 6;
+    public static final int DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR = 14;
     public static final int DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR = 3;
     public static final int DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR = 8;
     public static final int DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR = 9;
@@ -30,8 +30,7 @@ public class Constants {
 
     public static final double BOTTOM_FLYWHEEL_GEAR_RATIO = 1.5;
 
-    public static final int LEFT_INTAKE_MOTOR_PORT = 0;
-    public static final int RIGHT_INTAKE_MOTOR_PORT = 2;
+    public static final int INTAKE_MOTOR_PORT = 2;
 
     public static final int FLYWHEEL_PRIMARY_MOTOR_PORT = 11;
     public static final int FLYWHEEL_SECONDARY_MOTOR_PORT = 13;
@@ -47,8 +46,10 @@ public class Constants {
     public static final int FEEDER_IS_FULL_SENSOR_PORT = 2;
     public static final int FEEDER_INTAKE_BALL_SENSOR_PORT = 1;
 
-    public static final int CLIMBER_LOCK_SOLENOID_PORT = 4;
-    public static final int CLIMBER_MOTOR_PORT = 14;
+    public static final int CLIMBER_LOCK_SOLENOID_PORT = 2;
+    public static final int CLIMBER_MOTOR_PORT = 6;
 
     public static final int PIGEON_PORT = 20;
+
+    public static final int PRESSURE_SENSOR_PORT = 0;
 }

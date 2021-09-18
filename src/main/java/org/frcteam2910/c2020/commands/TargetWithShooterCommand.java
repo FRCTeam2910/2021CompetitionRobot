@@ -35,14 +35,12 @@ public class TargetWithShooterCommand extends CommandBase {
 
 
         //Good numbers for 3d port
-        SHOOTER_TUNING.put(new InterpolatingDouble(89.13),new Vector2(Math.toRadians(49.59),2421));
-        SHOOTER_TUNING.put(new InterpolatingDouble(130.76),new Vector2(Math.toRadians(38.09),2918));
-        SHOOTER_TUNING.put(new InterpolatingDouble(184.69),new Vector2(Math.toRadians(27.59),3663));
-        SHOOTER_TUNING.put(new InterpolatingDouble(229.17),new Vector2(Math.toRadians(24.08),3861));
-        SHOOTER_TUNING.put(new InterpolatingDouble(286.86),new Vector2(Math.toRadians(21.58),4258));
-        SHOOTER_TUNING.put(new InterpolatingDouble(450.92),new Vector2(Math.toRadians(19.08),4556));
-
-
+        SHOOTER_TUNING.put(new InterpolatingDouble(92.7),new Vector2(Math.toRadians(46.7),2580));
+        SHOOTER_TUNING.put(new InterpolatingDouble(123.8),new Vector2(Math.toRadians(44.2),2676));
+        SHOOTER_TUNING.put(new InterpolatingDouble(155.1),new Vector2(Math.toRadians(35.2),3123));
+        SHOOTER_TUNING.put(new InterpolatingDouble(186.8),new Vector2(Math.toRadians(28.1),3773));
+        SHOOTER_TUNING.put(new InterpolatingDouble(243.6),new Vector2(Math.toRadians(24.6),4269));
+        SHOOTER_TUNING.put(new InterpolatingDouble(328.0),new Vector2(Math.toRadians(19.2),4716));
     }
 
     public TargetWithShooterCommand(ShooterSubsystem shooterSubsystem, VisionSubsystem visionSubsystem, XboxController primaryController) {
