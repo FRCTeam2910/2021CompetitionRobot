@@ -2,6 +2,7 @@ package org.frcteam2910.c2020;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.c2020.subsystems.*;
 import org.frcteam2910.c2020.util.AutonomousChooser;
@@ -102,9 +103,9 @@ public class RobotContainer {
         );
 
         primaryController.getAButton().whenPressed(
-                new BasicDriveCommand(drivetrainSubsystem, new Vector2(-0.5, 0.0), 0.0, false).withTimeout(0.12)
+                new BasicDriveCommand(drivetrainSubsystem, new Vector2(-0.5, 0.0), 0.0, false).withTimeout(0.3)
         );
-        primaryController.getAButton().whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
+        primaryController.getAButton().whileHeld(new WaitCommand(0.6).andThen(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem)));
 
         primaryController.getXButton().whenPressed(new HomeHoodMotorCommand(shooterSubsystem));
 
@@ -120,7 +121,7 @@ public class RobotContainer {
         primaryController.getYButton().whenPressed(new ReverseClimbCommand(climberSubsystem, superstructure));
 
         // Climber movement
-        primaryController.getDPadButton(DPadButton.Direction.UP).whileHeld(new MoveClimberCommand(climberSubsystem, shooterSubsystem, 0.4));
+        primaryController.getDPadButton(DPadButton.Direction.UP).whileHeld(new MoveClimberCommand(climberSubsystem, shooterSubsystem, 1.0));
         primaryController.getDPadButton(DPadButton.Direction.DOWN).whileHeld(new MoveClimberCommand(climberSubsystem, shooterSubsystem, -1.0));
 
         // Manual hood adjustment
