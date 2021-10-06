@@ -3,6 +3,7 @@ package org.frcteam2910.c2020.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import org.frcteam2910.c2020.subsystems.FeederSubsystem;
 import org.frcteam2910.c2020.subsystems.ShooterSubsystem;
+import org.frcteam2910.c2020.subsystems.IntakeSubsystem;
 import org.frcteam2910.common.util.InterpolatingDouble;
 import org.frcteam2910.common.util.InterpolatingTreeMap;
 
@@ -12,6 +13,7 @@ public class FeedBallsToShooterCommand extends CommandBase {
 
     private final FeederSubsystem feederSubsystem;
     private final ShooterSubsystem shooterSubsystem;
+    private final IntakeSubsystem intakeSubsystem;
 
 
     static {
@@ -26,9 +28,10 @@ public class FeedBallsToShooterCommand extends CommandBase {
         SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5700.0), new InterpolatingDouble(1.0));
     }
 
-    public FeedBallsToShooterCommand(FeederSubsystem feederSubsystem, ShooterSubsystem shooterSubsystem) {
+    public FeedBallsToShooterCommand(FeederSubsystem feederSubsystem, ShooterSubsystem shooterSubsystem, IntakeSubsystem intakeSubsystem) {
         this.feederSubsystem = feederSubsystem;
         this.shooterSubsystem = shooterSubsystem;
+        this.intakeSubsystem = intakeSubsystem;
 
         addRequirements(feederSubsystem);
     }
@@ -52,10 +55,16 @@ public class FeedBallsToShooterCommand extends CommandBase {
             feederSubsystem.spinMotor(SLOW_FEEDER_OUTPUT_MAP.getInterpolated(new InterpolatingDouble(shooterSubsystem.getFlywheelVelocity())).value);
         }
 
+        if(feederSubsystem.isFifthBallAtIntake()) {
+            intakeSubsystem.setMotorOutput(0.5);
+        } else {
+            intakeSubsystem.setMotorOutput(0.0);
+        }
     }
 
     @Override
     public void end(boolean interrupted) {
         feederSubsystem.spinMotor(0.0);
+        intakeSubsystem.setMotorOutput(0.0);
     }
 }

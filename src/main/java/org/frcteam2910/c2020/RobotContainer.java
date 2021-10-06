@@ -90,7 +90,7 @@ public class RobotContainer {
         primaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(new SpinFeederCommand(feederSubsystem, intakeSubsystem, -0.5));
 
 
-        primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem));
+        primaryController.getRightTriggerAxis().getButton(0.5).whileHeld(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem, intakeSubsystem));
 
 
         primaryController.getRightBumperButton().whileHeld(
@@ -98,14 +98,14 @@ public class RobotContainer {
                         .alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem,
                                         () -> getDriveForwardAxis().get(true),
                                         () -> getDriveStrafeAxis().get(true)),
-                                new AutoFeedCommand(drivetrainSubsystem, feederSubsystem, shooterSubsystem, visionSubsystem)
+                                new AutoFeedCommand(drivetrainSubsystem, feederSubsystem, shooterSubsystem, visionSubsystem, intakeSubsystem)
                         )
         );
 
         primaryController.getAButton().whenPressed(
                 new BasicDriveCommand(drivetrainSubsystem, new Vector2(-0.5, 0.0), 0.0, false).withTimeout(0.3)
         );
-        primaryController.getAButton().whileHeld(new WaitCommand(0.6).andThen(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem)));
+        primaryController.getAButton().whileHeld(new WaitCommand(0.6).andThen(new FeedBallsToShooterCommand(feederSubsystem, shooterSubsystem, intakeSubsystem)));
 
         primaryController.getXButton().whenPressed(new HomeHoodMotorCommand(shooterSubsystem));
 
