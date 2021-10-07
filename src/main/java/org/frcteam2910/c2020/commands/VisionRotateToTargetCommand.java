@@ -54,7 +54,7 @@ public class VisionRotateToTargetCommand extends CommandBase {
         Vector2 translationalVelocity = new Vector2(xAxis.getAsDouble(), yAxis.getAsDouble());
 
         double rotationalVelocity = 0.0;
-        if(visionSubsystem.hasTarget()) {
+        if (visionSubsystem.hasTarget()) {
             double currentAngle = drivetrain.getPose().rotation.toRadians();
             double targetAngle = visionSubsystem.getAngleToTarget().getAsDouble();
             controller.setSetpoint(targetAngle);
@@ -68,12 +68,12 @@ public class VisionRotateToTargetCommand extends CommandBase {
                 );
             }
         }
-        drivetrain.drive(translationalVelocity, rotationalVelocity, true,false);
+        drivetrain.drive(translationalVelocity, rotationalVelocity, true);
     }
 
     @Override
     public void end(boolean interrupted) {
         visionSubsystem.setSnapshotEnabled(false);
-        drivetrain.drive(Vector2.ZERO,0,false,false);
+        drivetrain.drive(Vector2.ZERO, 0, false);
     }
 }

@@ -45,14 +45,6 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     private static final int MAX_LATENCY_COMPENSATION_MAP_ENTRIES = 25;
 
-    private final double HEADING_TO_HOLD = 0;
-
-    private boolean shouldHoldHeading = false;
-
-    private final PidConstants HOLD_HEADING_PID_CONSTANTS = new PidConstants(0.007, 0, 0.0);
-    private PidController holdHeadingPIDController = new PidController(HOLD_HEADING_PID_CONSTANTS);
-
-
     private final HolonomicMotionProfiledTrajectoryFollower follower = new HolonomicMotionProfiledTrajectoryFollower(
             new PidConstants(0.4, 0.0, 0.025),
             new PidConstants(5.0, 0.0, 0.0),
@@ -87,7 +79,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     @GuardedBy("kinematicsLock")
     private RigidTransform2 pose = RigidTransform2.ZERO;
     @GuardedBy("kinematicsLock")
-    private InterpolatingTreeMap<InterpolatingDouble, RigidTransform2> latencyCompensationMap = new InterpolatingTreeMap<>();
+    private final InterpolatingTreeMap<InterpolatingDouble, RigidTransform2> latencyCompensationMap = new InterpolatingTreeMap<>();
     @GuardedBy("kinematicsLock")
     private Vector2 velocity = Vector2.ZERO;
     @GuardedBy("kinematicsLock")
@@ -106,9 +98,6 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         synchronized (sensorLock) {
             gyroscope.setInverted(false);
         }
-
-        holdHeadingPIDController.setContinuous(true);
-        holdHeadingPIDController.setInputRange(0, 360);
 
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
@@ -184,10 +173,6 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withPosition(1, 1)
                 .withSize(1, 1);
 
-        tab.addBoolean("Hold Heading", () -> shouldHoldHeading)
-                .withPosition(1, 2)
-                .withSize(1, 1);
-
         tab.addNumber("Rotation Voltage", () -> {
             HolonomicDriveSignal signal;
             synchronized (stateLock) {
@@ -221,16 +206,9 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
-    public void drive(Vector2 translationalVelocity, double rotationalVelocity, boolean isFieldOriented, boolean shouldHoldHeading) {
+    public void drive(Vector2 translationalVelocity, double rotationalVelocity, boolean isFieldOriented) {
         synchronized (stateLock) {
-
-            if (shouldHoldHeading) {
-                holdHeadingPIDController.setSetpoint(HEADING_TO_HOLD);
-                rotationalVelocity = holdHeadingPIDController.calculate(getPose().rotation.toDegrees(), 0.2);
-            }
-
             driveSignal = new HolonomicDriveSignal(translationalVelocity, rotationalVelocity, isFieldOriented);
-
         }
     }
 
@@ -350,11 +328,5 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     public TrajectoryFollower<HolonomicDriveSignal> getFollower() {
         return follower;
     }
-
-
-    public void setShouldHoldHeading() {
-        shouldHoldHeading = !shouldHoldHeading;
-    }
-
 
 }
