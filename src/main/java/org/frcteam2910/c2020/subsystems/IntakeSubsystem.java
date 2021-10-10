@@ -15,6 +15,8 @@ import org.frcteam2910.common.robot.UpdateManager;
 
 
 public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
+    public static final double MIN_INTAKE_MOVEMENT_PRESSURE = 60.0;
+
     private TalonFX right_intake_motor = new TalonFX(Constants.INTAKE_MOTOR_PORT);
     private Solenoid topExtentionSolenoid = new Solenoid(Constants.TOP_INTAKE_EXTENSION_SOLENOID);
     private Solenoid bottomExtensionSolenoid = new Solenoid(Constants.BOTTOM_INTAKE_EXTENSION_SOLENOID);

@@ -22,7 +22,7 @@ public class RetractIntakeCommand extends CommandBase {
     public void execute() {
         intake.setMotorOutput(-1.0);
 
-        if (superstructure.getCurrentPressure() > 40.0 && !feeder.isFifthBallAtIntake()) {
+        if (superstructure.getCurrentPressure() > IntakeSubsystem.MIN_INTAKE_MOVEMENT_PRESSURE && !feeder.isFifthBallAtIntake()) {
             intake.setTopExtended(false);
         }
     }

@@ -10,9 +10,6 @@ public class Superstructure {
 
     public Superstructure() {
         pressureSensor = new AnalogInput(Constants.PRESSURE_SENSOR_PORT);
-
-        ShuffleboardTab tab = Shuffleboard.getTab("Superstructure");
-        tab.addNumber("Pressure", this::getCurrentPressure);
     }
 
     public double getCurrentPressure() {

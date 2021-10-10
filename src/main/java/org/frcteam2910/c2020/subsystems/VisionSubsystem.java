@@ -125,6 +125,15 @@ public class VisionSubsystem implements Subsystem {
         return isInnerTargetVisible;
     }
 
+    public Vector2 getPredictedPostition(){
+        Vector2 position = new Vector2(xFromTarget, yFromTarget);
+        return position;
+    }
+
+    public boolean doesIntakeHaveTarget(){
+        return intakeHasTarget;
+    }
+
     @Override
     public void periodic() {
         // Shooter limelight

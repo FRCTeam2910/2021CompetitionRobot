@@ -7,6 +7,7 @@ import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.c2020.subsystems.*;
 import org.frcteam2910.c2020.util.AutonomousChooser;
 import org.frcteam2910.c2020.util.AutonomousTrajectories;
+import org.frcteam2910.c2020.util.DriverReadout;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.input.Axis;
@@ -18,6 +19,7 @@ import java.io.IOException;
 public class RobotContainer {
     private static final double HOOD_MANUAL_ADJUST_INTERVAL = Math.toRadians(0.5);
     private static final double FLYWHEEL_MANUAL_ADJUST_INTERVAL = 50.0;
+
 
     private final XboxController primaryController = new XboxController(Constants.PRIMARY_CONTROLLER_PORT);
 
@@ -32,6 +34,8 @@ public class RobotContainer {
 
     private AutonomousTrajectories autonomousTrajectories;
     private final AutonomousChooser autonomousChooser;
+
+    private final DriverReadout driverReadout;
 
     public RobotContainer() {
         try {
@@ -63,6 +67,8 @@ public class RobotContainer {
         //CommandScheduler.getInstance().setDefaultCommand(feederSubsystem,new RetractTopIntakeWhenNoFifthBallCommand(feederSubsystem,intakeSubsystem));
 
 
+        driverReadout = new DriverReadout(this);
+
         configureButtonBindings();
     }
 
@@ -74,18 +80,22 @@ public class RobotContainer {
                 new SpinFlywheelCommand(shooterSubsystem, 0.0)
         );
 
-
-        primaryController.getLeftBumperButton().whenPressed(() -> intakeSubsystem.setTopExtended(true));
-
-        primaryController.getLeftBumperButton().whileHeld(new SimpleIntakeCommand(intakeSubsystem, feederSubsystem, primaryController, 1.0, 0.9));
+        primaryController.getLeftBumperButton().whileHeld(
+                new SimpleIntakeCommand(intakeSubsystem, feederSubsystem, primaryController, 1.0, 0.9)
+                        .alongWith(
+                                new DriveWithSetRotationCommand(drivetrainSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), 0.0)
+                                        .raceWith(new WaitCommand(0.5)
+                                                .andThen(new WaitUntilTargetFoundCommand(visionSubsystem)))
+                                        .andThen(new DriveToLoadingStationCommand(drivetrainSubsystem, visionSubsystem, driverReadout::getSelectedLoadingBay))
+                                )
+                        );
         primaryController.getLeftBumperButton().whenReleased(
                 new RetractIntakeCommand(feederSubsystem, intakeSubsystem, superstructure).withTimeout(1.0));
 
-//        primaryController.getLeftBumperButton().whileHeld(
-//                new SimpleIntakeCommand(intakeSubsystem,feederSubsystem, -1.0,0.9).withTimeout(0.25)
-//                        .andThen(new SimpleIntakeCommand(intakeSubsystem, feederSubsystem,1.0,0.9)));
-        //primaryController.getLeftBumperButton().whenReleased(new InstantCommand(() -> intakeSubsystem.setTopExtended(feederSubsystem.isBallAtIntake())));
-
+        primaryController.getLeftTriggerAxis().getButton(0.5).whenPressed(() -> intakeSubsystem.setTopExtended(true));
+        primaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(new SimpleIntakeCommand(intakeSubsystem, feederSubsystem, primaryController, 1.0, 0.9));
+        primaryController.getLeftTriggerAxis().getButton(0.5).whenReleased(
+                new RetractIntakeCommand(feederSubsystem, intakeSubsystem, superstructure).withTimeout(1.0));
 
         primaryController.getLeftTriggerAxis().getButton(0.5).whileHeld(new SpinFeederCommand(feederSubsystem, intakeSubsystem, -0.5));
 
@@ -123,6 +133,8 @@ public class RobotContainer {
         // Climber movement
         primaryController.getDPadButton(DPadButton.Direction.UP).whileHeld(new MoveClimberCommand(climberSubsystem, shooterSubsystem, 1.0));
         primaryController.getDPadButton(DPadButton.Direction.DOWN).whileHeld(new MoveClimberCommand(climberSubsystem, shooterSubsystem, -1.0));
+
+        primaryController.getDPadButton(DPadButton.Direction.LEFT).whileHeld(new SpinFeederCommand(feederSubsystem, intakeSubsystem, -0.5));
 
         // Manual hood adjustment
 //        primaryController.getDPadButton(DPadButton.Direction.DOWN).whenPressed(
@@ -183,5 +195,9 @@ public class RobotContainer {
 
     public XboxController getPrimaryController() {
         return primaryController;
+    }
+
+    public AutonomousChooser getAutonomousChooser() {
+        return autonomousChooser;
     }
 }

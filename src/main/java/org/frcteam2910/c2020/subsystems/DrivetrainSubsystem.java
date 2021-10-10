@@ -32,14 +32,14 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     public static final double WHEELBASE = 1.0;
 
     public static final DrivetrainFeedforwardConstants FEEDFORWARD_CONSTANTS = new DrivetrainFeedforwardConstants(
-            0.060602,
-            0.0070246,
-            0.53955
+            0.042746,
+            0.0032181,
+            0.30764
     );
 
     public static final TrajectoryConstraint[] TRAJECTORY_CONSTRAINTS = {
             new FeedforwardConstraint(11.0, FEEDFORWARD_CONSTANTS.getVelocityConstant(), FEEDFORWARD_CONSTANTS.getAccelerationConstant(), false),
-            new MaxAccelerationConstraint(15.0 * 12.0),
+            new MaxAccelerationConstraint(12.5 * 12.0),
             new CentripetalAccelerationConstraint(15 * 12.0)
     };
 
@@ -325,7 +325,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         odometryAngleEntry.setDouble(getPose().rotation.toDegrees());
     }
 
-    public TrajectoryFollower<HolonomicDriveSignal> getFollower() {
+    public HolonomicMotionProfiledTrajectoryFollower getFollower() {
         return follower;
     }
 

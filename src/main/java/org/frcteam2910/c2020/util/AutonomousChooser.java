@@ -1,7 +1,5 @@
 package org.frcteam2910.c2020.util;
 
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -16,23 +14,20 @@ import org.frcteam2910.common.math.Rotation2;
 public class AutonomousChooser {
     private final AutonomousTrajectories trajectories;
 
-    private static SendableChooser<AutonomousMode> autonomousModeChooser;
+    private SendableChooser<AutonomousMode> autonomousModeChooser = new SendableChooser<>();
 
-    static {
-        ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous settings");
+    public AutonomousChooser(AutonomousTrajectories trajectories) {
+        this.trajectories = trajectories;
 
-        autonomousModeChooser = new SendableChooser<>();
         autonomousModeChooser.setDefaultOption("8 Ball Auto", AutonomousMode.EIGHT_BALL);
         autonomousModeChooser.addOption("8 Ball Compatible", AutonomousMode.EIGHT_BALL_COMPATIBLE);
         autonomousModeChooser.addOption("10 Ball Auto", AutonomousMode.TEN_BALL);
         autonomousModeChooser.addOption("Circuit 10 Ball Auto", AutonomousMode.TEN_BALL_CIRCUIT);
         autonomousModeChooser.addOption("Simple Shoot Three", AutonomousMode.SIMPLE_SHOOT_THREE);
-        autoTab.add("Mode", autonomousModeChooser)
-        .withSize(3, 1);
     }
 
-    public AutonomousChooser(AutonomousTrajectories trajectories) {
-        this.trajectories = trajectories;
+    public SendableChooser<AutonomousMode> getAutonomousModeChooser() {
+        return autonomousModeChooser;
     }
 
     private SequentialCommandGroup get10BallAutoCommand(RobotContainer container) {

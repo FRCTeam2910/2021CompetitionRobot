@@ -26,7 +26,7 @@ public class DefaultIntakeCommand extends CommandBase {
         if (feederSubsystem.isFifthBallAtIntake()) {
             intakeSubsystem.setTopExtended(true);
         } else {
-            if (superstructure.getCurrentPressure() >= 40.0) {
+            if (superstructure.getCurrentPressure() >= IntakeSubsystem.MIN_INTAKE_MOVEMENT_PRESSURE) {
                 intakeSubsystem.setTopExtended(false);
             }
         }
