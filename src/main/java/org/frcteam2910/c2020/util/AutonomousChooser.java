@@ -19,10 +19,8 @@ public class AutonomousChooser {
     public AutonomousChooser(AutonomousTrajectories trajectories) {
         this.trajectories = trajectories;
 
-        autonomousModeChooser.setDefaultOption("8 Ball Auto", AutonomousMode.EIGHT_BALL);
-        autonomousModeChooser.addOption("8 Ball Compatible", AutonomousMode.EIGHT_BALL_COMPATIBLE);
-        autonomousModeChooser.addOption("10 Ball Auto", AutonomousMode.TEN_BALL);
-        autonomousModeChooser.addOption("Circuit 10 Ball Auto", AutonomousMode.TEN_BALL_CIRCUIT);
+        autonomousModeChooser.setDefaultOption("6 Ball Auto", AutonomousMode.EIGHT_BALL);
+        autonomousModeChooser.addOption("6 Ball Compatible", AutonomousMode.EIGHT_BALL_COMPATIBLE);
         autonomousModeChooser.addOption("Simple Shoot Three", AutonomousMode.SIMPLE_SHOOT_THREE);
     }
 
@@ -47,6 +45,7 @@ public class AutonomousChooser {
 
         //reset robot pose
         resetRobotPose(command, container, trajectories.getEightBallAutoPartOne());
+        command.addCommands(new HomeHoodMotorCommand(container.getShooterSubsystem()));
         //follow first trajectory and shoot
         follow(command, container, trajectories.getEightBallAutoPartOne());
         shootAtTarget(command, container, 1.5);
@@ -64,6 +63,7 @@ public class AutonomousChooser {
 
         //reset robot pose
         resetRobotPose(command, container, trajectories.getEightBallCompatiblePartOne());
+        command.addCommands(new HomeHoodMotorCommand(container.getShooterSubsystem()));
         //follow first trajectory and shoot
         follow(command, container, trajectories.getEightBallCompatiblePartOne());
         shootAtTarget(command, container);

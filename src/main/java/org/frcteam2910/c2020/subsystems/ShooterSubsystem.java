@@ -21,7 +21,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
     private static final double FLYWHEEL_FEEDFORWARD_COEFFICIENT = 0.0012148;
     private static final double FLYWHEEL_STATIC_FRICTION_CONSTANT = 0.5445;
 
-    private static final double FLYWHEEL_ALLOWABLE_ERROR = 200.0;
+    private static final double FLYWHEEL_ALLOWABLE_ERROR = 300.0;
 
     private static final double FLYWHEEL_P = 0.5;
     private static final double FLYWHEEL_I = 0.0;

@@ -20,7 +20,7 @@ public class AutonomousTrajectories {
     private static final String TEN_BALL_AUTO_PART_ONE_NAME = "autos/10BallAuto/10BallAutoPart1.path";
     private static final String TEN_BALL_AUTO_PART_TWO_NAME = "autos/10BallAuto/10BallAutoPart2.path";
 
-    private static final Path EIGHT_BALL_COMPATIBLE_PART_ONE = new SimplePathBuilder(new Vector2(511.75, -145.75), Rotation2.ZERO)
+    private static final Path EIGHT_BALL_COMPATIBLE_PART_ONE = new SimplePathBuilder(new Vector2(511.75, -148.0), Rotation2.ZERO)
             .lineTo(new Vector2(475.75, -134.25), Rotation2.fromDegrees(18.83))
             .build();
     private static final Path EIGHT_BALL_COMPATIBLE_PART_TWO = new SimplePathBuilder(new Vector2(475.75, -134.25), Rotation2.ZERO)
@@ -50,7 +50,7 @@ public class AutonomousTrajectories {
         slowConstraints[slowConstraints.length - 2] = new MaxAccelerationConstraint(4.0 * 12.0);
 
         eightBallAutoPartOne = new Trajectory(
-                new SimplePathBuilder(new Vector2(509.0, -162.0), Rotation2.ZERO)
+                new SimplePathBuilder(new Vector2(509.0, -155.0), Rotation2.ZERO)
                         .lineTo(new Vector2(468.0, -67.34))
                         .build(),
                 trajectoryConstraints, SAMPLE_DISTANCE
