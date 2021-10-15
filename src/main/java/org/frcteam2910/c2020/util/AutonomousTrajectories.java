@@ -29,10 +29,14 @@ public class AutonomousTrajectories {
     private static final Path EIGHT_BALL_COMPATIBLE_PART_THREE = new SimplePathBuilder(new Vector2(324.0, -134.25), Rotation2.ZERO)
             .lineTo(new Vector2(474.0, -114.25), Rotation2.fromDegrees(14.0))
             .build();
+    private static final Path EIGHT_BALL_COMPATIBLE_PART_FOUR = new SimplePathBuilder(new Vector2(474.0, -114.25), Rotation2.fromDegrees(14.0))
+            .lineTo(new Vector2(324.0,-134.25), Rotation2.fromDegrees(0.0))
+            .build();
 
     private Trajectory eightBallAutoPartOne;
     private Trajectory eightBallAutoPartTwo;
     private Trajectory eightBallAutoPartThree;
+    private Trajectory eightBallAutoPartFour;
     private Trajectory tenBallAutoPartOne;
     private Trajectory tenBallAutoPartTwo;
     private Trajectory circuitTenBallAutoPartOne;
@@ -41,6 +45,7 @@ public class AutonomousTrajectories {
     private final Trajectory eightBallCompatiblePartOne;
     private final Trajectory eightBallCompatiblePartTwo;
     private final Trajectory eightBallCompatiblePartThree;
+    private final Trajectory eightBallCompatiblePartFour;
 
     private final Trajectory simpleShootThree;
 
@@ -69,6 +74,12 @@ public class AutonomousTrajectories {
                         .build(),
                 trajectoryConstraints, SAMPLE_DISTANCE
         );
+        eightBallAutoPartFour = new Trajectory(
+                new SimplePathBuilder(new Vector2(468.0, -67.34), Rotation2.fromDegrees(0.0))
+                        .arcTo(new Vector2(324, -134.25), new Vector2(324.0, 54.16))
+                        .build(),
+                trajectoryConstraints, SAMPLE_DISTANCE
+        );
         tenBallAutoPartOne = new Trajectory(getPath(TEN_BALL_AUTO_PART_ONE_NAME), trajectoryConstraints, SAMPLE_DISTANCE);
         tenBallAutoPartTwo = new Trajectory(getPath(TEN_BALL_AUTO_PART_TWO_NAME), trajectoryConstraints, SAMPLE_DISTANCE);
 
@@ -92,6 +103,7 @@ public class AutonomousTrajectories {
         eightBallCompatiblePartOne = new Trajectory(EIGHT_BALL_COMPATIBLE_PART_ONE, trajectoryConstraints, SAMPLE_DISTANCE);
         eightBallCompatiblePartTwo = new Trajectory(EIGHT_BALL_COMPATIBLE_PART_TWO, slowConstraints, SAMPLE_DISTANCE);
         eightBallCompatiblePartThree = new Trajectory(EIGHT_BALL_COMPATIBLE_PART_THREE, trajectoryConstraints, SAMPLE_DISTANCE);
+        eightBallCompatiblePartFour = new Trajectory(EIGHT_BALL_COMPATIBLE_PART_FOUR, trajectoryConstraints, SAMPLE_DISTANCE);
 
         simpleShootThree = new Trajectory(
                 new SimplePathBuilder(Vector2.ZERO, Rotation2.ZERO)
@@ -124,6 +136,10 @@ public class AutonomousTrajectories {
         return eightBallAutoPartThree;
     }
 
+    public Trajectory getEightBallAutoPartFour() {
+        return eightBallAutoPartFour;
+    }
+
     public Trajectory getTenBallAutoPartOne() {
         return tenBallAutoPartOne;
     }
@@ -150,6 +166,10 @@ public class AutonomousTrajectories {
 
     public Trajectory getEightBallCompatiblePartThree() {
         return eightBallCompatiblePartThree;
+    }
+
+    public Trajectory getEightBallCompatiblePartFour() {
+        return eightBallCompatiblePartFour;
     }
 
     public Trajectory getSimpleShootThree() { return simpleShootThree; }

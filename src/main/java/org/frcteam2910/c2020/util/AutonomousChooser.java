@@ -53,7 +53,8 @@ public class AutonomousChooser {
         followAndIntake(command, container, trajectories.getEightBallAutoPartTwo());
 
         follow(command, container, trajectories.getEightBallAutoPartThree());
-        shootAtTarget(command, container);
+        shootAtTarget(command, container, 1.5);
+        follow(command, container, trajectories.getEightBallAutoPartFour());
 
         return command;
     }
@@ -66,12 +67,13 @@ public class AutonomousChooser {
         command.addCommands(new HomeHoodMotorCommand(container.getShooterSubsystem()));
         //follow first trajectory and shoot
         follow(command, container, trajectories.getEightBallCompatiblePartOne());
-        shootAtTarget(command, container);
+        shootAtTarget(command, container, 1.5);
         //follow second trajectory and shoot
         followAndIntake(command, container, trajectories.getEightBallCompatiblePartTwo());
 
         follow(command, container, trajectories.getEightBallCompatiblePartThree());
-        shootAtTarget(command, container);
+        shootAtTarget(command, container, 1.5);
+        follow(command, container, trajectories.getEightBallCompatiblePartFour());
 
         return command;
     }
