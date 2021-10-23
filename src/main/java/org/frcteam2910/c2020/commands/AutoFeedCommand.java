@@ -21,8 +21,12 @@ public class AutoFeedCommand extends CommandBase {
     private Timer timer = new Timer();
 
     static {
-        AUTO_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(3300.0), new InterpolatingDouble(1.0));
-        AUTO_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4500.0), new InterpolatingDouble(0.5));
+        AUTO_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(2580.0), new InterpolatingDouble(1.0));
+        AUTO_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(3873.0), new InterpolatingDouble(1.0));
+        AUTO_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4368.0), new InterpolatingDouble(0.7));
+        AUTO_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4763.0), new InterpolatingDouble(0.6));
+        AUTO_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4965.0), new InterpolatingDouble(0.5));
+        AUTO_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5412.0), new InterpolatingDouble(0.5));
     }
 
     public AutoFeedCommand(DrivetrainSubsystem drivetrain, FeederSubsystem feeder, ShooterSubsystem shooter, VisionSubsystem vision, IntakeSubsystem intake) {

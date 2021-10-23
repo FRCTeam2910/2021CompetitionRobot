@@ -22,7 +22,7 @@ public class VisionSubsystem implements Subsystem {
 
     private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(29.0);
 
-    private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(2.0);
+    private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(2.5);
 
     private static final Limelight LIMELIGHT = new Limelight("shooter");
     private static final double LOADING_STATION_TARGET_HEIGHT = 11.0;

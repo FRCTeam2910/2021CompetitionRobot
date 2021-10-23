@@ -13,7 +13,8 @@ import org.frcteam2910.common.robot.drivers.Limelight;
 import java.util.function.DoubleSupplier;
 
 public class VisionRotateToTargetCommand extends CommandBase {
-    private static final PidConstants PID_CONSTANTS = new PidConstants(0.5, 0.0, 0.05);
+    private static final PidConstants PID_CONSTANTS = new PidConstants(0.5, 2.0, 0.05);
+    private static final double ROTATION_STATIC_CONSTANT = 0.275;
 
     private final DrivetrainSubsystem drivetrain;
     private final VisionSubsystem visionSubsystem;
@@ -35,6 +36,7 @@ public class VisionRotateToTargetCommand extends CommandBase {
 
         controller.setInputRange(0.0, 2.0 * Math.PI);
         controller.setContinuous(true);
+        controller.setIntegralRange(Math.toRadians(10.0));
     }
 
     @Override
@@ -63,7 +65,7 @@ public class VisionRotateToTargetCommand extends CommandBase {
             if (translationalVelocity.length <
                     DrivetrainSubsystem.FEEDFORWARD_CONSTANTS.getStaticConstant() / RobotController.getBatteryVoltage()) {
                 rotationalVelocity += Math.copySign(
-                        0.35 / RobotController.getBatteryVoltage(),
+                        ROTATION_STATIC_CONSTANT / RobotController.getBatteryVoltage(),
                         rotationalVelocity
                 );
             }

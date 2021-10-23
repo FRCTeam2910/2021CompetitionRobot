@@ -102,7 +102,7 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
             topExtentionSolenoid.set(localTopExtended);
         }
 
-        bottomExtensionSolenoid.set(localBottomExtended);
+        bottomExtensionSolenoid.set(true);
 
 
 

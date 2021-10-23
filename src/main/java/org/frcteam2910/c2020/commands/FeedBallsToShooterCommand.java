@@ -17,15 +17,19 @@ public class FeedBallsToShooterCommand extends CommandBase {
 
 
     static {
-        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4700.0), new InterpolatingDouble(1.0));
-        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5000.0), new InterpolatingDouble(1.0));
-        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5500.0), new InterpolatingDouble(1.0));
-        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5700.0), new InterpolatingDouble(1.0));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(2580.0), new InterpolatingDouble(1.0));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(3873.0), new InterpolatingDouble(1.0));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4368.0), new InterpolatingDouble(0.7));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4763.0), new InterpolatingDouble(0.6));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4965.0), new InterpolatingDouble(0.5));
+        FAST_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5412.0), new InterpolatingDouble(0.5));
 
-        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4700.0), new InterpolatingDouble(1.0));//0.5 for slow
-        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5000.0), new InterpolatingDouble(1.0));
-        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5500.0), new InterpolatingDouble(1.0));
-        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5700.0), new InterpolatingDouble(1.0));
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(2580.0), new InterpolatingDouble(1.0));//0.5 for slow
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(3873.0), new InterpolatingDouble(1.0));
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4368.0), new InterpolatingDouble(0.7));
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4763.0), new InterpolatingDouble(0.6));
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(4965.0), new InterpolatingDouble(0.5));
+        SLOW_FEEDER_OUTPUT_MAP.put(new InterpolatingDouble(5412.0), new InterpolatingDouble(0.5));
     }
 
     public FeedBallsToShooterCommand(FeederSubsystem feederSubsystem, ShooterSubsystem shooterSubsystem, IntakeSubsystem intakeSubsystem) {
