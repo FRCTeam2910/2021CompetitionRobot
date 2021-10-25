@@ -128,7 +128,7 @@ public class RobotContainer {
 
         //primaryController.getAButton().whileHeld(new ManuallyAdjustShooterCommand(shooterSubsystem).alongWith(new VisionRotateToTargetCommand(drivetrainSubsystem, visionSubsystem, () -> getDriveForwardAxis().get(true), () -> getDriveStrafeAxis().get(true))));
 
-        primaryController.getYButton().whenPressed(new ReverseClimbCommand(climberSubsystem, superstructure));
+        primaryController.getYButton().whenPressed(new HomeClimberCommand(climberSubsystem, superstructure));
 
         // Climber movement
         primaryController.getDPadButton(DPadButton.Direction.UP).whileHeld(new MoveClimberCommand(climberSubsystem, shooterSubsystem, 1.0));
@@ -191,6 +191,10 @@ public class RobotContainer {
 
     public VisionSubsystem getVisionSubsystem() {
         return visionSubsystem;
+    }
+
+    public ClimberSubsystem getClimberSubsystem() {
+        return climberSubsystem;
     }
 
     public XboxController getPrimaryController() {

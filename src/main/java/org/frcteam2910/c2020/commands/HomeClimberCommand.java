@@ -4,10 +4,10 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import org.frcteam2910.c2020.Superstructure;
 import org.frcteam2910.c2020.subsystems.ClimberSubsystem;
 
-public class ReverseClimbCommand extends CommandBase {
+public class HomeClimberCommand extends CommandBase {
 
     private static final long CLIMBER_ZERO_VELOCITY_TIME_PERIOD = 250;
-    private static final long CLIMBER_TIME_TO_UNLOCK = 250;
+    private static final long CLIMBER_TIME_TO_UNLOCK = 500;
 
     private final ClimberSubsystem climber;
     private final Superstructure superstructure;
@@ -15,7 +15,7 @@ public class ReverseClimbCommand extends CommandBase {
     private long timeToUnlock;
     private long zeroVelocityTimestamp;
 
-    public ReverseClimbCommand(ClimberSubsystem climber, Superstructure superstructure) {
+    public HomeClimberCommand(ClimberSubsystem climber, Superstructure superstructure) {
         this.climber = climber;
         this.superstructure = superstructure;
 
@@ -27,15 +27,16 @@ public class ReverseClimbCommand extends CommandBase {
         climber.unlock();
         timeToUnlock = System.currentTimeMillis();
         zeroVelocityTimestamp = Long.MAX_VALUE;
+        climber.disableSoftLimits();
     }
 
     @Override
     public void execute() {
         if (System.currentTimeMillis() - timeToUnlock >= CLIMBER_TIME_TO_UNLOCK) {
-            climber.setMotorOutput(-0.2);
+            climber.setMotorOutput(-0.4);
         }
 
-        if (Math.abs(climber.getClimberVelocity()) < 10 && System.currentTimeMillis() - timeToUnlock >= CLIMBER_TIME_TO_UNLOCK) {
+        if (Math.abs(climber.getClimberVelocity()) < 50 && System.currentTimeMillis() - timeToUnlock >= CLIMBER_TIME_TO_UNLOCK) {
             if (zeroVelocityTimestamp == Long.MAX_VALUE) {
                 zeroVelocityTimestamp = System.currentTimeMillis();
             }
@@ -46,13 +47,14 @@ public class ReverseClimbCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return System.currentTimeMillis() - zeroVelocityTimestamp >= CLIMBER_ZERO_VELOCITY_TIME_PERIOD
-                || superstructure.getCurrentPressure() < 40.0;
+        return System.currentTimeMillis() - zeroVelocityTimestamp >= CLIMBER_ZERO_VELOCITY_TIME_PERIOD;
     }
 
     @Override
     public void end(boolean interrupted) {
         climber.setMotorOutput(0.0);
         climber.lock();
+        climber.zeroHeight();
+        climber.enableSoftLimits();
     }
 }

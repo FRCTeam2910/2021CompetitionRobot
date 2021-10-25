@@ -7,7 +7,7 @@ import org.frcteam2910.c2020.subsystems.ClimberSubsystem;
 import org.frcteam2910.c2020.subsystems.ShooterSubsystem;
 
 public class MoveClimberCommand extends CommandBase {
-    private static final double UNLOCK_WAIT_TIME = 0.25;
+    private static final double UNLOCK_WAIT_TIME = 0.5;
 
     private final ClimberSubsystem climber;
     private final ShooterSubsystem shooter;

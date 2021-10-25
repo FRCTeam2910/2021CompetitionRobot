@@ -3,12 +3,8 @@ package org.frcteam2910.c2020;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import org.frcteam2910.c2020.commands.CharacterizeDrivetrainCommand;
-import org.frcteam2910.c2020.commands.CharacterizeFlywheelCommand;
-import org.frcteam2910.c2020.commands.HomeHoodMotorCommand;
-import org.frcteam2910.c2020.commands.TestModeShooterCommand;
+import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.common.Logger;
-import org.frcteam2910.common.control.Trajectory;
 import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.robot.UpdateManager;
@@ -211,5 +207,7 @@ public class Robot extends TimedRobot {
         if(!robotContainer.getShooterSubsystem().isHoodHomed()){
             new HomeHoodMotorCommand(robotContainer.getShooterSubsystem()).schedule();
         }
+
+        new HomeClimberCommand(robotContainer.getClimberSubsystem(), robotContainer.getSuperstructure()).schedule();
     }
 }
