@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
 
 public class ClimberSubsystem implements Subsystem {
-    public static final double FORWARD_LIMIT = 505000.0;
-    public static final double REVERSE_LIMIT = 80000.0;
+    public static final double FORWARD_LIMIT = 400000.0;
+    public static final double REVERSE_LIMIT = 60000.0;
     public static final boolean ENABLE_LIMITS = true;
 
     private final Solenoid lockSolenoid = new Solenoid(Constants.CLIMBER_LOCK_SOLENOID_PORT);
