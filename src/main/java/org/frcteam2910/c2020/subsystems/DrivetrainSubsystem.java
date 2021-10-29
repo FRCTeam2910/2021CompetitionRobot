@@ -186,6 +186,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             return signal.getRotation() * RobotController.getBatteryVoltage();
         });
 
+        tab.addNumber("Average Velocity", this::getAverageAbsoluteValueVelocity);
     }
 
     public RigidTransform2 getPose() {
@@ -225,6 +226,14 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                     gyroscope.getUnadjustedAngle().rotateBy(angle.inverse())
             );
         }
+    }
+
+    public double getAverageAbsoluteValueVelocity() {
+        double averageVelocity = 0;
+        for (var module : modules) {
+            averageVelocity += Math.abs(module.getDriveVelocity());
+        }
+        return averageVelocity / 4;
     }
 
     private void updateOdometry(double time, double dt) {

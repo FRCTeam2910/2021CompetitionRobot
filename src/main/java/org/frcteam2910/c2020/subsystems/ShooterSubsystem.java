@@ -133,7 +133,7 @@ public class ShooterSubsystem implements Subsystem, UpdateManager.Updatable {
             return false;
         }
 
-        return MathUtils.epsilonEquals(targetAngle.getAsDouble(), currentAngle, Math.toRadians(0.5));
+        return MathUtils.epsilonEquals(targetAngle.getAsDouble(), currentAngle, Math.toRadians(1.0));
     }
 
     public void setFlywheelCurrentLimitEnabled(boolean enabled) {
