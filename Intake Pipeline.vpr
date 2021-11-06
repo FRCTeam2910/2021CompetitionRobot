@@ -31,7 +31,7 @@ image_flip:0
 image_source:0
 img_to_show:1
 intersection_filter:0
-pipeline_led_enabled:1
+pipeline_led_enabled:2
 pipeline_led_power:100
 pipeline_res:0
 pipeline_type:0
