@@ -13,7 +13,9 @@ import org.frcteam2910.common.robot.drivers.Limelight;
 import java.util.function.DoubleSupplier;
 
 public class VisionRotateToTargetCommand extends CommandBase {
-    private static final PidConstants PID_CONSTANTS = new PidConstants(1.0, 0.0, 0.05);
+    private static final PidConstants PID_CONSTANTS = new PidConstants(0.5, 2.0, 0.025);
+    private static final double ROTATION_STATIC_CONSTANT = 0.3;
+    private static  final double MAXIMUM_AVERAGE_VELOCITY = 2.0;
 
     private final DrivetrainSubsystem drivetrain;
     private final VisionSubsystem visionSubsystem;
@@ -35,6 +37,7 @@ public class VisionRotateToTargetCommand extends CommandBase {
 
         controller.setInputRange(0.0, 2.0 * Math.PI);
         controller.setContinuous(true);
+        controller.setIntegralRange(Math.toRadians(10.0));
     }
 
     @Override
@@ -54,26 +57,25 @@ public class VisionRotateToTargetCommand extends CommandBase {
         Vector2 translationalVelocity = new Vector2(xAxis.getAsDouble(), yAxis.getAsDouble());
 
         double rotationalVelocity = 0.0;
-        if(visionSubsystem.hasTarget()) {
+        if (visionSubsystem.hasTarget()) {
             double currentAngle = drivetrain.getPose().rotation.toRadians();
             double targetAngle = visionSubsystem.getAngleToTarget().getAsDouble();
             controller.setSetpoint(targetAngle);
             rotationalVelocity = controller.calculate(currentAngle, dt);
 
-            if (translationalVelocity.length <
-                    DrivetrainSubsystem.FEEDFORWARD_CONSTANTS.getStaticConstant() / RobotController.getBatteryVoltage()) {
+            if (drivetrain.getAverageAbsoluteValueVelocity() < MAXIMUM_AVERAGE_VELOCITY) {
                 rotationalVelocity += Math.copySign(
-                        0.78 / RobotController.getBatteryVoltage(),
+                        ROTATION_STATIC_CONSTANT / RobotController.getBatteryVoltage(),
                         rotationalVelocity
                 );
             }
         }
-        drivetrain.drive(translationalVelocity, rotationalVelocity, true,false);
+        drivetrain.drive(translationalVelocity, rotationalVelocity, true);
     }
 
     @Override
     public void end(boolean interrupted) {
         visionSubsystem.setSnapshotEnabled(false);
-        drivetrain.drive(Vector2.ZERO,0,false,false);
+        drivetrain.drive(Vector2.ZERO, 0, false);
     }
 }

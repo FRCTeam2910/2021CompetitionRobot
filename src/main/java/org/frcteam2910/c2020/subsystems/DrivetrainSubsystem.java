@@ -1,35 +1,20 @@
 package org.frcteam2910.c2020.subsystems;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.StatusFrame;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.CANCoderStatusFrame;
-import com.ctre.phoenix.sensors.PigeonIMU;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
+import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
+import com.swervedrivespecialties.swervelib.SwerveModule;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.c2020.Pigeon;
 import org.frcteam2910.common.control.*;
 import org.frcteam2910.common.drivers.Gyroscope;
-import org.frcteam2910.common.drivers.SwerveModule;
 import org.frcteam2910.common.kinematics.ChassisVelocity;
 import org.frcteam2910.common.kinematics.SwerveKinematics;
 import org.frcteam2910.common.kinematics.SwerveOdometry;
@@ -37,46 +22,28 @@ import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.UpdateManager;
-import org.frcteam2910.common.robot.drivers.Mk3SwerveModule;
-import org.frcteam2910.common.util.DrivetrainFeedforwardConstants;
-import org.frcteam2910.common.util.HolonomicDriveSignal;
-import org.frcteam2910.common.util.InterpolatingDouble;
-import org.frcteam2910.common.util.InterpolatingTreeMap;
-import org.frcteam2910.common.util.HolonomicFeedforward;
+import org.frcteam2910.common.util.*;
+
 import java.util.Optional;
 
 
 public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     public static final double TRACKWIDTH = 1.0;
     public static final double WHEELBASE = 1.0;
-    public static final double STEER_GEAR_RATIO = 12.8;
-    public static final double DRIVE_GEAR_RATIO = 6.86;
-
 
     public static final DrivetrainFeedforwardConstants FEEDFORWARD_CONSTANTS = new DrivetrainFeedforwardConstants(
-            0.060602,
-            0.0070246,
-            0.53955
+            0.042746,
+            0.0032181,
+            0.30764
     );
-
-    private static final double WHEEL_DIAMETER = 3.8;
-    private static final PidConstants MODULE_ANGLE_PID_CONSTANTS = new PidConstants(0.5, 0.0, 0.0001);
 
     public static final TrajectoryConstraint[] TRAJECTORY_CONSTRAINTS = {
             new FeedforwardConstraint(11.0, FEEDFORWARD_CONSTANTS.getVelocityConstant(), FEEDFORWARD_CONSTANTS.getAccelerationConstant(), false),
-            new MaxAccelerationConstraint(15.0 * 12.0),
+            new MaxAccelerationConstraint(12.5 * 12.0),
             new CentripetalAccelerationConstraint(15 * 12.0)
     };
 
     private static final int MAX_LATENCY_COMPENSATION_MAP_ENTRIES = 25;
-
-    private final double HEADING_TO_HOLD = 0;
-
-    private boolean shouldHoldHeading = false;
-
-    private final PidConstants HOLD_HEADING_PID_CONSTANTS = new PidConstants(0.007,0,0.0);
-    private  PidController holdHeadingPIDController = new PidController(HOLD_HEADING_PID_CONSTANTS);
-
 
     private final HolonomicMotionProfiledTrajectoryFollower follower = new HolonomicMotionProfiledTrajectoryFollower(
             new PidConstants(0.4, 0.0, 0.025),
@@ -92,18 +59,18 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     );
 
     private final SwerveDriveKinematics wpi_driveKinematics = new SwerveDriveKinematics(
-            new Translation2d(-TRACKWIDTH / 2.0,WHEELBASE / 2.0), //front left
-            new Translation2d(TRACKWIDTH / 2.0,WHEELBASE / 2.0), //front right
-            new Translation2d(-TRACKWIDTH / 2.0,-WHEELBASE / 2.0), // back left
-            new Translation2d(TRACKWIDTH / 2.0,-WHEELBASE / 2.0) // back right
+            new Translation2d(-TRACKWIDTH / 2.0, WHEELBASE / 2.0), //front left
+            new Translation2d(TRACKWIDTH / 2.0, WHEELBASE / 2.0), //front right
+            new Translation2d(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0), // back left
+            new Translation2d(TRACKWIDTH / 2.0, -WHEELBASE / 2.0) // back right
     );
 
 
-    private SwerveModule[] modules;
+    private final SwerveModule[] modules;
 
     private final Object sensorLock = new Object();
     @GuardedBy("sensorLock")
-    private Gyroscope gyroscope = new Pigeon(Constants.PIGEON_PORT);
+    private final Gyroscope gyroscope = new Pigeon(Constants.PIGEON_PORT);
 
 
     private final Object kinematicsLock = new Object();
@@ -112,7 +79,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     @GuardedBy("kinematicsLock")
     private RigidTransform2 pose = RigidTransform2.ZERO;
     @GuardedBy("kinematicsLock")
-    private InterpolatingTreeMap<InterpolatingDouble, RigidTransform2> latencyCompensationMap = new InterpolatingTreeMap<>();
+    private final InterpolatingTreeMap<InterpolatingDouble, RigidTransform2> latencyCompensationMap = new InterpolatingTreeMap<>();
     @GuardedBy("kinematicsLock")
     private Vector2 velocity = Vector2.ZERO;
     @GuardedBy("kinematicsLock")
@@ -127,103 +94,56 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final NetworkTableEntry odometryYEntry;
     private final NetworkTableEntry odometryAngleEntry;
 
-
-    private final NetworkTableEntry[] moduleAngleEntries;
-
     public DrivetrainSubsystem() {
         synchronized (sensorLock) {
             gyroscope.setInverted(false);
         }
 
-        holdHeadingPIDController.setContinuous(true);
-        holdHeadingPIDController.setInputRange(0,360);
+        ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
-
-        TalonFX frontLeftDriveMotor = new TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR);
-        TalonFX frontLeftAngleMotor = new TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR);
-
-        TalonFX frontRightDriveMotor = new TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR);
-        TalonFX frontRightAngleMotor = new TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR);
-
-        TalonFX backLeftDriveMotor = new TalonFX(Constants.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR);
-        TalonFX backLeftAngleMotor = new TalonFX(Constants.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR);
-
-        TalonFX backRightDriveMotor = new TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR);
-        TalonFX backRightAngleMotor = new TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR);
-
-        CANCoder frontLeftCANCoder = new CANCoder(Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_PORT);
-        frontLeftCANCoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData,50);
-        CANCoder frontRightCANCoder = new CANCoder(Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_PORT);
-        frontRightCANCoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData,50);
-        CANCoder backLeftCANCoder = new CANCoder(Constants.DRIVETRAIN_BACK_LEFT_ENCODER_PORT);
-        backLeftCANCoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData,50);
-        CANCoder backRightCANCoder = new CANCoder(Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_PORT);
-        backRightCANCoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData,50);
-
-        frontLeftDriveMotor.setNeutralMode(NeutralMode.Brake);
-        frontRightDriveMotor.setNeutralMode(NeutralMode.Brake);
-        backLeftDriveMotor.setNeutralMode(NeutralMode.Brake);
-        backRightDriveMotor.setNeutralMode(NeutralMode.Brake);
-
-        frontRightDriveMotor.setInverted(true);
-        backRightDriveMotor.setInverted(true);
-
-        StatorCurrentLimitConfiguration currentConfig = new StatorCurrentLimitConfiguration();
-        currentConfig.currentLimit = 15;
-
-        frontLeftDriveMotor.configStatorCurrentLimit(currentConfig);
-        frontRightDriveMotor.configStatorCurrentLimit(currentConfig);
-        backLeftDriveMotor.configStatorCurrentLimit(currentConfig);
-        backRightDriveMotor.configStatorCurrentLimit(currentConfig);
-
-
-        Mk3SwerveModule frontLeftModule = new Mk3SwerveModule(
-                new Vector2(TRACKWIDTH / 2.0, WHEELBASE / 2.0),
-                Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET,
-                STEER_GEAR_RATIO,
-                DRIVE_GEAR_RATIO,
-                frontLeftAngleMotor,
-                frontLeftDriveMotor,
-                frontLeftCANCoder
-
+        SwerveModule frontLeftModule = Mk4SwerveModuleHelper.createFalcon500(
+                tab.getLayout("Front Left Module", BuiltInLayouts.kList)
+                        .withPosition(2, 0)
+                        .withSize(2, 4),
+                Mk4SwerveModuleHelper.GearRatio.L4,
+                Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR,
+                Constants.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR,
+                Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_PORT,
+                Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET
         );
-
-        Mk3SwerveModule frontRightModule = new Mk3SwerveModule(
-                new Vector2(TRACKWIDTH / 2.0, -WHEELBASE / 2.0),
-                Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_OFFSET,
-                STEER_GEAR_RATIO,
-                DRIVE_GEAR_RATIO,
-                frontRightAngleMotor,
-                frontRightDriveMotor,
-                frontRightCANCoder
+        SwerveModule frontRightModule = Mk4SwerveModuleHelper.createFalcon500(
+                tab.getLayout("Front Right Module", BuiltInLayouts.kList)
+                        .withPosition(4, 0)
+                        .withSize(2, 4),
+                Mk4SwerveModuleHelper.GearRatio.L4,
+                Constants.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR,
+                Constants.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR,
+                Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_PORT,
+                Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_OFFSET
         );
-
-        Mk3SwerveModule backLeftModule = new Mk3SwerveModule(
-                new Vector2(-TRACKWIDTH / 2.0, WHEELBASE / 2.0),
-                Constants.DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET,
-                STEER_GEAR_RATIO,
-                DRIVE_GEAR_RATIO,
-                backLeftAngleMotor,
-                backLeftDriveMotor,
-                backLeftCANCoder
+        SwerveModule backLeftModule = Mk4SwerveModuleHelper.createFalcon500(
+                tab.getLayout("Back Left Module", BuiltInLayouts.kList)
+                        .withPosition(6, 0)
+                        .withSize(2, 4),
+                Mk4SwerveModuleHelper.GearRatio.L4,
+                Constants.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR,
+                Constants.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR,
+                Constants.DRIVETRAIN_BACK_LEFT_ENCODER_PORT,
+                Constants.DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET
         );
-
-        Mk3SwerveModule backRightModule = new Mk3SwerveModule(
-                new Vector2(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0),
-                Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET,
-                STEER_GEAR_RATIO,
-                DRIVE_GEAR_RATIO,
-                backRightAngleMotor,
-                backRightDriveMotor,
-                backRightCANCoder
-
+        SwerveModule backRightModule = Mk4SwerveModuleHelper.createFalcon500(
+                tab.getLayout("Back Right Module", BuiltInLayouts.kList)
+                        .withPosition(8, 0)
+                        .withSize(2, 4),
+                Mk4SwerveModuleHelper.GearRatio.L4,
+                Constants.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR,
+                Constants.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR,
+                Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_PORT,
+                Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET
         );
 
         modules = new SwerveModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
 
-        moduleAngleEntries = new NetworkTableEntry[modules.length];
-
-        ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         odometryXEntry = tab.add("X", 0.0)
                 .withPosition(0, 0)
                 .withSize(1, 1)
@@ -237,38 +157,22 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withSize(1, 1)
                 .getEntry();
         tab.addNumber("Trajectory X", () -> {
-            if (follower.getLastState() == null) {
-                return 0.0;
-            }
-            return follower.getLastState().getPathState().getPosition().x;
-        })
+                    if (follower.getLastState() == null) {
+                        return 0.0;
+                    }
+                    return follower.getLastState().getPathState().getPosition().x;
+                })
                 .withPosition(1, 0)
                 .withSize(1, 1);
         tab.addNumber("Trajectory Y", () -> {
-            if (follower.getLastState() == null) {
-                return 0.0;
-            }
-            return follower.getLastState().getPathState().getPosition().y;
-        })
+                    if (follower.getLastState() == null) {
+                        return 0.0;
+                    }
+                    return follower.getLastState().getPathState().getPosition().y;
+                })
                 .withPosition(1, 1)
                 .withSize(1, 1);
 
-        tab.addBoolean("Hold Heading", () -> shouldHoldHeading)
-        .withPosition(1,2)
-        .withSize(1,1);
-
-        ShuffleboardLayout[] moduleLayouts = {
-                tab.getLayout("Front Left Module", BuiltInLayouts.kList),
-                tab.getLayout("Front Right Module", BuiltInLayouts.kList),
-                tab.getLayout("Back Left Module", BuiltInLayouts.kList),
-                tab.getLayout("Back Right Module", BuiltInLayouts.kList)
-        };
-        for (int i = 0; i < modules.length; i++) {
-            ShuffleboardLayout layout = moduleLayouts[i]
-                    .withPosition(2 + i * 2, 0)
-                    .withSize(2, 4);
-            moduleAngleEntries[i] = layout.add("Angle", 1.0).getEntry();
-        }
         tab.addNumber("Rotation Voltage", () -> {
             HolonomicDriveSignal signal;
             synchronized (stateLock) {
@@ -282,6 +186,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             return signal.getRotation() * RobotController.getBatteryVoltage();
         });
 
+        tab.addNumber("Average Velocity", this::getAverageAbsoluteValueVelocity);
     }
 
     public RigidTransform2 getPose() {
@@ -302,16 +207,9 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
-    public void drive(Vector2 translationalVelocity, double rotationalVelocity, boolean isFieldOriented,boolean shouldHoldHeading) {
+    public void drive(Vector2 translationalVelocity, double rotationalVelocity, boolean isFieldOriented) {
         synchronized (stateLock) {
-
-            if(shouldHoldHeading){
-                holdHeadingPIDController.setSetpoint(HEADING_TO_HOLD);
-                rotationalVelocity = holdHeadingPIDController.calculate(getPose().rotation.toDegrees(), 0.2);
-            }
-
             driveSignal = new HolonomicDriveSignal(translationalVelocity, rotationalVelocity, isFieldOriented);
-
         }
     }
 
@@ -330,13 +228,20 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
+    public double getAverageAbsoluteValueVelocity() {
+        double averageVelocity = 0;
+        for (var module : modules) {
+            averageVelocity += Math.abs(module.getDriveVelocity());
+        }
+        return averageVelocity / 4;
+    }
+
     private void updateOdometry(double time, double dt) {
         Vector2[] moduleVelocities = new Vector2[modules.length];
         for (int i = 0; i < modules.length; i++) {
             var module = modules[i];
-            module.updateSensors();
 
-            moduleVelocities[i] = Vector2.fromAngle(Rotation2.fromRadians(module.getCurrentAngle())).scale(module.getCurrentVelocity());
+            moduleVelocities[i] = Vector2.fromAngle(Rotation2.fromRadians(module.getSteerAngle())).scale(module.getDriveVelocity() * 39.37008);
         }
 
         Rotation2 angle;
@@ -380,8 +285,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         SwerveKinematics.normalizeModuleVelocities(moduleOutputs, 1);
         for (int i = 0; i < moduleOutputs.length; i++) {
             var module = modules[i];
-            module.setTargetVelocity(moduleOutputs[i]);
-            module.updateState(dt);
+            module.set(moduleOutputs[i].length * 12.0, moduleOutputs[i].getAngle().toRadians());
         }
     }
 
@@ -428,20 +332,10 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         odometryXEntry.setDouble(pose.translation.x);
         odometryYEntry.setDouble(pose.translation.y);
         odometryAngleEntry.setDouble(getPose().rotation.toDegrees());
-
-        for (int i = 0; i < modules.length; i++) {
-            moduleAngleEntries[i].setDouble(Math.toDegrees(modules[i].getCurrentAngle()));
-        }
     }
 
-    public TrajectoryFollower<HolonomicDriveSignal> getFollower() {
+    public HolonomicMotionProfiledTrajectoryFollower getFollower() {
         return follower;
     }
-
-
-    public void setShouldHoldHeading(){
-        shouldHoldHeading = !shouldHoldHeading;
-    }
-
 
 }

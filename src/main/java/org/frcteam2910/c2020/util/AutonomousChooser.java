@@ -1,10 +1,10 @@
 package org.frcteam2910.c2020.util;
 
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import org.frcteam2910.c2020.RobotContainer;
 import org.frcteam2910.c2020.commands.*;
 import org.frcteam2910.common.control.Trajectory;
@@ -14,127 +14,115 @@ import org.frcteam2910.common.math.Rotation2;
 public class AutonomousChooser {
     private final AutonomousTrajectories trajectories;
 
-    private static SendableChooser<AutonomousMode> autonomousModeChooser;
-
-    static {
-        ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous settings");
-        autonomousModeChooser = new SendableChooser<>();
-
-        autonomousModeChooser.addOption("Optimized Barrel Racing",AutonomousMode.OPTIMIZED_BARREL_RACING);
-        autonomousModeChooser.addOption("Optimized Slalom",AutonomousMode.OPTIMIZED_SLALOM);
-        autonomousModeChooser.addOption("Bounce Path MK2",AutonomousMode.BOUNCE_PATH);
-        autonomousModeChooser.addOption("Galactic Search",AutonomousMode.GALACTIC_SEARCH);
-        autoTab.add("Mode", autonomousModeChooser)
-                .withSize(3, 1);
-    }
+    private SendableChooser<AutonomousMode> autonomousModeChooser = new SendableChooser<>();
 
     public AutonomousChooser(AutonomousTrajectories trajectories) {
         this.trajectories = trajectories;
+
+        autonomousModeChooser.setDefaultOption("6 Ball Auto", AutonomousMode.EIGHT_BALL);
+        autonomousModeChooser.addOption("6 Ball Compatible", AutonomousMode.EIGHT_BALL_COMPATIBLE);
+        autonomousModeChooser.addOption("Simple Shoot Three", AutonomousMode.SIMPLE_SHOOT_THREE);
     }
 
+    public SendableChooser<AutonomousMode> getAutonomousModeChooser() {
+        return autonomousModeChooser;
+    }
 
-    public Command getOptimizedBarrelRacing(RobotContainer container){
+    private SequentialCommandGroup get10BallAutoCommand(RobotContainer container) {
         SequentialCommandGroup command = new SequentialCommandGroup();
 
-        //Reset robot pos
-        resetRobotPoseAndGyro(command,container,trajectories.getOptimizedBarrelRacing());
-
-        simpleFollow(command,container,trajectories.getOptimizedBarrelRacing());
+        resetRobotPose(command, container, trajectories.getTenBallAutoPartOne());
+        followAndIntake(command, container, trajectories.getTenBallAutoPartOne());
+        shootAtTarget(command, container);
+        //command.addCommands(new FollowTrajectoryCommand(drivetrainSubsystem, trajectories.getTenBallAutoPartTwo()));
+        //command.addCommands(new TargetWithShooterCommand(shooterSubsystem, visionSubsystem, xboxController));
 
         return command;
     }
 
-    private Command getOptimizedSlalom(RobotContainer container){
+    private Command get8BallAutoCommand(RobotContainer container) {
         SequentialCommandGroup command = new SequentialCommandGroup();
 
-        //Reset robot pos
-        resetRobotPoseAndGyro(command,container,trajectories.getOptimizedSlalom());
+        //reset robot pose
+        resetRobotPose(command, container, trajectories.getEightBallAutoPartOne());
+        command.addCommands(new HomeHoodMotorCommand(container.getShooterSubsystem()));
+        //follow first trajectory and shoot
+        follow(command, container, trajectories.getEightBallAutoPartOne());
+        shootAtTarget(command, container, 1.5);
+        //follow second trajectory and shoot
+        followAndIntake(command, container, trajectories.getEightBallAutoPartTwo());
 
-        simpleFollow(command,container,trajectories.getOptimizedSlalom());
+        follow(command, container, trajectories.getEightBallAutoPartThree());
+        shootAtTarget(command, container, 1.5);
+        follow(command, container, trajectories.getEightBallAutoPartFour());
 
         return command;
     }
 
-    private Command getBouncePathMk2(RobotContainer container){
+    private Command get8BallCompatibleCommand(RobotContainer container) {
         SequentialCommandGroup command = new SequentialCommandGroup();
 
-        //reset robot pos
-        resetRobotPoseAndGyro(command,container,trajectories.getBouncePathMk2());
+        //reset robot pose
+        resetRobotPose(command, container, trajectories.getEightBallCompatiblePartOne());
+        command.addCommands(new HomeHoodMotorCommand(container.getShooterSubsystem()));
+        //follow first trajectory and shoot
+        follow(command, container, trajectories.getEightBallCompatiblePartOne());
+        shootAtTarget(command, container, 1.5);
+        //follow second trajectory and shoot
+        followAndIntake(command, container, trajectories.getEightBallCompatiblePartTwo());
 
-        simpleFollow(command,container,trajectories.getBouncePathMk2());
+        follow(command, container, trajectories.getEightBallCompatiblePartThree());
+        shootAtTarget(command, container, 1.5);
+        follow(command, container, trajectories.getEightBallCompatiblePartFour());
 
         return command;
     }
 
-    public Command getGalacticPath(RobotContainer container){
-        SequentialCommandGroup sequentialCommandGroup = new SequentialCommandGroup();
-        ParallelCommandGroup parallelCommand = new ParallelCommandGroup();
+    public Command getCircuit10BallAutoCommand(RobotContainer container) {
+        SequentialCommandGroup command = new SequentialCommandGroup();
 
-        double distFromARedAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(180).inverse()).toRadians();
-        double distFromABlueAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(90).inverse()).toRadians();
-        double distFromBRedAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(45).inverse()).toRadians();
-        double distFromBBlueAngle = container.getDrivetrainSubsystem().getPose().rotation.rotateBy(Rotation2.fromDegrees(-45).inverse()).toRadians();
+        // Reset the robot pose
+        resetRobotPose(command, container, trajectories.getCircuitTenBallAutoPartOne());
+        // Pickup the first balls and shoot
+        followAndIntake(command, container, trajectories.getCircuitTenBallAutoPartOne());
+        followAndIntake(command, container, trajectories.getCircuitTenBallAutoPartTwo());
+        shootAtTarget(command, container);
 
-        if(distFromARedAngle > Math.PI){
-            distFromARedAngle = (2 * Math.PI) - distFromARedAngle;
-        }
-        if(distFromABlueAngle > Math.PI){
-            distFromABlueAngle = (2 * Math.PI) - distFromABlueAngle;
-        }
-        if(distFromBRedAngle > Math.PI){
-            distFromBRedAngle = (2 * Math.PI) - distFromBRedAngle;
-        }
-        if(distFromBBlueAngle > Math.PI){
-            distFromBBlueAngle = (2 * Math.PI) - distFromBBlueAngle;
-        }
+        // Grab from trench
+        followAndIntake(command, container, trajectories.getEightBallAutoPartTwo());
+        followAndIntake(command, container, trajectories.getEightBallAutoPartThree());
+        shootAtTarget(command, container);
 
-        double smallestDist = Math.min(distFromARedAngle,Math.min(distFromABlueAngle,Math.min(distFromBBlueAngle,distFromBRedAngle)));
+        return command;
+    }
 
-        Trajectory trajectory = null;
+    public Command getSimpleShootThreeAutoCommand(RobotContainer container) {
+        SequentialCommandGroup command = new SequentialCommandGroup();
 
-        if(distFromARedAngle == smallestDist){
-            trajectory = trajectories.getPathARed();
+        resetRobotPose(command, container, trajectories.getSimpleShootThree());
+        command.addCommands(new HomeHoodMotorCommand(container.getShooterSubsystem()));
 
-        }
-        else if(distFromABlueAngle == smallestDist){
-            trajectory = trajectories.getPathABlue();
+        shootAtTarget(command, container);
+        follow(command, container, trajectories.getSimpleShootThree());
 
-        }
-        else if(distFromBRedAngle == smallestDist){
-            trajectory = trajectories.getPathBRed();
-        }
-        else if(distFromBBlueAngle == smallestDist){
-            trajectory = trajectories.getPathBBlue();
-        }
-
-        if(trajectory != null){
-            //Reset Robot
-            resetRobotPose(sequentialCommandGroup,container,trajectory);
-            simpleFollow(sequentialCommandGroup,container,trajectory);
-
-            //Run in parallel
-            deployIntake(parallelCommand,container,trajectory);
-
-            parallelCommand.addCommands(sequentialCommandGroup);
-
-        }
-        return parallelCommand;
-
+        return command;
     }
 
     public Command getCommand(RobotContainer container) {
         switch (autonomousModeChooser.getSelected()) {
-            case OPTIMIZED_BARREL_RACING:
-                return getOptimizedBarrelRacing(container);
-            case OPTIMIZED_SLALOM:
-                return getOptimizedSlalom(container);
-            case BOUNCE_PATH:
-                return getBouncePathMk2(container);
-            case GALACTIC_SEARCH:
-                return getGalacticPath(container);
+            case EIGHT_BALL:
+                return get8BallAutoCommand(container);
+            case EIGHT_BALL_COMPATIBLE:
+                return get8BallCompatibleCommand(container);
+            case TEN_BALL:
+                return get10BallAutoCommand(container);
+            case TEN_BALL_CIRCUIT:
+                return getCircuit10BallAutoCommand(container);
+            case SIMPLE_SHOOT_THREE:
+                return getSimpleShootThreeAutoCommand(container);
         }
 
-        return getOptimizedBarrelRacing(container);//default command
+        return get10BallAutoCommand(container);
     }
 
     private void shootAtTarget(SequentialCommandGroup command, RobotContainer container) {
@@ -150,37 +138,37 @@ public class AutonomousChooser {
                         .withTimeout(timeToWait));
     }
 
-
-
     private void follow(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {
         command.addCommands(new FollowTrajectoryCommand(container.getDrivetrainSubsystem(), trajectory)
                 .deadlineWith(new TargetWithShooterCommand(container.getShooterSubsystem(), container.getVisionSubsystem(), container.getPrimaryController()))
                 .alongWith(new PrepareBallsToShootCommand(container.getFeederSubsystem(), 1.0)));
     }
 
-    private void deployIntake(ParallelCommandGroup command, RobotContainer container, Trajectory trajectory){
-        command.addCommands(new SimpleIntakeCommand(container.getIntakeSubsystem(), container.getFeederSubsystem(),null,1.0,0.9));
+    private void followAndIntake(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {
+        command.addCommands(new InstantCommand(() -> container.getIntakeSubsystem().setTopExtended(true)));
+        command.addCommands(
+                new FollowTrajectoryCommand(container.getDrivetrainSubsystem(), trajectory)
+                        .deadlineWith(
+                                new IntakeCommand(container.getIntakeSubsystem(), container.getFeederSubsystem(), -1.0).withTimeout(0.25)
+                                        .andThen(
+                                                new IntakeCommand(container.getIntakeSubsystem(), container.getFeederSubsystem(), 1.0)
+                                                        .alongWith(
+                                                                new FeederIntakeWhenNotFullCommand(container.getFeederSubsystem(), 1.0)
+                                                        ))));
+        command.addCommands(new InstantCommand(() -> container.getIntakeSubsystem().setTopExtended(false)));
     }
 
-    private void resetRobotPoseAndGyro(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {
+    private void resetRobotPose(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory) {
         command.addCommands(new InstantCommand(() -> container.getDrivetrainSubsystem().resetGyroAngle(Rotation2.ZERO)));
         command.addCommands(new InstantCommand(() -> container.getDrivetrainSubsystem().resetPose(
                 new RigidTransform2(trajectory.calculate(0.0).getPathState().getPosition(), Rotation2.ZERO))));
     }
 
-    private void resetRobotPose(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory){
-        command.addCommands(new InstantCommand(() -> container.getDrivetrainSubsystem().resetPose(
-                new RigidTransform2(trajectory.calculate(0.0).getPathState().getPosition(), container.getDrivetrainSubsystem().getPose().rotation))));
-    }
-
-    private void simpleFollow(SequentialCommandGroup command, RobotContainer container, Trajectory trajectory){
-        command.addCommands(new FollowTrajectoryCommand(container.getDrivetrainSubsystem(),trajectory));
-    }
-
     private enum AutonomousMode {
-        OPTIMIZED_BARREL_RACING,
-        OPTIMIZED_SLALOM,
-        BOUNCE_PATH,
-        GALACTIC_SEARCH
+        EIGHT_BALL,
+        EIGHT_BALL_COMPATIBLE,
+        TEN_BALL,
+        TEN_BALL_CIRCUIT,
+        SIMPLE_SHOOT_THREE,
     }
 }

@@ -25,10 +25,9 @@ public class FeederSubsystem implements Subsystem, UpdateManager.Updatable {
     private final NetworkTableEntry motorSpeedEntry;
 
     public FeederSubsystem() {
-        motor.setInverted(true);
+        motor.setInverted(false);
         motor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
         motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0,255);
-
         motor.setNeutralMode(NeutralMode.Brake);
 
 

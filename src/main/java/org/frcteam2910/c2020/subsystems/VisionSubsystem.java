@@ -22,9 +22,17 @@ public class VisionSubsystem implements Subsystem {
 
     private static final double LIMELIGHT_MOUNTING_ANGLE = Math.toRadians(29.0);
 
-    private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(2.0);
+    private static final double TARGET_ALLOWABLE_ERROR = Math.toRadians(2.5);
 
     private static final Limelight LIMELIGHT = new Limelight("shooter");
+    private static final double LOADING_STATION_TARGET_HEIGHT = 11.0;
+
+    private final Limelight intakeLimelight = new Limelight("intake");
+    private boolean intakeHasTarget = false;
+    private double intakeDistanceToTarget = Double.NaN;
+    private double xFromTarget = Double.NaN;
+    private double yFromTarget = Double.NaN;
+
     private final DrivetrainSubsystem drivetrain;
 
     private final NetworkTableEntry distanceToTargetEntry;
@@ -63,11 +71,24 @@ public class VisionSubsystem implements Subsystem {
                 .withPosition(5, 0)
                 .withSize(1, 1);
         tab.addNumber("Horizontal Target Error", () -> {
-            double gyroAngle = drivetrain.getPose().rotation.toRadians();
-            return getDistanceToTarget().orElse(0.0) *
-                    (Math.sin(gyroAngle - getAngleToTarget().orElse(0.0)) / Math.sin(Math.PI / 2.0 - gyroAngle));
-        })
+                    double gyroAngle = drivetrain.getPose().rotation.toRadians();
+                    return getDistanceToTarget().orElse(0.0) *
+                            (Math.sin(gyroAngle - getAngleToTarget().orElse(0.0)) / Math.sin(Math.PI / 2.0 - gyroAngle));
+                })
                 .withPosition(6, 0)
+                .withSize(1, 1);
+
+        tab.addBoolean("Intake Has Target", () -> intakeHasTarget)
+                .withPosition(0, 1)
+                .withSize(1, 1);
+        tab.addNumber("Intake Distance to Target", () -> intakeDistanceToTarget)
+                .withPosition(1, 1)
+                .withSize(1, 1);
+        tab.addNumber("X-Coord Distance to Target", () -> xFromTarget)
+                .withPosition(2, 1)
+                .withSize(1, 1);
+        tab.addNumber("Y-Coord Distance To Target", () -> yFromTarget)
+                .withPosition(3, 1)
                 .withSize(1, 1);
     }
 
@@ -104,8 +125,18 @@ public class VisionSubsystem implements Subsystem {
         return isInnerTargetVisible;
     }
 
+    public Vector2 getPredictedPostition(){
+        Vector2 position = new Vector2(xFromTarget, yFromTarget);
+        return position;
+    }
+
+    public boolean doesIntakeHaveTarget(){
+        return intakeHasTarget;
+    }
+
     @Override
     public void periodic() {
+        // Shooter limelight
         // Determine whether the Limelight has a target or not
         hasTarget = LIMELIGHT.hasTarget();
         if (hasTarget) {
@@ -148,6 +179,23 @@ public class VisionSubsystem implements Subsystem {
             distanceToTarget = OptionalDouble.empty();
             angleToTarget = OptionalDouble.empty();
             isInnerTargetVisible = false;
+        }
+
+        // Intake limelight
+        intakeHasTarget = intakeLimelight.hasTarget();
+        if (intakeHasTarget) {
+            double tvert = intakeLimelight.getTable().getEntry("tvert").getDouble(0.0);
+            double tx = Math.toRadians(intakeLimelight.getTable().getEntry("tx").getDouble(0.0));
+            double vertAngle = Math.toRadians(45.7) / 240.0 * tvert;
+            double gyroAngle = drivetrain.getPose().rotation.toRadians();
+
+            intakeDistanceToTarget = LOADING_STATION_TARGET_HEIGHT / Math.tan(vertAngle);
+
+            double angleFromTarget = tx - gyroAngle;
+            xFromTarget = intakeDistanceToTarget * Math.cos(angleFromTarget);
+            yFromTarget = intakeDistanceToTarget * Math.sin(angleFromTarget) * -1;
+        } else {
+            intakeDistanceToTarget = Double.NaN;
         }
 
         // Update shuffleboard

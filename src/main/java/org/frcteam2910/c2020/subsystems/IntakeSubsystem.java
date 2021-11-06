@@ -15,8 +15,9 @@ import org.frcteam2910.common.robot.UpdateManager;
 
 
 public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
-    private TalonFX left_intake_motor = new TalonFX(Constants.LEFT_INTAKE_MOTOR_PORT);
-    private TalonFX right_intake_motor = new TalonFX(Constants.RIGHT_INTAKE_MOTOR_PORT);
+    public static final double MIN_INTAKE_MOVEMENT_PRESSURE = 60.0;
+
+    private TalonFX right_intake_motor = new TalonFX(Constants.INTAKE_MOTOR_PORT);
     private Solenoid topExtentionSolenoid = new Solenoid(Constants.TOP_INTAKE_EXTENSION_SOLENOID);
     private Solenoid bottomExtensionSolenoid = new Solenoid(Constants.BOTTOM_INTAKE_EXTENSION_SOLENOID);
 
@@ -44,12 +45,6 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
     public IntakeSubsystem() {
         fifthBallTimer = new Timer();
         this.isTimerRunning = false;
-
-        right_intake_motor.follow(left_intake_motor);
-        right_intake_motor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
-        right_intake_motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
-
-        left_intake_motor.setInverted(true);
 
         ShuffleboardTab tab = Shuffleboard.getTab("Intake");
         leftMotorSpeedEntry = tab.add("Left Motor Speed", 0.0)
@@ -80,7 +75,7 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
         boolean localTopExtended;
         boolean localBottomExtended;
         synchronized (stateLock) {
-            if(left_intake_motor.getStatorCurrent() > 20){
+            if(right_intake_motor.getStatorCurrent() > 20){
                 if(!isTimerRunning){
                     fifthBallTimer.start();
                     isTimerRunning = true;
@@ -102,12 +97,12 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
             localBottomExtended = bottomExtended;
         }
 
-        left_intake_motor.set(ControlMode.PercentOutput, localMotorOutput);
+        right_intake_motor.set(ControlMode.PercentOutput, localMotorOutput);
         if (localTopExtended != topExtentionSolenoid.get()) {
             topExtentionSolenoid.set(localTopExtended);
         }
 
-        bottomExtensionSolenoid.set(localBottomExtended);
+        bottomExtensionSolenoid.set(true);
 
 
 
@@ -133,7 +128,7 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public double getLeftMotorOutput() {
         synchronized (stateLock) {
-            return left_intake_motor.getMotorOutputPercent();
+            return right_intake_motor.getMotorOutputPercent();
         }
     }
 
@@ -163,7 +158,7 @@ public class IntakeSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public double getLeftMotorCurrent(){
         synchronized (stateLock){
-            return left_intake_motor.getStatorCurrent();
+            return right_intake_motor.getStatorCurrent();
         }
     }
 
