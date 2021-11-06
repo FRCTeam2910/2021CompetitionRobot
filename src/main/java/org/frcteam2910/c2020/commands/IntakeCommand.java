@@ -25,7 +25,7 @@ public class IntakeCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        intake.setExtended(true);
+        intake.setTopExtended(true);
         intake.setMotorOutput(intakeSpeed);
     }
 
@@ -36,7 +36,7 @@ public class IntakeCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        intake.setExtended(false);
+        intake.setTopExtended(false);
         intake.setMotorOutput(0.0);
     }
 }

@@ -1,13 +1,25 @@
 package org.frcteam2910.c2020.subsystems;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
@@ -15,8 +27,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.frcteam2910.c2020.Constants;
 import org.frcteam2910.c2020.Pigeon;
-import org.frcteam2910.c2020.Robot;
-import org.frcteam2910.c2020.RobotContainer;
 import org.frcteam2910.common.control.*;
 import org.frcteam2910.common.drivers.Gyroscope;
 import org.frcteam2910.common.drivers.SwerveModule;
@@ -27,84 +37,46 @@ import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.robot.UpdateManager;
-import org.frcteam2910.common.robot.drivers.Mk2SwerveModuleBuilder;
-import org.frcteam2910.common.robot.drivers.NavX;
+import org.frcteam2910.common.robot.drivers.Mk3SwerveModule;
 import org.frcteam2910.common.util.DrivetrainFeedforwardConstants;
 import org.frcteam2910.common.util.HolonomicDriveSignal;
 import org.frcteam2910.common.util.InterpolatingDouble;
 import org.frcteam2910.common.util.InterpolatingTreeMap;
 import org.frcteam2910.common.util.HolonomicFeedforward;
-
 import java.util.Optional;
 
 
 public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     public static final double TRACKWIDTH = 1.0;
     public static final double WHEELBASE = 1.0;
+    public static final double STEER_GEAR_RATIO = 12.8;
+    public static final double DRIVE_GEAR_RATIO = 6.86;
+
 
     public static final DrivetrainFeedforwardConstants FEEDFORWARD_CONSTANTS = new DrivetrainFeedforwardConstants(
-            0.0584,
-            0.00519,
-            0.665
+            0.060602,
+            0.0070246,
+            0.53955
     );
 
-    private static final double GEAR_REDUCTION = 190.0 / 27.0;
-    private static final double WHEEL_DIAMETER = 4.0;
+    private static final double WHEEL_DIAMETER = 3.8;
     private static final PidConstants MODULE_ANGLE_PID_CONSTANTS = new PidConstants(0.5, 0.0, 0.0001);
 
     public static final TrajectoryConstraint[] TRAJECTORY_CONSTRAINTS = {
             new FeedforwardConstraint(11.0, FEEDFORWARD_CONSTANTS.getVelocityConstant(), FEEDFORWARD_CONSTANTS.getAccelerationConstant(), false),
-            new MaxAccelerationConstraint(6.0 * 12.0),
-            new CentripetalAccelerationConstraint(20.0 * 12.0)
+            new MaxAccelerationConstraint(15.0 * 12.0),
+            new CentripetalAccelerationConstraint(15 * 12.0)
     };
 
     private static final int MAX_LATENCY_COMPENSATION_MAP_ENTRIES = 25;
 
-    private final SwerveModule frontLeftModule =
-            new Mk2SwerveModuleBuilder(new Vector2(TRACKWIDTH / 2.0, WHEELBASE / 2.0))
-                    .angleMotor(
-                            new WPI_TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR), MODULE_ANGLE_PID_CONSTANTS)
-                    .driveMotor(
-                            new TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
-                    .angleEncoder(
-                            new AnalogInput(Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_PORT),
-                            Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET)
-                    .build();
+    private final double HEADING_TO_HOLD = 0;
 
-    private final SwerveModule frontRightModule =
-            new Mk2SwerveModuleBuilder(new Vector2(TRACKWIDTH / 2.0, -WHEELBASE / 2.0))
-                    .angleMotor(
-                            new WPI_TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR), MODULE_ANGLE_PID_CONSTANTS)
-                    .driveMotor(
-                            new TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
-                    .angleEncoder(
-                            new AnalogInput(Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_PORT),
-                            Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_OFFSET)
-                    .build();
+    private boolean shouldHoldHeading = false;
 
-    private final SwerveModule backLeftModule =
-            new Mk2SwerveModuleBuilder(new Vector2(-TRACKWIDTH / 2.0, WHEELBASE / 2.0))
-                    .angleMotor(
-                            new WPI_TalonFX(Constants.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR), MODULE_ANGLE_PID_CONSTANTS)
-                    .driveMotor(
-                            new TalonFX(Constants.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
-                    .angleEncoder(
-                            new AnalogInput(Constants.DRIVETRAIN_BACK_LEFT_ENCODER_PORT),
-                            Constants.DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET)
-                    .build();
+    private final PidConstants HOLD_HEADING_PID_CONSTANTS = new PidConstants(0.007,0,0.0);
+    private  PidController holdHeadingPIDController = new PidController(HOLD_HEADING_PID_CONSTANTS);
 
-    private final SwerveModule backRightModule =
-            new Mk2SwerveModuleBuilder(new Vector2(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0))
-                    .angleMotor(
-                            new WPI_TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR), MODULE_ANGLE_PID_CONSTANTS)
-                    .driveMotor(
-                            new TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR), GEAR_REDUCTION, WHEEL_DIAMETER)
-                    .angleEncoder(
-                            new AnalogInput(Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_PORT),
-                            Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET)
-                    .build();
-
-    private final SwerveModule[] modules = {frontLeftModule, frontRightModule, backLeftModule, backRightModule};
 
     private final HolonomicMotionProfiledTrajectoryFollower follower = new HolonomicMotionProfiledTrajectoryFollower(
             new PidConstants(0.4, 0.0, 0.025),
@@ -119,9 +91,20 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             new Vector2(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0)        //back right
     );
 
+    private final SwerveDriveKinematics wpi_driveKinematics = new SwerveDriveKinematics(
+            new Translation2d(-TRACKWIDTH / 2.0,WHEELBASE / 2.0), //front left
+            new Translation2d(TRACKWIDTH / 2.0,WHEELBASE / 2.0), //front right
+            new Translation2d(-TRACKWIDTH / 2.0,-WHEELBASE / 2.0), // back left
+            new Translation2d(TRACKWIDTH / 2.0,-WHEELBASE / 2.0) // back right
+    );
+
+
+    private SwerveModule[] modules;
+
     private final Object sensorLock = new Object();
     @GuardedBy("sensorLock")
-    private Gyroscope gyroscope = new NavX(SPI.Port.kMXP);
+    private Gyroscope gyroscope = new Pigeon(Constants.PIGEON_PORT);
+
 
     private final Object kinematicsLock = new Object();
     @GuardedBy("kinematicsLock")
@@ -144,12 +127,101 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     private final NetworkTableEntry odometryYEntry;
     private final NetworkTableEntry odometryAngleEntry;
 
-    private final NetworkTableEntry[] moduleAngleEntries = new NetworkTableEntry[modules.length];
+
+    private final NetworkTableEntry[] moduleAngleEntries;
 
     public DrivetrainSubsystem() {
         synchronized (sensorLock) {
             gyroscope.setInverted(false);
         }
+
+        holdHeadingPIDController.setContinuous(true);
+        holdHeadingPIDController.setInputRange(0,360);
+
+
+        TalonFX frontLeftDriveMotor = new TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR);
+        TalonFX frontLeftAngleMotor = new TalonFX(Constants.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR);
+
+        TalonFX frontRightDriveMotor = new TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR);
+        TalonFX frontRightAngleMotor = new TalonFX(Constants.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR);
+
+        TalonFX backLeftDriveMotor = new TalonFX(Constants.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR);
+        TalonFX backLeftAngleMotor = new TalonFX(Constants.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR);
+
+        TalonFX backRightDriveMotor = new TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR);
+        TalonFX backRightAngleMotor = new TalonFX(Constants.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR);
+
+        CANCoder frontLeftCANCoder = new CANCoder(Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_PORT);
+        frontLeftCANCoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData,50);
+        CANCoder frontRightCANCoder = new CANCoder(Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_PORT);
+        frontRightCANCoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData,50);
+        CANCoder backLeftCANCoder = new CANCoder(Constants.DRIVETRAIN_BACK_LEFT_ENCODER_PORT);
+        backLeftCANCoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData,50);
+        CANCoder backRightCANCoder = new CANCoder(Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_PORT);
+        backRightCANCoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData,50);
+
+        frontLeftDriveMotor.setNeutralMode(NeutralMode.Brake);
+        frontRightDriveMotor.setNeutralMode(NeutralMode.Brake);
+        backLeftDriveMotor.setNeutralMode(NeutralMode.Brake);
+        backRightDriveMotor.setNeutralMode(NeutralMode.Brake);
+
+        frontRightDriveMotor.setInverted(true);
+        backRightDriveMotor.setInverted(true);
+
+        StatorCurrentLimitConfiguration currentConfig = new StatorCurrentLimitConfiguration();
+        currentConfig.currentLimit = 15;
+
+        frontLeftDriveMotor.configStatorCurrentLimit(currentConfig);
+        frontRightDriveMotor.configStatorCurrentLimit(currentConfig);
+        backLeftDriveMotor.configStatorCurrentLimit(currentConfig);
+        backRightDriveMotor.configStatorCurrentLimit(currentConfig);
+
+
+        Mk3SwerveModule frontLeftModule = new Mk3SwerveModule(
+                new Vector2(TRACKWIDTH / 2.0, WHEELBASE / 2.0),
+                Constants.DRIVETRAIN_FRONT_LEFT_ENCODER_OFFSET,
+                STEER_GEAR_RATIO,
+                DRIVE_GEAR_RATIO,
+                frontLeftAngleMotor,
+                frontLeftDriveMotor,
+                frontLeftCANCoder
+
+        );
+
+        Mk3SwerveModule frontRightModule = new Mk3SwerveModule(
+                new Vector2(TRACKWIDTH / 2.0, -WHEELBASE / 2.0),
+                Constants.DRIVETRAIN_FRONT_RIGHT_ENCODER_OFFSET,
+                STEER_GEAR_RATIO,
+                DRIVE_GEAR_RATIO,
+                frontRightAngleMotor,
+                frontRightDriveMotor,
+                frontRightCANCoder
+        );
+
+        Mk3SwerveModule backLeftModule = new Mk3SwerveModule(
+                new Vector2(-TRACKWIDTH / 2.0, WHEELBASE / 2.0),
+                Constants.DRIVETRAIN_BACK_LEFT_ENCODER_OFFSET,
+                STEER_GEAR_RATIO,
+                DRIVE_GEAR_RATIO,
+                backLeftAngleMotor,
+                backLeftDriveMotor,
+                backLeftCANCoder
+        );
+
+        Mk3SwerveModule backRightModule = new Mk3SwerveModule(
+                new Vector2(-TRACKWIDTH / 2.0, -WHEELBASE / 2.0),
+                Constants.DRIVETRAIN_BACK_RIGHT_ENCODER_OFFSET,
+                STEER_GEAR_RATIO,
+                DRIVE_GEAR_RATIO,
+                backRightAngleMotor,
+                backRightDriveMotor,
+                backRightCANCoder
+
+        );
+
+        modules = new SwerveModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
+
+        moduleAngleEntries = new NetworkTableEntry[modules.length];
 
         ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
         odometryXEntry = tab.add("X", 0.0)
@@ -181,6 +253,10 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
                 .withPosition(1, 1)
                 .withSize(1, 1);
 
+        tab.addBoolean("Hold Heading", () -> shouldHoldHeading)
+        .withPosition(1,2)
+        .withSize(1,1);
+
         ShuffleboardLayout[] moduleLayouts = {
                 tab.getLayout("Front Left Module", BuiltInLayouts.kList),
                 tab.getLayout("Front Right Module", BuiltInLayouts.kList),
@@ -191,7 +267,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
             ShuffleboardLayout layout = moduleLayouts[i]
                     .withPosition(2 + i * 2, 0)
                     .withSize(2, 4);
-            moduleAngleEntries[i] = layout.add("Angle", 0.0).getEntry();
+            moduleAngleEntries[i] = layout.add("Angle", 1.0).getEntry();
         }
         tab.addNumber("Rotation Voltage", () -> {
             HolonomicDriveSignal signal;
@@ -205,6 +281,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
             return signal.getRotation() * RobotController.getBatteryVoltage();
         });
+
     }
 
     public RigidTransform2 getPose() {
@@ -225,9 +302,16 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         }
     }
 
-    public void drive(Vector2 translationalVelocity, double rotationalVelocity, boolean isFieldOriented) {
+    public void drive(Vector2 translationalVelocity, double rotationalVelocity, boolean isFieldOriented,boolean shouldHoldHeading) {
         synchronized (stateLock) {
+
+            if(shouldHoldHeading){
+                holdHeadingPIDController.setSetpoint(HEADING_TO_HOLD);
+                rotationalVelocity = holdHeadingPIDController.calculate(getPose().rotation.toDegrees(), 0.2);
+            }
+
             driveSignal = new HolonomicDriveSignal(translationalVelocity, rotationalVelocity, isFieldOriented);
+
         }
     }
 
@@ -265,6 +349,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
         ChassisVelocity velocity = swerveKinematics.toChassisVelocity(moduleVelocities);
 
         synchronized (kinematicsLock) {
+
             this.pose = swerveOdometry.update(angle, dt, moduleVelocities);
             if (latencyCompensationMap.size() > MAX_LATENCY_COMPENSATION_MAP_ENTRIES) {
                 latencyCompensationMap.remove(latencyCompensationMap.firstKey());
@@ -302,7 +387,7 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
 
     public RigidTransform2 getPoseAtTime(double timestamp) {
         synchronized (kinematicsLock) {
-            if(latencyCompensationMap.isEmpty()) {
+            if (latencyCompensationMap.isEmpty()) {
                 return RigidTransform2.ZERO;
             }
             return latencyCompensationMap.getInterpolated(new InterpolatingDouble(timestamp));
@@ -352,4 +437,11 @@ public class DrivetrainSubsystem implements Subsystem, UpdateManager.Updatable {
     public TrajectoryFollower<HolonomicDriveSignal> getFollower() {
         return follower;
     }
+
+
+    public void setShouldHoldHeading(){
+        shouldHoldHeading = !shouldHoldHeading;
+    }
+
+
 }

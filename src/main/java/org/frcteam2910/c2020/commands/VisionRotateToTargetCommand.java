@@ -63,16 +63,17 @@ public class VisionRotateToTargetCommand extends CommandBase {
             if (translationalVelocity.length <
                     DrivetrainSubsystem.FEEDFORWARD_CONSTANTS.getStaticConstant() / RobotController.getBatteryVoltage()) {
                 rotationalVelocity += Math.copySign(
-                        0.8 / RobotController.getBatteryVoltage(),
+                        0.78 / RobotController.getBatteryVoltage(),
                         rotationalVelocity
                 );
             }
         }
-        drivetrain.drive(translationalVelocity, rotationalVelocity, true);
+        drivetrain.drive(translationalVelocity, rotationalVelocity, true,false);
     }
 
     @Override
     public void end(boolean interrupted) {
         visionSubsystem.setSnapshotEnabled(false);
+        drivetrain.drive(Vector2.ZERO,0,false,false);
     }
 }

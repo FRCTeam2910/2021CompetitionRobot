@@ -21,11 +21,11 @@ public class BasicDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        drivetrain.drive(translation, rotation, fieldOriented);
+        drivetrain.drive(translation, rotation, fieldOriented,false);
     }
 
     @Override
     public void end(boolean interrupted) {
-        drivetrain.drive(Vector2.ZERO, 0.0, false);
+        drivetrain.drive(Vector2.ZERO, 0.0, false,false);
     }
 }
